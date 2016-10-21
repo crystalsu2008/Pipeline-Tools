@@ -1,0 +1,18 @@
+global proc toolsSourcePathPointer(){}
+
+global proc string toolsSourcePath()
+{
+string $whatIs=`whatIs toolsSourcePathPointer`;
+string $fullPath=`substring $whatIs 25 999`;
+$path=toNativePath(dirname($fullPath));
+return $path;
+}
+
+string $sourceSetup = "import sys\n"
+            + "Dir = '" + toolsSourcePath() + "'\n"
+            + "if Dir not in sys.path:\n"
+            + "    sys.path.append(Dir)\n"
+            + "import mayaPipelineSetup;reload(mayaPipelineSetup)\n"
+            + "mayaPipelineSetup.install(source=Dir, installToVersionDir=True)\n";
+
+python( $sourceSetup );
