@@ -15,6 +15,11 @@ class PipelineSetup(object):
     repositoryDest=None
     repositoryName=None
 
+    baseflags = ['name', 'l', 'c', 'type']
+    extendflags = ['file']
+    ext2Type = {'.py': 'python', '.PY': 'python', '.mel': 'mel', '.MEL': 'mel'}
+    type2ext = {'python': '.py', 'mel': '.mel'}
+
     menus={}
     mainMenu=None
 
@@ -39,18 +44,74 @@ class PipelineSetup(object):
         info = {}
         if suffix in ['.inf', '.INF', '.py', '.PY', '.mel', '.MEL'] and not filename == '__init__.py':
 
-            if suffix in ['.py', '.PY'] and not os.path.exists(os.path.join(root, menu+'.inf')):
+            if suffix in ['.py', '.PY'] and not os.path.exists(os.path.join(root, menu+'.inf')) and not os.path.exists(os.path.join(root, menu+'.INF')):
                 info['name'] = menu
+                info['l'] = mel.eval('interToUI( "'+menu+'" )')
+                info['c'] = menu+'.'+menu+'()'
                 info['type'] = 'python'
                 info['file'] = menufile
-                info['c'] = menu+'.'+menu+'()'
+
+            elif suffix in ['.mel', '.MEL'] and not os.path.exists(os.path.join(root, menu+'.inf')) and not os.path.exists(os.path.join(root, menu+'.INF')):
+                info['name'] = menu
                 info['l'] = mel.eval('interToUI( "'+menu+'" )')
+                info['c'] = menu+'()'
+                info['type'] = 'mel'
+                info['file'] = menufile
 
             elif suffix in ['.inf', '.INF']:
-                pass
+                info['name'] = menu
 
-            else:
-                pass
+                # Analyz Info File
+                inf = open(menufile, 'r')
+                for eachLine in inf:
+                    parts = eachLine.split(',')
+                    for eachPart in parts:
+                        flags = self.baseflags + self.extendflags
+                        for flag in flags:
+                            if (flag+':') in eachPart:
+                                info[flag] = eachPart.partition(flag+':')[2].strip()
+                inf.close()
+
+                if 'l' not in info:
+                    info['l'] = mel.eval('interToUI( "'+info['name']+'" )')
+
+                if 'type' in info and 'file' not in info:
+                    info['file'] = os.path.join(root, menu+type2ext[info['type']])
+
+                if 'file' not in info:
+                    info['file'] = os.path.join(root, menu+'.py')
+                    if os.path.exists(info['file']):
+                        info['type'] = 'python'
+                    else:
+                        info['file'] = os.path.join(root, menu+'.PY')
+                        if os.path.exists(info['file']):
+                            info['type'] = 'python'
+                        else:
+                            info['file'] = os.path.join(root, menu+'.mel')
+                            if os.path.exists(info['file']):
+                                info['type'] = 'mel'
+                            else:
+                                info['file'] = os.path.join(root, menu+'.MEL')
+                                if os.path.exists(info['file']):
+                                    info['type'] = 'mel'
+                                else:
+                                    print('There is no module '+menu+' exist. Menu "'+menu+'" will not be created!')
+                                    info = None
+                else:
+                    baseFile = os.path.split(info['file'])[-1]
+                    info['file'] =  os.path.join(root, baseFile)
+                    if os.path.exists(info['file']):
+                        module, filesuffix = os.path.splitext(baseFile)
+                        info['type'] = self.ext2Type[filesuffix]
+                        if 'c' not in info:
+                            info['c'] = module+'.'+info['name']+'()'
+                    else:
+                        print('There is no file '+info['file']+' exist. Menu "'+menu+'" will not be created!')
+                        info = None
+
+                if info:
+                    if 'c' not in info:
+                        info['c'] = menu+'.'+info['name']+'()'
         else:
             info = None
 
@@ -110,8 +171,10 @@ class PipelineSetup(object):
     def manageMenuItem(self):
         parent = self.mainMenu
         pm.menuItem(divider=True, p=parent)
-        uninstallCmd = 'try:\n\t'+self.repositoryName+'_pipset.uninstall()\n'\
-                     + 'except:\n\tmayaPipelineSetup.uninstall()'
+        refreshCmd = 'from '+self.repositoryName+'.pipelineStartup import *'
+        pm.menuItem('refresh', l='Refresh', c=refreshCmd, p=parent)
+        uninstallCmd = 'try:\n\t'+self.repositoryName+'_pipset.uninstall()\n' +\
+					   'except:\n\tmayaPipelineSetup.uninstall()'
         pm.menuItem('uninstall', l='Uninstall', c=uninstallCmd, p=parent)
 
     def pipelineStartup_py(self):
@@ -123,7 +186,8 @@ class PipelineSetup(object):
         for k, menu in self.menus.iteritems():
             if 'file' in menu:
                 if menu['type']=='python':
-                    importStr += ('import ' + k + '\n')
+                    module = os.path.split(os.path.splitext(menu['file'])[0])[-1]
+                    importStr += ('import ' + module + '\n')
             else:
                 syspathStr += ('if \'' + pm.encodeString(menu['dir']) + '\' not in sys.path:\n')
                 syspathStr += ('\tsys.path.append(\'' + pm.encodeString(menu['dir']) + '\')\n')
@@ -206,13 +270,15 @@ class PipelineSetup(object):
         # Create userSetup
         self.userSetup_mel()
 
+        return self.repositoryName
+
 #------------------------------------------------------------------------------#
 
 def install( source, installToVersionDir=True ):
     global pipset
     if pipset is None:
         pipset = PipelineSetup()
-    pipset.install( source, installToVersionDir )
+    return( pipset.install( source, installToVersionDir ) )
 
 def uninstall( installToVersionDir=True ):
     global pipset

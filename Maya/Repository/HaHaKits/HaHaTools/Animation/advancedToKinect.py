@@ -6,7 +6,7 @@ if Dir not in sys.path:
 
 import advancedToKinect;reload(advancedToKinect)
 
-advancedToKinect.create()
+advancedToKinect.createKinect2()
 '''
 
 import pymel.core as pm
@@ -274,4 +274,4 @@ def copySkinWeights():
     global a2k
     if a2k is None:
         a2k = Advanced2Kinect()
-    a2k.copyK2SkinWeights()
+    a2k.copySkinWeights()
