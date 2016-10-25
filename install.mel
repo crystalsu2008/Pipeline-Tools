@@ -16,25 +16,4 @@ string $prepareSetup = "import sys\n"
 python( $prepareSetup );
 
 // Install Pipeline Tools and get the Tools name.
-string $pipelineRepositoryName = python("mayaPipelineSetup.install(source=Dir, installToVersionDir=True)");
-
-
-if (`window -ex "PipelineConfirmWindow"`)
-  deleteUI -window "PipelineConfirmWindow";
-
-string $cmd = "python(\"from "+$pipelineRepositoryName+".pipelineStartup import *\");\n";
-string $pipelineConfirmWindow;
-if (int(`about -v`) < 2016)
-  $pipelineConfirmWindow = `window -t "Install Pipeline Tools" -w 300 -h 90 -s 0 -tb 0 "PipelineConfirmWindow"`;
-else
-  $pipelineConfirmWindow = `window -t "Install Pipeline Tools" -w 300 -h 90 -s 0 -mnb 0 -mxb 0 -cc $cmd "PipelineConfirmWindow"`;
-string $form = `formLayout -numberOfDivisions 100`;
-$cmd += "deleteUI -window " + $pipelineConfirmWindow + ";";
-string $confirmButton = `button -label "installation is completed!" -command $cmd`;
-formLayout -edit
-    -attachForm     $confirmButton     "top"    30
-    -attachPosition $confirmButton     "left"   0 20
-    -attachForm     $confirmButton     "bottom" 30
-    -attachPosition $confirmButton     "right"  0 80
-$form;
-showWindow $pipelineConfirmWindow;
+python("mayaPipelineSetup.install(source=Dir, auto=False, installToVersionDir=True)");
