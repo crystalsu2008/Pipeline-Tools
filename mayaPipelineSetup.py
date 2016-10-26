@@ -190,10 +190,16 @@ class PipelineSetup(object):
     def manageMenuItem(self):
         parent = self.mainMenu
         pm.menuItem(divider=True, p=parent)
-        refreshCmd = 'from '+self.repositoryName+'.pipelineStartup import *'
+
+        refreshCmd = "import "+self.repositoryName+"\n" \
+                 + "reload("+self.repositoryName+")\n" \
+                 + "from "+self.repositoryName+".pipelineStartup import *\n" \
+                 + "reload ("+self.repositoryName+".pipelineStartup)\n"
         pm.menuItem('refresh', l='Refresh', c=refreshCmd, p=parent)
-        uninstallCmd = 'try:\n\t'+self.repositoryName+'_pipset.uninstall()\n' +\
-					   'except:\n\tmayaPipelineSetup.uninstall()'
+
+        #uninstallCmd = 'try:\n\t'+self.repositoryName+'_pipset.uninstall()\n' +\
+		#			   'except:\n\tmayaPipelineSetup.uninstall()'
+        uninstallCmd = self.repositoryName+'_pipset.uninstall()'
         pm.menuItem('uninstall', l='Uninstall', c=uninstallCmd, p=parent)
 
     def setSource(self, source):
@@ -221,14 +227,15 @@ class PipelineSetup(object):
             if 'file' in menu:
                 if menu['type']=='python':
                     module = os.path.split(os.path.splitext(menu['file'])[0])[-1]
-                    importStr += ('import ' + module + '\n')
+                    importStr += ('import ' + module + ';reload(' + module + ')\n')
             else:
                 syspathStr += ('if \'' + pm.encodeString(menu['dir']) + '\' not in sys.path:\n')
                 syspathStr += ('\tsys.path.append(\'' + pm.encodeString(menu['dir']) + '\')\n')
 
         startupCmd += syspathStr
         startupCmd += importStr
-        startupCmd += 'from ' + self.repositoryName + ' import mayaPipelineSetup\n\n'
+        startupCmd += 'import ' + self.repositoryName + ';reload(' + self.repositoryName + ')\n\n'
+        startupCmd += 'from ' + self.repositoryName + ' import mayaPipelineSetup;reload(mayaPipelineSetup)\n\n'
 
         startupCmd += self.repositoryName+'_pipset = mayaPipelineSetup.PipelineSetup()\n\n'
 
@@ -246,9 +253,19 @@ class PipelineSetup(object):
         pipStartup.close()
 
     def userSetup_mel(self, uninstall=False):
+        mayaScriptPath = os.path.join(toNativePath(pm.internalVar(uad=True)), 'scripts', 'userSetup.mel')
+        versionScriptPath = os.path.join(toNativePath(pm.internalVar(upd=True)[0:-7]), 'scripts', 'userSetup.mel')
+
         filepath = os.path.join(os.path.split(self.repositoryDest)[0], 'userSetup.mel')
+        if not filepath == mayaScriptPath:
+            filepath = versionScriptPath
+
         flag = '//'+self.repositoryName+'_PIPELINESTARTUP'
-        statupcmd = '\npython("from '+self.repositoryName+'.pipelineStartup import *" ); '+flag
+        statupcmd = '\npython("import '+self.repositoryName+';' \
+                  + 'reload('+self.repositoryName+');' \
+                  + 'from '+self.repositoryName+'.pipelineStartup import *;' \
+                  + 'reload ('+self.repositoryName+'.pipelineStartup)" ); '+flag
+        cmds=''
         if not os.path.exists(filepath):
             if not uninstall:
                 userSetup = open(filepath, 'w')
@@ -256,7 +273,6 @@ class PipelineSetup(object):
                 userSetup.close()
         else:
             userSetup = open(filepath, 'r')
-            cmds=''
             for EachLine in userSetup:
                 if not flag in EachLine and not EachLine == '\n':
                     cmds += EachLine
@@ -266,6 +282,28 @@ class PipelineSetup(object):
             userSetup = open(filepath, 'w')
             userSetup.write(cmds)
             userSetup.close()
+            if not cmds:
+                os.remove(filepath)
+
+    def confirmWindow(self):
+        buttncmd = "import "+self.repositoryName+"\n" \
+                 + "reload("+self.repositoryName+")\n" \
+                 + "from "+self.repositoryName+".pipelineStartup import *\n" \
+                 + "reload ("+self.repositoryName+".pipelineStartup)\n"
+
+        if pm.window('PipelineConfirmWindow', ex=True ):
+            pm.deleteUI('PipelineConfirmWindow')
+
+        if int(pm.about(v=True)) < 2016:
+            win = pm.window('PipelineConfirmWindow', w=350, h=100, s=0, mnb=0, mxb=0, t='Pipeline Tools Install')
+        else:
+            win = pm.window('PipelineConfirmWindow', w=350, h=100, s=0, mnb=0, mxb=0, t='Pipeline Tools Install', cc=buttncmd)
+
+        form = pm.formLayout( numberOfDivisions=100)
+        buttncmd+='pm.deleteUI(\''+win+'\')'
+        buttn = pm.button(label='Click Here To Finish The Installation!', c=buttncmd)
+        pm.formLayout(form, e=True, af=[(buttn,'top',30), (buttn,'bottom',30)], ap=[(buttn,'left',0,20), (buttn,'right',0,80)])
+        pm.showWindow( win )
 
     def uninstall(self):
         # Delete Menus
@@ -302,23 +340,12 @@ class PipelineSetup(object):
         # Create userSetup.mel
         self.userSetup_mel()
 
-        buttncmd = 'from '+self.repositoryName+'.pipelineStartup import *'
-        if pm.window('PipelineConfirmWindow', ex=True ):
-            pm.deleteUI('PipelineConfirmWindow')
-
-        if int(pm.about(v=True)) < 2016:
-            win = pm.window('PipelineConfirmWindow', w=350, h=100, s=0, mnb=0, mxb=0, t='Pipeline Tools Install')
-        else:
-            win = pm.window('PipelineConfirmWindow', w=350, h=100, s=0, mnb=0, mxb=0, t='Pipeline Tools Install', cc=buttncmd)
-        form = pm.formLayout( numberOfDivisions=100)
-        buttncmd+=';pm.deleteUI(\''+win+'\')'
-        buttn = pm.button(label='Click Here To Finish The Installation!', c=buttncmd)
-        pm.formLayout(form, e=True, af=[(buttn,'top',30), (buttn,'bottom',30)], ap=[(buttn,'left',0,20), (buttn,'right',0,80)])
-        pm.showWindow( win )
+        # Finish The Installation Confirm.
+        return self.repositoryName
 
 #------------------------------------------------------------------------------#
 
-def install( source, auto=False, installToVersionDir=True ):
+def install( source, installToVersionDir=True ):
     global pipset
 
     if installToVersionDir :
@@ -328,23 +355,15 @@ def install( source, auto=False, installToVersionDir=True ):
     destination = os.path.join(toNativePath(destination), 'scripts')
 
     # Initial
-    if pipset is None:
+    if pipset in None:
         pipset = PipelineSetup()
         pipset.installInitial( source, destination )
 
-    if auto:
-        pipset.install()
-    else:
-        uiOptions()
+    pipset.install()
 
-def uninstall():
-    global pipset
-    if pipset:
-        pipset.uninstall()
-    else:
-        print 'There is Nothing to Uninstall.'
+    return pipset.repositoryName
 
-def uiOptions():
+def uiInstall():
     template = pm.uiTemplate( 'PipelineToolsInstallTemplate', force=True )
     template.define( pm.button, w=200, h=30, al='left' )
     template.define( pm.frameLayout, bv=True, lv=False, mh=5, mw=1 )
@@ -358,9 +377,28 @@ def uiOptions():
             with pm.columnLayout( rowSpacing=5 ):
                 with pm.frameLayout():
                     with pm.columnLayout():
-                        #sourField = pm.textFieldButtonGrp( l='Source Path:', tx=source, bl='   Browse   ', cw3=(65,265,70), w=400 )
-                        destField = pm.textFieldButtonGrp( l='Install Path:', tx=pipset.repositoryDest, bl='   Browse   ', cw3=(65,265,70), w=400 )
+                        #sourField = pm.textFieldButtonGrp( l='Source Path:', fi=source, bl='   Browse   ', cw3=(65,265,70), w=400 )
+                        destField = pm.textFieldButtonGrp( l='Install Path:', bl='   Browse   ', cw3=(65,265,70), w=400 )
+                        destField.setFileName(pipset.destination)
+
+                        browseCmd = "caption = 'Pick a Directory to install Repository'\n" \
+                                  + "destination = pm.textFieldButtonGrp('"+destField+"', q=True, fi=True)\n" \
+                                  + "pm.textFieldButtonGrp('"+destField+"', e=True, fi=pm.fileDialog2(cap=caption, fm=3, dir=destination)[0])"
+                        destField.buttonCommand(browseCmd)
                 with pm.horizontalLayout():
-                    insButtnCmd = 'mayaPipelineSetup.pipset.install();from '+pipset.repositoryName+'.pipelineStartup import *;pm.deleteUI(\''+win+'\')'
-                    insButtn = pm.button( label='Install', c=insButtnCmd )
-                    canButtn = pm.button( label='Cancel' )
+                    insButtnCmd = "source = mayaPipelineSetup.pipset.source\n" \
+                                + "destination = mayaPipelineSetup.toNativePath( pm.textFieldButtonGrp('"+destField+"', q=True, fi=True) )\n" \
+                                + "mayaPipelineSetup.pipset.installInitial(source, destination)\n" \
+                                + "modul = mayaPipelineSetup.pipset.install()\n"
+                    closeWinCmd = 'pm.deleteUI("'+win+'")\n'
+                    confirmCmd = 'mayaPipelineSetup.pipset.confirmWindow()'
+
+                    insButtn = pm.button( label='Install', c=insButtnCmd+closeWinCmd+confirmCmd )
+                    canButtn = pm.button( label='Cancel', c=closeWinCmd )
+
+def uninstall():
+    global pipset
+    if pipset:
+        pipset.uninstall()
+    else:
+        print 'There is Nothing to Uninstall.'

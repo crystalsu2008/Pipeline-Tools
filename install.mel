@@ -1,3 +1,5 @@
+int $PiplineTollsAutoInstall = 1;
+
 global proc toolsSourcePathPointer(){}
 
 global proc string toolsSourcePath()
@@ -8,6 +10,15 @@ global proc string toolsSourcePath()
   return $path;
 }
 
+proc string PiplineToolsRefreshPyCmds(string $module)
+{
+  string $cmds = "import "+$module+"\n"
+       + "reload("+$module+")\n"
+       + "from "+$module+".pipelineStartup import *\n"
+       + "reload ("+$module+".pipelineStartup)";
+  return $cmds;
+}
+
 string $prepareSetup = "import sys\n"
   + "Dir = '" + toolsSourcePath() + "'\n"
   + "if Dir not in sys.path:\n"
@@ -16,4 +27,42 @@ string $prepareSetup = "import sys\n"
 python( $prepareSetup );
 
 // Install Pipeline Tools and get the Tools name.
-python("mayaPipelineSetup.install(source=Dir, auto=False, installToVersionDir=True)");
+if ( $PiplineTollsAutoInstall )
+{
+  string $module = `python("mayaPipelineSetup.install(source=Dir, installToVersionDir=True)")`;
+  string $refreshCmds = PiplineToolsRefreshPyCmds($module);
+  python($refreshCmds);
+}
+else
+{
+  template = pm.uiTemplate( 'PipelineToolsInstallTemplate', force=True )
+  template.define( pm.button, w=200, h=30, al='left' )
+  template.define( pm.frameLayout, bv=True, lv=False, mh=5, mw=1 )
+
+  if `window -ex "PipelineToolsInstallWin"`
+      deleteUI -window "PipelineToolsInstallWin";
+
+   $window = `window -title "Long Name";
+   $win = `window -mb 0 -mbv 0 -t 'Pipeline Tools Install' "PipelineToolsInstallWin"`;
+    columnLayout( rowSpacing=5 ):
+              with pm.frameLayout():
+                  with pm.columnLayout():
+                      #sourField = pm.textFieldButtonGrp( l='Source Path:', fi=source, bl='   Browse   ', cw3=(65,265,70), w=400 )
+                      destField = pm.textFieldButtonGrp( l='Install Path:', bl='   Browse   ', cw3=(65,265,70), w=400 )
+                      destField.setFileName(pipset.destination)
+
+                      browseCmd = "caption = 'Pick a Directory to install Repository'\n" \
+                                + "destination = pm.textFieldButtonGrp('"+destField+"', q=True, fi=True)\n" \
+                                + "pm.textFieldButtonGrp('"+destField+"', e=True, fi=pm.fileDialog2(cap=caption, fm=3, dir=destination)[0])"
+                      destField.buttonCommand(browseCmd)
+              with pm.horizontalLayout():
+                  insButtnCmd = "source = mayaPipelineSetup.pipset.source\n" \
+                              + "destination = mayaPipelineSetup.toNativePath( pm.textFieldButtonGrp('"+destField+"', q=True, fi=True) )\n" \
+                              + "mayaPipelineSetup.pipset.installInitial(source, destination)\n" \
+                              + "modul = mayaPipelineSetup.pipset.install()\n"
+                  closeWinCmd = 'pm.deleteUI("'+win+'")\n'
+                  confirmCmd = 'mayaPipelineSetup.pipset.confirmWindow()'
+
+                  insButtn = pm.button( label='Install', c=insButtnCmd+closeWinCmd+confirmCmd )
+                  canButtn = pm.button( label='Cancel', c=closeWinCmd )
+}
