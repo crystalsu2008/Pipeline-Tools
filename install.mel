@@ -1,5 +1,6 @@
-int $PiplineTollsAutoInstall = 1;
-
+int $PiplineTollsAutoInstall = 0;
+int $InstallToVersionDir = 1;
+//----------------------------------------------------------------------------//
 global proc toolsSourcePathPointer(){}
 
 global proc string toolsSourcePath()
@@ -10,59 +11,100 @@ global proc string toolsSourcePath()
   return $path;
 }
 
-proc string PiplineToolsRefreshPyCmds(string $module)
+proc string getPiplineToolsInstallDestination(int $InstallToVersionDir)
 {
-  string $cmds = "import "+$module+"\n"
-       + "reload("+$module+")\n"
-       + "from "+$module+".pipelineStartup import *\n"
-       + "reload ("+$module+".pipelineStartup)";
-  return $cmds;
+  string $dest;
+  if ($InstallToVersionDir)
+  {
+    $dest = dirname(`internalVar -upd`);
+    $dest = toNativePath($dest+"/scripts");
+  }
+  else
+  {
+    $dest = `internalVar -uad`;
+    $dest = toNativePath($dest+"scripts");
+  }
+  return $dest;
 }
 
-string $prepareSetup = "import sys\n"
-  + "Dir = '" + toolsSourcePath() + "'\n"
+global proc string PiplineToolsRefreshPyCmds(string $module, string $destination)
+{
+  string $cmds = "import sys\n"
+        + "Dir = '" + $destination + "'\n"
+        + "if Dir not in sys.path:\n"
+        + "    sys.path.append(Dir)\n"
+        + "import "+$module+"\n"
+        + "reload("+$module+")\n"
+        + "from "+$module+".pipelineStartup import *\n"
+        + "reload ("+$module+".pipelineStartup)";
+  return $cmds;
+}
+//----------------------------------------------------------------------------//
+string $source = toolsSourcePath();
+string $destination = getPiplineToolsInstallDestination($InstallToVersionDir);
+
+string $prepareInstall = "import sys\n"
+  + "Dir = '" + encodeString($source) + "'\n"
   + "if Dir not in sys.path:\n"
   + "    sys.path.append(Dir)\n"
   + "import mayaPipelineSetup;reload(mayaPipelineSetup)\n";
-python( $prepareSetup );
+python( $prepareInstall );
 
-// Install Pipeline Tools and get the Tools name.
 if ( $PiplineTollsAutoInstall )
 {
-  string $module = `python("mayaPipelineSetup.install(source=Dir, installToVersionDir=True)")`;
-  string $refreshCmds = PiplineToolsRefreshPyCmds($module);
+  // Install Pipeline Tools and get the Tools name.
+  string $module = `python("mayaPipelineSetup.install(source=Dir, destination='"+encodeString($destination)+"')")`;
+  // Refresh the Tools.
+  string $refreshCmds = PiplineToolsRefreshPyCmds($module, $destination);
+  // !!! I don't why, when the tools frist refresh in the Maya 2014, there is a warning:
+  // UnicodeWarning: Unicode equal comparison failed to convert both arguments to Unicode - interpreting them as being unequal, at line 4, in  "D:\Program Files\Autodesk\Maya2014\bin\maya.exe"
+  // So I must do double refresh, then it's OK!!!
+  python($refreshCmds);
   python($refreshCmds);
 }
 else
 {
-  template = pm.uiTemplate( 'PipelineToolsInstallTemplate', force=True )
-  template.define( pm.button, w=200, h=30, al='left' )
-  template.define( pm.frameLayout, bv=True, lv=False, mh=5, mw=1 )
-
-  if `window -ex "PipelineToolsInstallWin"`
+  //template.define( pm.button, w=200, h=30, al='left' )
+  if (`window -ex "PipelineToolsInstallWin"`)
       deleteUI -window "PipelineToolsInstallWin";
 
-   $window = `window -title "Long Name";
-   $win = `window -mb 0 -mbv 0 -t 'Pipeline Tools Install' "PipelineToolsInstallWin"`;
-    columnLayout( rowSpacing=5 ):
-              with pm.frameLayout():
-                  with pm.columnLayout():
-                      #sourField = pm.textFieldButtonGrp( l='Source Path:', fi=source, bl='   Browse   ', cw3=(65,265,70), w=400 )
-                      destField = pm.textFieldButtonGrp( l='Install Path:', bl='   Browse   ', cw3=(65,265,70), w=400 )
-                      destField.setFileName(pipset.destination)
+    $win = `window -mb 0 -mbv 0 -t "Pipeline Tools Install" "PipelineToolsInstallWin"`;
+      $form = `formLayout -nd 100`;
+        $frame = `frameLayout -bv 1 -lv 0 -mh 5 -mw 1`;
+          rowLayout -adj 1;
+            columnLayout -rowSpacing 5 -adj 1;
+              //$sourField = textFieldButtonGrp -l "Source Path:" -fi `toolsSourcePath()` -bl="   Browse   ", -cw3 65 265 70 -w 400;
+              $destField = `textFieldButtonGrp -l "Install Path:" -fi $destination -bl "   Browse   "
+                          -cw3 65 265 70 -adj 2 -cal 1 "right" -cat 1 "both" 0 -cat 2 "both" 0 -cat 3 "both" 0`;
+              string $browseCmd = "string $caption = \"Pick a Directory to install Repository\";\n"
+                                + "string $destination = `textFieldButtonGrp -q -fi \""+$destField+"\"`;\n"
+                                + "textFieldButtonGrp -e -fi (`fileDialog2 -cap $caption -fm 3 -dir $destination`) "+$destField+";";
+              textFieldButtonGrp -e -bc $browseCmd $destField;
+              setParent ..;
+            setParent ..;
+          setParent ..;
+          $row = `rowLayout -nc 3 -cw3 200 100 100 -cal 1 "right" -cat 1 "both" 0 -adj 1`;
+            formLayout; setParent ..;
+            $insButtnCmd = "string $source = \""+encodeString($source)+"\";\n"
+                         + "string $destination = `textFieldButtonGrp -q -fi "+$destField+"`;\n"
+                         + "$destination = encodeString(`toNativePath($destination)`);\n"
+                         + "string $module = `python(\"mayaPipelineSetup.install(source='\"+$source+\"', destination='\"+$destination+\"')\")`;\n"
+                         + "string $refreshCmds = PiplineToolsRefreshPyCmds($module, $destination);\n"
+                         + "python($refreshCmds);python($refreshCmds);\n";
+            $closeWinCmd = "deleteUI -window "+$win+";";
+            button -l "Install" -w 100 -h 30 -al "left" -c ($insButtnCmd+$closeWinCmd);
+            button -l "Cancel" -w 100 -h 30 -al "left" -c $closeWinCmd;
 
-                      browseCmd = "caption = 'Pick a Directory to install Repository'\n" \
-                                + "destination = pm.textFieldButtonGrp('"+destField+"', q=True, fi=True)\n" \
-                                + "pm.textFieldButtonGrp('"+destField+"', e=True, fi=pm.fileDialog2(cap=caption, fm=3, dir=destination)[0])"
-                      destField.buttonCommand(browseCmd)
-              with pm.horizontalLayout():
-                  insButtnCmd = "source = mayaPipelineSetup.pipset.source\n" \
-                              + "destination = mayaPipelineSetup.toNativePath( pm.textFieldButtonGrp('"+destField+"', q=True, fi=True) )\n" \
-                              + "mayaPipelineSetup.pipset.installInitial(source, destination)\n" \
-                              + "modul = mayaPipelineSetup.pipset.install()\n"
-                  closeWinCmd = 'pm.deleteUI("'+win+'")\n'
-                  confirmCmd = 'mayaPipelineSetup.pipset.confirmWindow()'
+  formLayout -e
+    -attachForm     $frame "top"    5
+    -attachForm     $frame "left"   5
+    -attachForm     $frame "right"  5
+    -attachControl  $frame "bottom" 5 $row
 
-                  insButtn = pm.button( label='Install', c=insButtnCmd+closeWinCmd+confirmCmd )
-                  canButtn = pm.button( label='Cancel', c=closeWinCmd )
+    -attachForm     $row   "bottom" 5
+    -attachForm     $row   "left"   5
+    -attachForm     $row   "right"  5
+  $form;
+
+  showWindow $win;
 }
