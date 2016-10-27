@@ -37,7 +37,7 @@ class PipelineSetup(object):
     def installInitial(self, source, destination):
         self.source = source
         self.destination = destination
-        reposDir = os.path.join(source, 'Maya', 'Repository')
+        reposDir = os.path.join(source, 'Repository')
         reposSubdirs = None
         if os.path.exists(reposDir):
             reposSubdirs = [x for x in os.listdir(reposDir) if os.path.isdir(os.path.join(reposDir, x))]
