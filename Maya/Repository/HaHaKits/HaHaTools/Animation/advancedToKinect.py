@@ -16,31 +16,31 @@ a2k = None
 
 class Advanced2Kinect(object):
 
-    k2map = {'SPINEBASE': ('Root_M', None, 'SPINEMID'),
-             'SPINEMID': ('Spine1_M', 'SPINEBASE', 'SPINESHOULDER'),
-              'SPINESHOULDER': ('Chest_M', 'SPINEMID', 'NECK'),
-               'NECK': ('Neck_M', 'SPINESHOULDER', 'HEAD'),
-                'HEAD': ('HeadEnd_M', 'NECK', None),
-            'SHOULDERLEFT': ('Shoulder_L', 'SPINESHOULDER', 'ELBOWLEFT'),
-             'ELBOWLEFT': ('Elbow_L', 'SHOULDERLEFT', 'WRISTLEFT'),
-              'WRISTLEFT': ('Wrist_L', 'ELBOWLEFT', 'HANDLEFT'),
-               'HANDLEFT': ('MiddleFinger1_L', 'WRISTLEFT', 'HANDTIPLEFT'),
-                'HANDTIPLEFT': ('MiddleFinger4_L', 'HANDLEFT', None),
-                 'THUMBLEFT': ('ThumbFinger4_L', 'WRISTLEFT', None),
-            'SHOULDERRIGHT': ('Shoulder_R', 'SPINESHOULDER', 'ELBOWRIGHT'),
-             'ELBOWRIGHT': ('Elbow_R', 'SHOULDERRIGHT', 'WRISTRIGHT'),
-              'WRISTRIGHT': ('Wrist_R', 'ELBOWRIGHT', 'HANDRIGHT'),
-               'HANDRIGHT': ('MiddleFinger1_R', 'WRISTRIGHT', 'HANDTIPRIGHT'),
-                'HANDTIPRIGHT': ('MiddleFinger4_R', 'HANDRIGHT', None),
-                 'THUMBRIGHT': ('ThumbFinger4_R', 'WRISTRIGHT', None),
-            'HIPLEFT': ('Hip_L', 'SPINEBASE', 'KNEELEFT'),
-             'KNEELEFT': ('Knee_L', 'HIPLEFT', 'ANKLELEFT'),
-              'ANKLELEFT': ('Ankle_L', 'KNEELEFT', 'FOOTLEFT'),
-               'FOOTLEFT': ('ToesEnd_L', 'ANKLELEFT', None),
-            'HIPRIGHT': ('Hip_R', 'SPINEBASE', 'KNEERIGHT'),
-             'KNEERIGHT': ('Knee_R', 'HIPRIGHT', 'ANKLERIGHT'),
-              'ANKLERIGHT': ('Ankle_R', 'KNEERIGHT', 'FOOTRIGHT'),
-               'FOOTRIGHT': ('ToesEnd_R', 'ANKLERIGHT', None)}
+    k2map = {'SPINEBASE': ('Root_M', None, 'SPINEMID', (1,0,0), (0,1,0)),
+             'SPINEMID': ('Spine1_M', 'SPINEBASE', 'SPINESHOULDER', (1,0,0), (0,1,0)),
+              'SPINESHOULDER': ('Chest_M', 'SPINEMID', 'NECK', (1,0,0), (0,1,0)),
+               'NECK': ('Neck_M', 'SPINESHOULDER', 'HEAD', (0,1,0), (0,0,1)),
+                'HEAD': ('HeadEnd_M', 'NECK', None, (1,0,0), (0,1,0)),
+            'SHOULDERLEFT': ('Shoulder_L', 'SPINESHOULDER', 'ELBOWLEFT', (1,0,0), (0,1,0)),
+             'ELBOWLEFT': ('Elbow_L', 'SHOULDERLEFT', 'WRISTLEFT', (1,0,0), (0,1,0)),
+              'WRISTLEFT': ('Wrist_L', 'ELBOWLEFT', 'HANDLEFT', (1,0,0), (0,1,0)),
+               'HANDLEFT': ('MiddleFinger1_L', 'WRISTLEFT', 'HANDTIPLEFT', (1,0,0), (0,1,0)),
+                'HANDTIPLEFT': ('MiddleFinger4_L', 'HANDLEFT', None, (1,0,0), (0,1,0)),
+                 'THUMBLEFT': ('ThumbFinger4_L', 'WRISTLEFT', None, (1,0,0), (0,1,0)),
+            'SHOULDERRIGHT': ('Shoulder_R', 'SPINESHOULDER', 'ELBOWRIGHT', (1,0,0), (0,1,0)),
+             'ELBOWRIGHT': ('Elbow_R', 'SHOULDERRIGHT', 'WRISTRIGHT', (1,0,0), (0,1,0)),
+              'WRISTRIGHT': ('Wrist_R', 'ELBOWRIGHT', 'HANDRIGHT', (1,0,0), (0,1,0)),
+               'HANDRIGHT': ('MiddleFinger1_R', 'WRISTRIGHT', 'HANDTIPRIGHT', (1,0,0), (0,1,0)),
+                'HANDTIPRIGHT': ('MiddleFinger4_R', 'HANDRIGHT', None, (1,0,0), (0,1,0)),
+                 'THUMBRIGHT': ('ThumbFinger4_R', 'WRISTRIGHT', None, (1,0,0), (0,1,0)),
+            'HIPLEFT': ('Hip_L', 'SPINEBASE', 'KNEELEFT', (1,0,0), (0,-1,0)),
+             'KNEELEFT': ('Knee_L', 'HIPLEFT', 'ANKLELEFT', (1,0,0), (0,-1,0)),
+              'ANKLELEFT': ('Ankle_L', 'KNEELEFT', 'FOOTLEFT', (1,0,0), (0,-1,0)),
+               'FOOTLEFT': ('ToesEnd_L', 'ANKLELEFT', None, (1,0,0), (0,-1,0)),
+            'HIPRIGHT': ('Hip_R', 'SPINEBASE', 'KNEERIGHT', (1,0,0), (0,1,0)),
+             'KNEERIGHT': ('Knee_R', 'HIPRIGHT', 'ANKLERIGHT', (1,0,0), (0,1,0)),
+              'ANKLERIGHT': ('Ankle_R', 'KNEERIGHT', 'FOOTRIGHT', (1,0,0), (0,1,0)),
+               'FOOTRIGHT': ('ToesEnd_R', 'ANKLERIGHT', None, (1,0,0), (0,1,0))}
 
     k2wmap= {'SPINEBASE': ['Root_M'],
              'SPINEMID': ['Spine1_M'],
@@ -91,16 +91,16 @@ class Advanced2Kinect(object):
             tag = self.k2map[kjot][0]
             aimid = self.k2map[kjot][2]
             aim = None if aimid is None else self.k2map[aimid][0]
-            aimv = (1,0,0)
+            aimv = self.k2map[kjot][3]
 
             t = pm.xform( tag, q=True, ws=True, t=True )
             pm.select( cl=True )
             interJoint = pm.joint( p=t, n=(kjot+'intermediate') )
 
             if not aim is None:
-                aimv = (-1,0,0) if pm.getAttr(aim+'.tx') < 0 else aimv
+                #aimv = (-1,0,0) if pm.getAttr(aim+'.tx') < 0 else aimv
                 aimer = pm.aimConstraint( aim, interJoint, aim=aimv, wuo=tag,\
-                                   wut='objectrotation', u=(0,1,0), wu=(0,1,0) )
+                                   wut='objectrotation', u=self.k2map[kjot][4], wu=(0,1,0) )
                 pm.delete( aimer )
             pm.duplicate( interJoint, n=kjot )
 
@@ -128,16 +128,16 @@ class Advanced2Kinect(object):
             tag = self.k2map[kjot][0]
             aimid = self.k2map[kjot][2]
             aim = None if aimid is None else self.k2map[aimid][0]
-            aimv = (1,0,0)
+            aimv = self.k2map[kjot][3]
 
             # Point Constraint
             pm.pointConstraint( tag, (kjot+'intermediate') )
 
             # Aim Constraint
             if not aim is None:
-                aimv = (-1,0,0) if pm.getAttr(aim+'.tx') < 0 else aimv
+                #aimv = (-1,0,0) if pm.getAttr(aim+'.tx') < 0 else aimv
                 pm.aimConstraint( aim, (kjot+'intermediate'), aim=aimv,\
-                          wut='objectrotation', u=(0,1,0), wu=(0,1,0), wuo=tag )
+                          wut='objectrotation', u=self.k2map[kjot][4], wu=(0,1,0), wuo=tag )
 
             pm.setAttr( (kjot+'.jointOrient'), pm.getAttr(kjot+'intermediate.jointOrient') )
             pm.connectAttr( (kjot+'intermediate.r'), (kjot+'.r') )
@@ -217,7 +217,7 @@ class Advanced2Kinect(object):
         pm.parent( 'SPINEBASE', rootGrp )
 
         # Move intermediate joint to Advanced Skeleton Group.
-        asGroup = pm.listRelatives(pm.listRelatives(pm.ls('MainShape', typ='nurbsCurve'), p=True), p=True)
+        asGroup = pm.listRelatives(pm.listRelatives(pm.ls('MainShape', typ='nurbsCurve'), p=True), p=True)[0]
         pm.parent( 'SPINEBASEintermediate', asGroup)
         pm.setAttr( 'SPINEBASEintermediate.visibility', False )
         return
