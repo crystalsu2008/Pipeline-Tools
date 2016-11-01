@@ -259,6 +259,12 @@ class PipelineSetup(object):
         # Reinstall Repository Files
         self.installRepository(update=True);
 
+        # Create Menus
+        self.createMenu()
+
+        # Create manager menu items
+        self.manageMenuItem()
+
         # Rewrite pipelineStartup.py
         self.pipelineStartup_py()
 
@@ -330,6 +336,8 @@ class PipelineSetup(object):
         syspathStr = ''
         importStr = '\nimport pymel.core as pm\n'
 
+        print self.menus
+
         for k, menu in self.menus.iteritems():
             if 'file' in menu:
                 if menu['type']=='python':
@@ -355,8 +363,9 @@ class PipelineSetup(object):
 
         if self.updateWhenStartup:
             startupCmd += self.repositoryName+'_pipset.update()\n'
-        startupCmd += self.repositoryName+'_pipset.createMenu()\n'
-        startupCmd += self.repositoryName+'_pipset.manageMenuItem()\n'
+        else:
+            startupCmd += self.repositoryName+'_pipset.createMenu()\n'
+            startupCmd += self.repositoryName+'_pipset.manageMenuItem()\n'
 
         pipStartup = open(os.path.join(self.repositoryDest, 'pipelineStartup.py'), 'w')
         pipStartup.write( startupCmd )
