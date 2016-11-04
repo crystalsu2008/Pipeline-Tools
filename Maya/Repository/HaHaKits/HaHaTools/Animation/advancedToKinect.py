@@ -16,6 +16,34 @@ a2k = None
 
 class Advanced2Kinect(object):
 
+    # Advanced to Avatar Map
+    avamap = {'SPINEBASE': ('Root_M', None, 'SPINEMID', (1,0,0), (0,1,0)),
+             'SPINEMID': ('Spine1_M', 'SPINEBASE', 'SPINESHOULDER', (1,0,0), (0,1,0)),
+              'SPINESHOULDER': ('Chest_M', 'SPINEMID', 'NECK', (1,0,0), (0,1,0)),
+               'NECK': ('Neck_M', 'SPINESHOULDER', 'HEAD', (1,0,0), (0,1,0)),
+                'HEAD': ('HeadEnd_M', 'NECK', None, (1,0,0), (0,1,0)),
+            'SHOULDERLEFT': ('Shoulder_L', 'SPINESHOULDER', 'ELBOWLEFT', (1,0,0), (0,0,-1)),
+             'ELBOWLEFT': ('Elbow_L', 'SHOULDERLEFT', 'WRISTLEFT', (1,0,0), (0,0,-1)),
+              'WRISTLEFT': ('Wrist_L', 'ELBOWLEFT', 'HANDLEFT', (1,0,0), (0,0,-1)),
+               'HANDLEFT': ('MiddleFinger1_L', 'WRISTLEFT', 'HANDTIPLEFT', (1,0,0), (0,0,-1)),
+                'HANDTIPLEFT': ('MiddleFinger4_L', 'HANDLEFT', None, (1,0,0), (0,0,-1)),
+                 'THUMBLEFT': ('ThumbFinger4_L', 'WRISTLEFT', None, (1,0,0), (0,0,-1)),
+            'SHOULDERRIGHT': ('Shoulder_R', 'SPINESHOULDER', 'ELBOWRIGHT', (1,0,0), (0,0,-1)),
+             'ELBOWRIGHT': ('Elbow_R', 'SHOULDERRIGHT', 'WRISTRIGHT', (1,0,0), (0,0,-1)),
+              'WRISTRIGHT': ('Wrist_R', 'ELBOWRIGHT', 'HANDRIGHT', (1,0,0), (0,0,-1)),
+               'HANDRIGHT': ('MiddleFinger1_R', 'WRISTRIGHT', 'HANDTIPRIGHT', (1,0,0), (0,0,-1)),
+                'HANDTIPRIGHT': ('MiddleFinger4_R', 'HANDRIGHT', None, (1,0,0), (0,0,-1)),
+                 'THUMBRIGHT': ('ThumbFinger4_R', 'WRISTRIGHT', None, (1,0,0), (0,0,-1)),
+            'HIPLEFT': ('Hip_L', 'SPINEBASE', 'KNEELEFT', (1,0,0), (0,-1,0)),
+             'KNEELEFT': ('Knee_L', 'HIPLEFT', 'ANKLELEFT', (1,0,0), (0,-1,0)),
+              'ANKLELEFT': ('Ankle_L', 'KNEELEFT', 'FOOTLEFT', (1,0,0), (0,-1,0)),
+               'FOOTLEFT': ('ToesEnd_L', 'ANKLELEFT', None, (1,0,0), (0,-1,0)),
+            'HIPRIGHT': ('Hip_R', 'SPINEBASE', 'KNEERIGHT', (1,0,0), (0,1,0)),
+             'KNEERIGHT': ('Knee_R', 'HIPRIGHT', 'ANKLERIGHT', (1,0,0), (0,1,0)),
+              'ANKLERIGHT': ('Ankle_R', 'KNEERIGHT', 'FOOTRIGHT', (1,0,0), (0,1,0)),
+               'FOOTRIGHT': ('ToesEnd_R', 'ANKLERIGHT', None, (1,0,0), (0,1,0))}
+
+    # Advanced to Kinect2 Map
     k2map = {'SPINEBASE': ('Root_M', None, 'SPINEMID', (1,0,0), (0,1,0)),
              'SPINEMID': ('Spine1_M', 'SPINEBASE', 'SPINESHOULDER', (1,0,0), (0,1,0)),
               'SPINESHOULDER': ('Chest_M', 'SPINEMID', 'NECK', (1,0,0), (0,1,0)),
@@ -83,33 +111,36 @@ class Advanced2Kinect(object):
 
     asSkins, k2Skins = [None], [None]
 
-    def createKinect2(self):
+    def convertSkeleton(self, toType='Kinect2'):
+        if toType=='Kinect2':
+            mapdict = self.k2map
+        elif toType=='Avatar':
+            mapdict = self.avamap
         #
         # Create Kinect2 Joints
         #
-        for kjot in self.k2map:
-            tag = self.k2map[kjot][0]
-            aimid = self.k2map[kjot][2]
-            aim = None if aimid is None else self.k2map[aimid][0]
-            aimv = self.k2map[kjot][3]
+        for kjot in mapdict:
+            tag = mapdict[kjot][0]
+            aimid = mapdict[kjot][2]
+            aim = None if aimid is None else mapdict[aimid][0]
+            aimv = mapdict[kjot][3]
 
             t = pm.xform( tag, q=True, ws=True, t=True )
             pm.select( cl=True )
             interJoint = pm.joint( p=t, n=(kjot+'intermediate') )
 
             if not aim is None:
-                #aimv = (-1,0,0) if pm.getAttr(aim+'.tx') < 0 else aimv
-                aimer = pm.aimConstraint( aim, interJoint, aim=aimv, wuo=tag,\
-                                   wut='objectrotation', u=self.k2map[kjot][4], wu=(0,1,0) )
+                aimer = pm.aimConstraint( aim, interJoint, aim=aimv, wuo=aim,\
+                                   wut='objectrotation', u=mapdict[kjot][4], wu=(0,1,0) )
                 pm.delete( aimer )
             pm.duplicate( interJoint, n=kjot )
 
         #
         # Make Joints Hierarchy
         #
-        for kjot in self.k2map:
-            parent = self.k2map[kjot][1]
-            aimid = self.k2map[kjot][2]
+        for kjot in mapdict:
+            parent = mapdict[kjot][1]
+            aimid = mapdict[kjot][2]
             if not parent is None:
                 pm.parent( (kjot+'intermediate'), (parent+'intermediate') )
                 pm.parent( kjot, parent )
@@ -123,21 +154,20 @@ class Advanced2Kinect(object):
         #
         # Make Constraint
         #
-        for kjot in self.k2map:
-            parent = self.k2map[kjot][1]
-            tag = self.k2map[kjot][0]
-            aimid = self.k2map[kjot][2]
-            aim = None if aimid is None else self.k2map[aimid][0]
-            aimv = self.k2map[kjot][3]
+        for kjot in mapdict:
+            parent = mapdict[kjot][1]
+            tag = mapdict[kjot][0]
+            aimid = mapdict[kjot][2]
+            aim = None if aimid is None else mapdict[aimid][0]
+            aimv = mapdict[kjot][3]
 
             # Point Constraint
             pm.pointConstraint( tag, (kjot+'intermediate') )
 
             # Aim Constraint
             if not aim is None:
-                #aimv = (-1,0,0) if pm.getAttr(aim+'.tx') < 0 else aimv
-                pm.aimConstraint( aim, (kjot+'intermediate'), aim=aimv,\
-                          wut='objectrotation', u=self.k2map[kjot][4], wu=(0,1,0), wuo=tag )
+                pm.aimConstraint( aim, (kjot+'intermediate'), aim=aimv, wuo=aim,\
+                          wut='objectrotation', u=mapdict[kjot][4], wu=(0,1,0) )
 
             pm.setAttr( (kjot+'.jointOrient'), pm.getAttr(kjot+'intermediate.jointOrient') )
             pm.connectAttr( (kjot+'intermediate.r'), (kjot+'.r') )
@@ -152,8 +182,6 @@ class Advanced2Kinect(object):
             if asjos:
                 for asjo in asjos:
                     as_map_k2[asjo]=k2jo
-        #for x, y in as_map_k2.iteritems():
-        #    print x,y
 
         # Finding the keepJoints.
         keepJoints = {}
@@ -199,13 +227,11 @@ class Advanced2Kinect(object):
         #
         # Create 'Kinect2' joint root curve handle.
         #
-        xpos = pm.xform('HANDTIPLEFT', q=True, t=True, ws=True)
-        ypos = pm.xform('HEAD', q=True, t=True, ws=True)
-        zpos = pm.xform('SPINEBASE', q=True, t=True, ws=True)
-        textCurveGrp = pm.textCurves( f='Courier', t='Kinect2', ch=False)
+        xpos, ypos, zpos = self.getHandlePos()
+        textCurveGrp = pm.textCurves( f='Courier', t=toType, ch=False)
         bbox = pm.exactWorldBoundingBox(textCurveGrp)
-        pm.xform(textCurveGrp, t=(xpos[0], ypos[1], zpos[2]), ro=(0,0,-90),\
-                      s=(ypos[1]/3/bbox[3],ypos[1]/3/bbox[3],ypos[1]/3/bbox[3]))
+        pm.xform(textCurveGrp, t=(xpos, ypos, zpos), ro=(0,0,-90),\
+                      s=(ypos/3/bbox[3],ypos/3/bbox[3],ypos/3/bbox[3]))
         rootCurvesShape = pm.listRelatives(textCurveGrp, ad=True, s=True)
         rootCurves = pm.parent(rootCurvesShape, w=True)
         pm.makeIdentity(rootCurves, apply=True, t=1, r=1, s=1, n=0, pn=1)
@@ -221,6 +247,15 @@ class Advanced2Kinect(object):
         pm.parent( 'SPINEBASEintermediate', asGroup)
         pm.setAttr( 'SPINEBASEintermediate.visibility', False )
         return
+
+    def getHandlePos(self):
+        x = y = z = 0
+        for jot in pm.listRelatives('SPINEBASE', ad=True, typ='joint'):
+            x1, y1, z1 = pm.xform(jot, q=True, t=True, ws=True)
+            x = x1 if x1 > x else x
+            y = y1 if y1 > y else y
+            z = z1 if z1 > z else z
+        return x, y, z
 
     def copySkinWeights(self):
         if not self.asSkins[0] or not self.k2Skins[0]:
@@ -262,11 +297,19 @@ class Advanced2Kinect(object):
             if not len(pm.listConnections(x)):
                 pm.delete(x)
 
+def createAvatar():
+    global a2k
+    if a2k is None:
+        a2k = Advanced2Kinect()
+    a2k.convertSkeleton(toType='Avatar')
+    a2k.duplicateSkinObjects()
+    a2k.copySkinWeights()
+
 def createKinect2():
     global a2k
     if a2k is None:
         a2k = Advanced2Kinect()
-    a2k.createKinect2()
+    a2k.convertSkeleton()
     a2k.duplicateSkinObjects()
     a2k.copySkinWeights()
 

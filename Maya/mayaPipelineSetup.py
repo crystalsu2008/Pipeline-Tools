@@ -336,8 +336,6 @@ class PipelineSetup(object):
         syspathStr = ''
         importStr = '\nimport pymel.core as pm\n'
 
-        print self.menus
-
         for k, menu in self.menus.iteritems():
             if 'file' in menu:
                 if menu['type']=='python':
