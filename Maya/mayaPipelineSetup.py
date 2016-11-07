@@ -6,7 +6,7 @@ import filecmp
 def toNativePath(strFile):
 	if pm.about(nt=True):
 		strFile = pm.encodeString(strFile).replace("/","\\")
-	return strFile;
+	return strFile
 
 pipset = None
 
