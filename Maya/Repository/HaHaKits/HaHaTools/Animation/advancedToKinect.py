@@ -47,20 +47,20 @@ class Advanced2Kinect(object):
     k2map = {'SPINEBASE': ('Root_M', None, 'SPINEMID', (1,0,0), (0,1,0)),
              'SPINEMID': ('Spine1_M', 'SPINEBASE', 'SPINESHOULDER', (1,0,0), (0,1,0)),
               'SPINESHOULDER': ('Chest_M', 'SPINEMID', 'NECK', (1,0,0), (0,1,0)),
-               'NECK': ('Neck_M', 'SPINESHOULDER', 'HEAD', (0,1,0), (0,0,1)),
+               'NECK': ('Neck_M', 'SPINESHOULDER', 'HEAD', (1,0,0), (0,1,0)),
                 'HEAD': ('HeadEnd_M', 'NECK', None, (1,0,0), (0,1,0)),
-            'SHOULDERLEFT': ('Shoulder_L', 'SPINESHOULDER', 'ELBOWLEFT', (1,0,0), (0,1,0)),
-             'ELBOWLEFT': ('Elbow_L', 'SHOULDERLEFT', 'WRISTLEFT', (1,0,0), (0,1,0)),
-              'WRISTLEFT': ('Wrist_L', 'ELBOWLEFT', 'HANDLEFT', (1,0,0), (0,1,0)),
-               'HANDLEFT': ('MiddleFinger1_L', 'WRISTLEFT', 'HANDTIPLEFT', (1,0,0), (0,1,0)),
-                'HANDTIPLEFT': ('MiddleFinger4_L', 'HANDLEFT', None, (1,0,0), (0,1,0)),
-                 'THUMBLEFT': ('ThumbFinger4_L', 'WRISTLEFT', None, (1,0,0), (0,1,0)),
-            'SHOULDERRIGHT': ('Shoulder_R', 'SPINESHOULDER', 'ELBOWRIGHT', (1,0,0), (0,1,0)),
-             'ELBOWRIGHT': ('Elbow_R', 'SHOULDERRIGHT', 'WRISTRIGHT', (1,0,0), (0,1,0)),
-              'WRISTRIGHT': ('Wrist_R', 'ELBOWRIGHT', 'HANDRIGHT', (1,0,0), (0,1,0)),
-               'HANDRIGHT': ('MiddleFinger1_R', 'WRISTRIGHT', 'HANDTIPRIGHT', (1,0,0), (0,1,0)),
-                'HANDTIPRIGHT': ('MiddleFinger4_R', 'HANDRIGHT', None, (1,0,0), (0,1,0)),
-                 'THUMBRIGHT': ('ThumbFinger4_R', 'WRISTRIGHT', None, (1,0,0), (0,1,0)),
+            'SHOULDERLEFT': ('Shoulder_L', 'SPINESHOULDER', 'ELBOWLEFT', (1,0,0), (0,0,-1)),
+             'ELBOWLEFT': ('Elbow_L', 'SHOULDERLEFT', 'WRISTLEFT', (1,0,0), (0,0,-1)),
+              'WRISTLEFT': ('Wrist_L', 'ELBOWLEFT', 'HANDLEFT', (1,0,0), (0,0,-1)),
+               'HANDLEFT': ('MiddleFinger1_L', 'WRISTLEFT', 'HANDTIPLEFT', (1,0,0), (0,0,-1)),
+                'HANDTIPLEFT': ('MiddleFinger4_L', 'HANDLEFT', None, (1,0,0), (0,0,-1)),
+                 'THUMBLEFT': ('ThumbFinger4_L', 'WRISTLEFT', None, (1,0,0), (0,0,-1)),
+            'SHOULDERRIGHT': ('Shoulder_R', 'SPINESHOULDER', 'ELBOWRIGHT', (1,0,0), (0,0,-1)),
+             'ELBOWRIGHT': ('Elbow_R', 'SHOULDERRIGHT', 'WRISTRIGHT', (1,0,0), (0,0,-1)),
+              'WRISTRIGHT': ('Wrist_R', 'ELBOWRIGHT', 'HANDRIGHT', (1,0,0), (0,0,-1)),
+               'HANDRIGHT': ('MiddleFinger1_R', 'WRISTRIGHT', 'HANDTIPRIGHT', (1,0,0), (0,0,-1)),
+                'HANDTIPRIGHT': ('MiddleFinger4_R', 'HANDRIGHT', None, (1,0,0), (0,0,-1)),
+                 'THUMBRIGHT': ('ThumbFinger4_R', 'WRISTRIGHT', None, (1,0,0), (0,0,-1)),
             'HIPLEFT': ('Hip_L', 'SPINEBASE', 'KNEELEFT', (1,0,0), (0,-1,0)),
              'KNEELEFT': ('Knee_L', 'HIPLEFT', 'ANKLELEFT', (1,0,0), (0,-1,0)),
               'ANKLELEFT': ('Ankle_L', 'KNEELEFT', 'FOOTLEFT', (1,0,0), (0,-1,0)),
@@ -148,9 +148,12 @@ class Advanced2Kinect(object):
                     pm.setAttr( kjot+'intermediate'+'.jointOrient', (0,0,0) )
 
             # Freeze Transformations
-            pm.makeIdentity( (kjot+'intermediate'), a=True, jo=False, t=False,\
-                             r=True, s=False, n=0, pn=True )
-
+            if int(pm.about(v=True)[0:4]) >= 2016:
+                pm.makeIdentity( (kjot+'intermediate'), a=True, jo=False, t=False,\
+                                 r=True, s=False, n=0, pn=True )
+            else:
+                pm.makeIdentity( (kjot+'intermediate'), a=True, jo=False, t=False,\
+                                 r=True, s=False, n=0 )
         #
         # Make Constraint
         #
@@ -234,7 +237,7 @@ class Advanced2Kinect(object):
                       s=(ypos/3/bbox[3],ypos/3/bbox[3],ypos/3/bbox[3]))
         rootCurvesShape = pm.listRelatives(textCurveGrp, ad=True, s=True)
         rootCurves = pm.parent(rootCurvesShape, w=True)
-        pm.makeIdentity(rootCurves, apply=True, t=1, r=1, s=1, n=0, pn=1)
+        pm.makeIdentity(rootCurves, apply=True, t=1, r=1, s=1, n=0)
 
         # Create 'Kinect2' joint root.
         rootGrp = pm.group( 'SPINEBASE', n='K2_Skeleton', w=True, em=True)
