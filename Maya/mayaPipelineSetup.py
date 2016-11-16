@@ -190,18 +190,18 @@ class PipelineSetup(object):
             shutil.copy(sourceFile, destinationFile)
             print "Copy '" + sourceFile + "'\n  to '" + destinationFile + "'."
 
-    def install3rd(self):
-        the3rdSour = os.path.join(self.source, '3rd')
-        the3rdDest = os.path.join(self.destination, '3rd')
-        if not os.path.exists(the3rdDest):
-            os.mkdir(the3rdDest)
-
-        for root, dirs, files in os.walk(the3rdSour):
-            for the3rdfile in files:
-                suffix = os.path.splitext(the3rdfile)[-1]
-                if suffix in ['.py', '.PY', '.inf', '.INF', '.mel', '.MEL']:
-                    shutil.copy(os.path.join(root, the3rdfile),\
-                                os.path.join(the3rdDest, the3rdfile))
+    # def install3rd(self):
+    #     the3rdSour = os.path.join(self.source, '3rd')
+    #     the3rdDest = os.path.join(self.destination, '3rd')
+    #     if not os.path.exists(the3rdDest):
+    #         os.mkdir(the3rdDest)
+    #
+    #     for root, dirs, files in os.walk(the3rdSour):
+    #         for the3rdfile in files:
+    #             suffix = os.path.splitext(the3rdfile)[-1]
+    #             if suffix in ['.py', '.PY', '.inf', '.INF', '.mel', '.MEL']:
+    #                 shutil.copy(os.path.join(root, the3rdfile),\
+    #                             os.path.join(the3rdDest, the3rdfile))
 
     def createMenu(self):
         for root, dirs, files in os.walk(self.repositoryDest):
@@ -424,9 +424,6 @@ class PipelineSetup(object):
 
         # Create manager menu items
         self.manageMenuItem()
-
-        # Install the third party software.
-        #self.install3rd()
 
         # Create pipelineStartup.py
         self.pipelineStartup_py()
