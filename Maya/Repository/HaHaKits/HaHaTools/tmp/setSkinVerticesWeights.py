@@ -1,8 +1,8 @@
 import pymel.core as pm
 
 def setSkinVerticesWeights():
-    vtxs = ['headShape.vtx[0:910]']
-    pm.skinPercent( 'skinCluster2', vtxs, tmw=('Scapula_R', 'Neck_M') )
+    vtxs = ['ShirtShape.vtx[27]', 'ShirtShape.vtx[37:50]', 'ShirtShape.vtx[72:87]', 'ShirtShape.vtx[93:95]', 'ShirtShape.vtx[97]', 'ShirtShape.vtx[102]', 'ShirtShape.vtx[123:142]', 'ShirtShape.vtx[190:193]', 'ShirtShape.vtx[227:229]', 'ShirtShape.vtx[235:239]', 'ShirtShape.vtx[241]', 'ShirtShape.vtx[243:249]', 'ShirtShape.vtx[251]', 'ShirtShape.vtx[255:258]', 'ShirtShape.vtx[260:275]', 'ShirtShape.vtx[325:358]', 'ShirtShape.vtx[369:372]', 'ShirtShape.vtx[374]', 'ShirtShape.vtx[403:436]', 'ShirtShape.vtx[487:495]', 'ShirtShape.vtx[509]', 'ShirtShape.vtx[512:513]', 'ShirtShape.vtx[515:518]', 'ShirtShape.vtx[520:530]', 'ShirtShape.vtx[554:570]', 'ShirtShape.vtx[578]', 'ShirtShape.vtx[584]', 'ShirtShape.vtx[607]', 'ShirtShape.vtx[610:627]', 'ShirtShape.vtx[647:654]']
+    pm.skinPercent( 'skinCluster42', vtxs, tmw=('ShoulderPart1_L', 'Shoulder_L') )
 
 def setSkinVerticesWeights1():
     vtxs = ['cat_bodyShape.vtx[416:419]', 'cat_bodyShape.vtx[442]', 'cat_bodyShape.vtx[445:447]']
