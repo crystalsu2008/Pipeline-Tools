@@ -1,8 +1,8 @@
 import pymel.core as pm
 
 def setSkinVerticesWeights():
-    vtxs = ['ShirtShape.vtx[27]', 'ShirtShape.vtx[37:50]', 'ShirtShape.vtx[72:87]', 'ShirtShape.vtx[93:95]', 'ShirtShape.vtx[97]', 'ShirtShape.vtx[102]', 'ShirtShape.vtx[123:142]', 'ShirtShape.vtx[190:193]', 'ShirtShape.vtx[227:229]', 'ShirtShape.vtx[235:239]', 'ShirtShape.vtx[241]', 'ShirtShape.vtx[243:249]', 'ShirtShape.vtx[251]', 'ShirtShape.vtx[255:258]', 'ShirtShape.vtx[260:275]', 'ShirtShape.vtx[325:358]', 'ShirtShape.vtx[369:372]', 'ShirtShape.vtx[374]', 'ShirtShape.vtx[403:436]', 'ShirtShape.vtx[487:495]', 'ShirtShape.vtx[509]', 'ShirtShape.vtx[512:513]', 'ShirtShape.vtx[515:518]', 'ShirtShape.vtx[520:530]', 'ShirtShape.vtx[554:570]', 'ShirtShape.vtx[578]', 'ShirtShape.vtx[584]', 'ShirtShape.vtx[607]', 'ShirtShape.vtx[610:627]', 'ShirtShape.vtx[647:654]']
-    pm.skinPercent( 'skinCluster42', vtxs, tmw=('ShoulderPart1_L', 'Shoulder_L') )
+    vtxs = ['penguin_bodyShape.vtx[88:95]', 'penguin_bodyShape.vtx[97:107]', 'penguin_bodyShape.vtx[183:232]', 'penguin_bodyShape.vtx[241:266]', 'penguin_bodyShape.vtx[286:291]', 'penguin_bodyShape.vtx[743:756]', 'penguin_bodyShape.vtx[764:776]', 'penguin_bodyShape.vtx[779:827]', 'penguin_bodyShape.vtx[982:1064]', 'penguin_bodyShape.vtx[1082:1119]', 'penguin_bodyShape.vtx[1130]', 'penguin_bodyShape.vtx[1170:1175]', 'penguin_bodyShape.vtx[1847:1850]', 'penguin_bodyShape.vtx[1853:1858]', 'penguin_bodyShape.vtx[1860:1875]', 'penguin_bodyShape.vtx[1952:1995]', 'penguin_bodyShape.vtx[2004:2029]', 'penguin_bodyShape.vtx[2039:2040]', 'penguin_bodyShape.vtx[2061:2066]']
+    pm.skinPercent( 'skinCluster2', vtxs, tmw=('Spine1_M', 'Hip_L') )
 
 def setSkinVerticesWeights1():
     vtxs = ['cat_bodyShape.vtx[416:419]', 'cat_bodyShape.vtx[442]', 'cat_bodyShape.vtx[445:447]']

@@ -43,9 +43,9 @@ def matchPoints(referenceMesh, across='YZ', posiToNega=True):
 
     return machMap
 
-def referenceSymmetrical(across='YZ', posiToNega=True):
+def referenceSymmetrical(across='YZ', posiToNega=False):
     objs = pm.ls(sl=True, dag=True, type='mesh', fl=True)
-    referenceMesh = objs[0]
+    referenceMesh = objs[-1]
 
     symId, symDir = symertricalOptions(across, posiToNega)
     machMap = matchPoints(referenceMesh, across, posiToNega)
