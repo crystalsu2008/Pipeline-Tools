@@ -16,7 +16,7 @@ def symertricalOptions(across='YZ', posiToNega=True):
 
     return symId, symDir
 
-def referenceSymmetrical(across='YZ', posiToNega=False):
+def referenceSymmetrical(across='YZ', posiToNega=True):
     objs = pm.ls(sl=True, fl=True)
     referenceMesh = objs[-1]
     try:
