@@ -14,7 +14,7 @@ import maya.mel as mel
 
 class fixRotKey180Flip(object):
     '''This is used to fix rotation keyframes 180 degree flip. Usually the keyframes are baked from some animation contrals.'''
-    tol = 5
+    tol = 60
     minStep = 1
 
     @staticmethod
@@ -50,9 +50,15 @@ class fixRotKey180Flip(object):
                         nextValue = pm.keyframe(obj ,at=attr, index=(idx+1), q=True, eval=True)[0]
 
                         diff = nextValue-value
-                        if 180-fixRotKey180Flip.tol < abs(diff) < 180+fixRotKey180Flip.tol:
-                            move = 180 if diff < 0 else -180
-                            pm.keyframe(obj, at=attr, r=True, e=True, index=(nextTime, keyCount-1), vc=move)
+                        sign = -1 if diff > 0 else 1
+                        diff = abs(diff)
+                        if diff > 180-fixRotKey180Flip.tol:
+                            mult = int(diff / 180)
+                            diff = diff % 180
+                            if diff > 180-fixRotKey180Flip.tol:
+                                mult += 1
+                            move = sign * mult * 180
+                            pm.keyframe(obj, at=attr, r=True, e=True, index=(idx+1, keyCount-1), vc=move)
 
 def fixRotationKeyframes180Flip():
     fixRotKey180Flip.fix()
