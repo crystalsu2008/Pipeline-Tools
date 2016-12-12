@@ -10,6 +10,10 @@ def HHK1toHHAS():
         pm.setAttr(joint+'.r', 0, 0, 0)
     pm.select(cl=True)
 
+    pm.setAttr(prefix+":HIP_CENTER.t", 0, 54.384, 7.815);
+    pm.setAttr(prefix+":SHOULDER_LEFT.tx", 12.727);
+    pm.setAttr(prefix+":SHOULDER_RIGHT.tx", 12.727);
+
     pos = pm.xform(prefix+':SPINE', q=True, t=True, ws=True)
     im_SPINE_L = pm.joint(p=pos)
     im_SPINE_R = pm.joint(p=pos)
