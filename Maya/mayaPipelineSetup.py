@@ -75,7 +75,7 @@ class PipelineSetup(object):
             elif suffix in ['.mel', '.MEL'] and not os.path.exists(os.path.join(root, menu+'.inf')) and not os.path.exists(os.path.join(root, menu+'.INF')):
                 info['name'] = menu
                 info['l'] = mel.eval('interToUI( "'+menu+'" )')
-                info['c'] = menu+'()'
+                info['c'] = 'mel.eval(\'' + menu + '\')'
                 info['type'] = 'mel'
                 info['file'] = menufile
 
@@ -335,12 +335,16 @@ class PipelineSetup(object):
 
         syspathStr = ''
         importStr = '\nimport pymel.core as pm\n'
+        importStr += '\nimport maya.mel as mel\n'
 
         for k, menu in self.menus.iteritems():
             if 'file' in menu:
                 if menu['type']=='python':
                     module = os.path.split(os.path.splitext(menu['file'])[0])[-1]
                     importStr += ('import ' + module + ';reload(' + module + ')\n')
+                elif menu['type']=='mel':
+                    melfile = toNativePath(menu['file'])
+                    importStr += ('mel.eval(\'source "' + pm.encodeString(melfile) + '"\')\n')
             else:
                 syspathStr += ('if \'' + pm.encodeString(menu['dir']) + '\' not in sys.path:\n')
                 syspathStr += ('\tsys.path.append(\'' + pm.encodeString(menu['dir']) + '\')\n')
