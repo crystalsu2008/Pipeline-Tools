@@ -4,7 +4,12 @@ global proc HH_FaceControl ()
     float $textScale = 10;
 
     //Create blendShape
-    string $tmpExpressionBlendNode[] = `blendShape Jaw_UP Jaw_Down Jaw_Move_R Jaw_Move_L Mouth_ZCDNRSTX Mouth_A_E_I Mouth_U_W Mouth_B_M_P Mouth_F_V Mouth_O Mouth_Kiss Mouth_Shrink_R Mouth_Shrink_L Mouth_Extend_R Mouth_Extend_L Mouth_Smile Mouth_Smile_R Mouth_Smile_L Mouth_Depressed Mouth_Depressed_R Mouth_Depressed_L Mouth_Jeer_Down Mouth_Jeer_Down_R Mouth_Jeer_Down_L Mouth_Jeer_Up Mouth_Jeer_Up_R Mouth_Jeer_Up_L facial_blendshapes|Brow_Up_In_R facial_blendshapes|Brow_Up_In_L Brow_Up_Out_R Brow_Up_Out_L Brow_Down_Out_R Brow_Down_Out_L Brow_Angry_R Brow_Angry_L LowerEyelid_Half_R LowerEyelid_Half_L UpperEyelid_Half_R UpperEyelid_Half_L UpperEyelid_R UpperEyelid_L LowerEyelid_Look_Up UpperEyelid_Look_Down Nose_Enlarge Nose_Down Nose_Up Nose_Up_R Nose_Up_L Nose_Move_R Nose_Move_L Head_Mesh`;
+    string $tmpExpressionBlendNode[];
+    if (`exists Mouth_Kiss`)
+        $tmpExpressionBlendNode = `blendShape Jaw_UP Jaw_Down Jaw_Move_R Jaw_Move_L Mouth_ZCDNRSTX Mouth_A_E_I Mouth_U_W Mouth_B_M_P Mouth_F_V Mouth_O Mouth_Kiss Mouth_Shrink_R Mouth_Shrink_L Mouth_Extend_R Mouth_Extend_L Mouth_Smile Mouth_Smile_R Mouth_Smile_L Mouth_Depressed Mouth_Depressed_R Mouth_Depressed_L Mouth_Jeer_Down Mouth_Jeer_Down_R Mouth_Jeer_Down_L Mouth_Jeer_Up Mouth_Jeer_Up_R Mouth_Jeer_Up_L facial_blendshapes|Brow_Up_In_R facial_blendshapes|Brow_Up_In_L Brow_Up_Out_R Brow_Up_Out_L Brow_Down_Out_R Brow_Down_Out_L Brow_Angry_R Brow_Angry_L LowerEyelid_Half_R LowerEyelid_Half_L UpperEyelid_Half_R UpperEyelid_Half_L UpperEyelid_R UpperEyelid_L LowerEyelid_Look_Up UpperEyelid_Look_Down Nose_Enlarge Nose_Down Nose_Up Nose_Up_R Nose_Up_L Nose_Move_R Nose_Move_L Head_Mesh`;
+    else
+        $tmpExpressionBlendNode = `blendShape Jaw_UP Jaw_Down Jaw_Move_R Jaw_Move_L Mouth_ZCDNRSTX Mouth_A_E_I Mouth_U_W Mouth_B_M_P Mouth_F_V Mouth_O Mouth_Shrink_R Mouth_Shrink_L Mouth_Extend_R Mouth_Extend_L Mouth_Smile Mouth_Smile_R Mouth_Smile_L Mouth_Depressed Mouth_Depressed_R Mouth_Depressed_L Mouth_Jeer_Down Mouth_Jeer_Down_R Mouth_Jeer_Down_L Mouth_Jeer_Up Mouth_Jeer_Up_R Mouth_Jeer_Up_L facial_blendshapes|Brow_Up_In_R facial_blendshapes|Brow_Up_In_L Brow_Up_Out_R Brow_Up_Out_L Brow_Down_Out_R Brow_Down_Out_L Brow_Angry_R Brow_Angry_L LowerEyelid_Half_R LowerEyelid_Half_L UpperEyelid_Half_R UpperEyelid_Half_L UpperEyelid_R UpperEyelid_L LowerEyelid_Look_Up UpperEyelid_Look_Down Nose_Enlarge Nose_Down Nose_Up Nose_Up_R Nose_Up_L Nose_Move_R Nose_Move_L Head_Mesh`;
+
     string $expressionBlendNode = `rename $tmpExpressionBlendNode[0] "expressionBlendShape"`;
 
     //pronunciation Control zcdnrsx
@@ -271,8 +276,10 @@ global proc HH_FaceControl ()
 
     setAttr ($Slider_Dock_Kiss+".t") 90 -72 0;
 
-    setDrivenKeyframe -cd ($Slider_Kiss+".translateX") -dv 0 -v 0 -itt linear -ott linear ($expressionBlendNode+".Mouth_Kiss");
-    setDrivenKeyframe -cd ($Slider_Kiss+".translateX") -dv 50 -v 1 -itt linear -ott linear ($expressionBlendNode+".Mouth_Kiss");
+    if (`exists Mouth_Kiss`){
+        setDrivenKeyframe -cd ($Slider_Kiss+".translateX") -dv 0 -v 0 -itt linear -ott linear ($expressionBlendNode+".Mouth_Kiss");
+        setDrivenKeyframe -cd ($Slider_Kiss+".translateX") -dv 50 -v 1 -itt linear -ott linear ($expressionBlendNode+".Mouth_Kiss");
+    }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
