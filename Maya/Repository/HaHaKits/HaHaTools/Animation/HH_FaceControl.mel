@@ -51,7 +51,7 @@ global proc HH_FaceControl ()
     setDrivenKeyframe -cd ($Slider_zcdnrsx+".translateX") -dv 0 -v 0 -itt linear -ott linear ($expressionBlendNode+".Mouth_ZCDNRSTX");
     setDrivenKeyframe -cd ($Slider_zcdnrsx+".translateX") -dv 50 -v 1 -itt linear -ott linear ($expressionBlendNode+".Mouth_ZCDNRSTX");
 
-    //pronunciation Control A_E_I
+    //pronounciation Control A_E_I
     string $Slider_Dock_aei = `curve -d 1 -p -37 5 0 -p 53.83574775 5 0 -p 53.83574775 -5 0 -p -37 -5 0 -p -37 5 0`;
     $Slider_Dock_aei = `rename $Slider_Dock_aei "Slider_Dock_aei"`;
     parent $Slider_Dock_aei $expressionCtrl_rootGrp;
