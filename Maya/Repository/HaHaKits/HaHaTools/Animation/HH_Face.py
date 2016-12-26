@@ -1,16 +1,18 @@
 import pymel.core as pm
+import maya.mel as mel
+import freezeToOrigin
 
 def HH_Face(name='expression_control', textScale=10, font='Times New Roman|h-13|w400|c0'):
 
-    pronTargs = {'ZCDNRSTX': {'name': 'zcdnrstx', 'tar': 'Mouth_ZCDNRSTX'},
-                 'A_E_I':    {'name': 'a_e_i',    'tar': 'Mouth_A_E_I'   },
-                 'U_W':      {'name': 'u_w',      'tar': 'Mouth_U_W'     },
-                 'B_M_P':    {'name': 'b_m_p',    'tar': 'Mouth_B_M_P'   },
-                 'F_V':      {'name': 'f_v',      'tar': 'Mouth_F_V'     },
-                 'O':        {'name': 'o',        'tar': 'Mouth_O'       },
-                 'Kiss':     {'name': 'kiss',     'tar': 'Mouth_Kiss'    }}
+    pronTargs = {'ZCDNRSTX': {'label': 'zcdnrstx', 'tar': 'Mouth_ZCDNRSTX'},
+                 'A_E_I':    {'label': 'a_e_i',    'tar': 'Mouth_A_E_I'   },
+                 'U_W':      {'label': 'u_w',      'tar': 'Mouth_U_W'     },
+                 'B_M_P':    {'label': 'b_m_p',    'tar': 'Mouth_B_M_P'   },
+                 'F_V':      {'label': 'f_v',      'tar': 'Mouth_F_V'     },
+                 'O':        {'label': 'o',        'tar': 'Mouth_O'       },
+                 'Kiss':     {'label': 'kiss',     'tar': 'Mouth_Kiss'    }}
 
-    targets  =  {'Head_Mesh': 'Head_Mesh',
+    targets  =  {'base': {'label': 'base', 'tar': 'Head_Mesh'},
                 'Jaw_UP': 'Jaw_UP',
                     'Jaw_Down': 'Jaw_Down',
                         'Jaw_Move_R': 'Jaw_Move_R',
@@ -55,41 +57,58 @@ def HH_Face(name='expression_control', textScale=10, font='Times New Roman|h-13|
                                     'Nose_Move_R': 'Nose_Move_R',
                                         'Nose_Move_L': 'Nose_Move_L'}
 
-    # Pronounciation Control zcdnrstx
-    pronExpression(name, textScale, font, pronTargs)
+    exprBlender = None
+    baseMesh = targets['base']['tar']
+    if pm.objExists(baseMesh):
+        exprBlender = pm.blendShape( 'Head_Mesh' )[0]
+    else:
+        pm.warning('The base mesh "'+targets['base']['tar']+'" does not exists!!!')
+        return
+
+    # Create Pronounciation Controls
+    pronExpression(name, exprBlender, baseMesh, textScale, font, pronTargs)
 
 
-
-
-def pronExpression(name, textScale, font, targs, offset=-12):
+def pronExpression(name, blender, baseMesh, textScale, font, targs, offset=-12):
     pronounciationGrp = pm.group(em=True, name=name+'_pronGrp')
-
+    idx = pm.blendShape(blender, q=True, gi=True)[-1]
     ty = 0
     for pron, expr in targs.iteritems():
-        Slider_Dock = sliderDock_curve('Slider_Dock'+expr['name'])
-        titleCurve = sliderLabel_curve(expr['name'], (-35, -2.3, 0), textScale, font)
-        SlideSlot = slideSlot_curve('Slider_Slot'+expr['name'])
-        Slider = slider_curve('Slider'+expr['name'])
+        if pm.objExists(expr['tar']):
+            idx += 1
+            pm.blendShape(blender, e=True, t=(baseMesh, idx, expr['tar'], 1.0))
+            aliasMel = 'blendShapeRenameTargetAlias '+blender+' '+str(idx)+' '+expr['label']+';'
+            mel.eval(aliasMel)
+            #pm.aliasAttr(expr['label'], blender+'.w['+str(idx)+']')
 
-        pm.parent(Slider, Slider_Dock)
-        pm.parent(SlideSlot, Slider_Dock)
-        pm.parent(titleCurve, Slider_Dock)
-        pm.parent(Slider_Dock, pronounciationGrp)
+            Slider_Dock = sliderDock_curve('Slider_Dock'+expr['label'])
+            titleCurve = sliderLabel_curve(expr['label'], (-20.25, 0, 0), textScale, font)
+            SlideSlot = slideSlot_curve('Slider_Slot'+expr['label'])
+            Slider = slider_curve('Slider'+expr['label'])
 
-        pm.transformLimits(Slider, tx=(0, 50), etx=(1, 1))
-        pm.setAttr((Slider+'.ty'), l=True, k=False, cb=False)
-        pm.setAttr((Slider+'.tz'), l=True, k=False, cb=False)
-        pm.setAttr((Slider+'.rx'), l=True, k=False, cb=False)
-        pm.setAttr((Slider+'.ry'), l=True, k=False, cb=False)
-        pm.setAttr((Slider+'.rz'), l=True, k=False, cb=False)
-        pm.setAttr((Slider+'.sx'), l=True, k=False, cb=False)
-        pm.setAttr((Slider+'.sy'), l=True, k=False, cb=False)
-        pm.setAttr((Slider+'.sz'), l=True, k=False, cb=False)
-        pm.setAttr((Slider+'.v'), l=True, k=False, cb=False)
+            pm.parent(Slider, Slider_Dock)
+            pm.parent(SlideSlot, Slider_Dock)
+            pm.parent(titleCurve, Slider_Dock)
+            pm.parent(Slider_Dock, pronounciationGrp)
 
-        pm.setAttr((Slider_Dock+".t"), (90, ty, 0))
-        ty += offset
-    return pronounciationGrp
+            pm.transformLimits(Slider, tx=(0, 50), etx=(1, 1))
+            pm.setAttr((Slider+'.ty'), l=True, k=False, cb=False)
+            pm.setAttr((Slider+'.tz'), l=True, k=False, cb=False)
+            pm.setAttr((Slider+'.rx'), l=True, k=False, cb=False)
+            pm.setAttr((Slider+'.ry'), l=True, k=False, cb=False)
+            pm.setAttr((Slider+'.rz'), l=True, k=False, cb=False)
+            pm.setAttr((Slider+'.sx'), l=True, k=False, cb=False)
+            pm.setAttr((Slider+'.sy'), l=True, k=False, cb=False)
+            pm.setAttr((Slider+'.sz'), l=True, k=False, cb=False)
+            pm.setAttr((Slider+'.v'), l=True, k=False, cb=False)
+
+            pm.setDrivenKeyframe(blender+"."+expr['label'], cd=Slider+'.tx', dv=0, v=0, itt='linear', ott='linear', )
+            pm.setDrivenKeyframe(blender+"."+expr['label'], cd=Slider+'.tx', dv=50, v=1, itt='linear', ott='linear', )
+
+            pm.setAttr((Slider_Dock+".t"), (90, ty, 0))
+            ty += offset
+        else:
+            pm.warning('The target mesh "'+expr['tar']+'" does not exists! Skiped.')
 
 def slider_curve(name):
     return pm.curve( n=name, d=1, p=[(-2.5, 3.5, 0), (2.5, 3.5, 0), (2.5, -3.5, 0), (-2.5, -3.5, 0), (-2.5, 3.5, 0)] )
@@ -100,11 +119,12 @@ def slideSlot_curve(name):
     return curve
 
 def sliderDock_curve(name):
-    return pm.curve( n=name, d=1, p=[(-37, 5, 0), (54, 5, 0), (54, -5, 0), (-37, -5, 0), (-37, 5, 0)] )
+    return pm.curve( n=name, d=1, p=[(-39, 5, 0), (54, 5, 0), (54, -5, 0), (-39, -5, 0), (-39, 5, 0)] )
 
-def sliderLabel_curve(name, t, s, font='Times New Roman|h-13|w400|c0'):
-    curve = pm.textCurves(n=name, ch=False, f=font, t=name)[0]
+def sliderLabel_curve(label, t, s, font='Times New Roman|h-13|w400|c0'):
+    curve = pm.textCurves(n=label, ch=False, f=font, t=label)[0]
     pm.setAttr(curve+'.s', (s, s, s))
+    freezeToOrigin.freezeToOrigin(objects=[str(curve)],cx='mid',cy='mid',cz='mid')
     pm.setAttr(curve+'.t', t)
     pm.setAttr(curve+'.template', 1)
     return curve
