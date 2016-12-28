@@ -38,39 +38,100 @@ def HH_Face(name='HHExpr', textScale=10, font='Times New Roman|h-13|w400|c0'):
                        'd': 3, 'grp': 'Jaw_grp', 'grplocal': (0,-31.5,0),
                        'targs':['Jaw_UP', 'Jaw_Down', 'Jaw_Move_R', 'Jaw_Move_L'],
                        'lim': [(-7, 7), (-5, 5), (0, 0)],
-                       'lock':['tz','rx','ry','rz','sx','sy','sz','v']},
-                'Jaw_Scope':{'points': [(-17.346979, 12, 0), (17.346979, 12, 0), (17.346979, -12, 0), (-17.346979, -12, 0), (-17.346979, 12, 0)],
-                                'd': 1, 'decorate': True, 'local': (0,-31.5,0)}}
+                       'lock': ['tz','rx','ry','rz','sx','sy','sz','v']},
+                'Jaw_Scope': {'points': [(-17.346979, 12, 0), (17.346979, 12, 0), (17.346979, -12, 0), (-17.346979, -12, 0), (-17.346979, 12, 0)],
+                                'd': 1, 'decorate': True, 'local': (0,-31.5,0)},
+                'Mouth_Corner_R': {'cmd': 'pm.circle(c=(0,0,0), nr=(0,0,1), sw=360, r=3, d=3, ut=False, tol=0.01, s=8, ch=False)',
+                                'grp': 'Mouth_Corner_R_grp', 'grplocal': (-20, -15, 0),
+                                'targs':['Mouth_Shrink_R', 'Mouth_Extend_R', 'Mouth_Smile_R', 'Mouth_Depressed_R'],
+                                'lim': [(-5, 5), (-5, 5), (0, 0)],
+                                'lock': ['tz','rx','ry','rz','sx','sy','sz','v']},
+                'Mouth_Corner_R_Scope': {'points': [(-8, 8, 0), (8, 8, 0), (8, -8, 0), (-8, -8, 0), (-8, 8, 0)],
+                                'd': 1, 'decorate': True, 'local': (-20, -15, 0)},
+                'Mouth_Corner_L': {'cmd': 'pm.circle(c=(0,0,0), nr=(0,0,1), sw=360, r=3, d=3, ut=False, tol=0.01, s=8, ch=False)',
+                                'grp': 'Mouth_Corner_L_grp', 'grplocal': (20, -15, 0),
+                                'targs':['Mouth_Shrink_L', 'Mouth_Extend_L', 'Mouth_Smile_L', 'Mouth_Depressed_L'],
+                                'lim': [(-5, 5), (-5, 5), (0, 0)],
+                                'lock': ['tz','rx','ry','rz','sx','sy','sz','v']},
+                'Mouth_Corner_L_Scope': {'points': [(-8, 8, 0), (8, 8, 0), (8, -8, 0), (-8, -8, 0), (-8, 8, 0)],
+                                'd': 1, 'decorate': True, 'local': (20, -15, 0)},
+                'Mouth_Smile_Depressed': {'points': [(0, 1, 0), (12, 0, 0), (0, -1, 0), (-12, 0, 0), (0, 1, 0)],
+                       'd': 1, 'grp': 'Mouth_Smile_Depressed_grp', 'grplocal': (0,-18,0),
+                       'targs':['Mouth_Smile', 'Mouth_Depressed'],
+                       'lim': [(0, 0), (-5, 5), (0, 0)],
+                       'lock': ['tx','tz','rx','ry','rz','sx','sy','sz','v']},
+                'Brow_Up_Angry_In_R': {'points': [(-2.64187375, 1.5, 0), (-0.38591175, 1.5, 0), (2.42005555, 1.5, 0), (3.53625575, 1.5, 0),
+                                            (3.53625575, -0.2001944, 0), (3.53625575, -1.5, 0), (2.29304305, -1.5, 0), (-1.37289515, -1.5, 0),
+                                            (-3.53625575, -1.5, 0), (-3.52202905, 0.0411871, 0), (-3.48646255, 1.5, 0), (-2.68887295, 1.5, 0)],
+                       'd': 3, 'grp': 'Brow_Up_Angry_In_R_grp', 'grplocal': (-9, 18, 0),
+                       'targs':['Brow_Up_In_R', 'Brow_Angry_R'],
+                       'lim': [(0, 0), (-5, 5), (0, 0)],
+                       'lock': ['tx','tz','rx','ry','rz','sx','sy','sz','v']},
+                'Brow_Up_Angry_In_L': {'points': [(2.64187375, 1.5, 0), (0.38591175, 1.5, 0), (-2.42005555, 1.5, 0), (-3.53625575, 1.5, 0),
+                                            (-3.53625575, -0.2001944, 0), (-3.53625575, -1.5, 0), (-2.29304305, -1.5, 0), (1.37289515, -1.5, 0),
+                                            (3.53625575, -1.5, 0), (3.52202905, 0.0411871, 0), (3.48646255, 1.5, 0), (2.68887295, 1.5, 0)],
+                       'd': 3, 'grp': 'Brow_Up_Angry_In_L_grp', 'grplocal': (9, 18, 0),
+                       'targs':['Brow_Up_In_L', 'Brow_Angry_L'],
+                       'lim': [(0, 0), (-5, 5), (0, 0)],
+                       'lock': ['tx','tz','rx','ry','rz','sx','sy','sz','v']},
+                'Brow_Up_Down_Out_R': {'points': [(4.6214182, 2.12377205, 0), (4.7142892, 2.08065145, 0), (4.7242184, 0.04926635, 0), (4.7418461, -0.77373025, 0),
+                                                (3.2437022, -0.77373025, 0), (0.510237, -0.77373025, 0), (-2.4830579, -1.42728325, 0), (-4.7418461, -2.22626975, 0),
+                                                (-4.0198353, -1.19287575, 0), (-2.7139715, 0.10882665, 0), (-0.9053917, 1.52675825, 0), (2.3845528, 2.22626975, 0),
+                                                (2.7161625, 2.22626975, 0), (4.6651644, 2.22626975, 0), (4.6214182, 2.12377205, 0)],
+                       'd': 3, 'grp': 'Brow_Up_Down_Out_R_grp', 'grplocal': (-18, 17.25, 0),
+                       'targs':['Brow_Up_Out_R', 'Brow_Down_Out_R'],
+                       'lim': [(0, 0), (-5, 5), (0, 0)],
+                       'lock': ['tx','tz','rx','ry','rz','sx','sy','sz','v']},
+                'Brow_Up_Down_Out_L': {'points': [(-4.6214182, 2.12377205, 0), (-4.7142892, 2.08065145, 0), (-4.7242184, 0.04926635, 0), (-4.7418461, -0.77373025, 0),
+                                                (-3.2437022, -0.77373025, 0), (-0.510237, -0.77373025, 0), (2.4830579, -1.42728325, 0), (4.7418461, -2.22626975, 0),
+                                                (4.0198353, -1.19287575, 0), (2.7139715, 0.10882665, 0), (0.9053917, 1.52675825, 0), (-2.3845528, 2.22626975, 0),
+                                                (-2.7161625, 2.22626975, 0), (-4.6651644, 2.22626975, 0), (-4.6214182, 2.12377205, 0)],
+                       'd': 3, 'grp': 'Brow_Up_Down_Out_L_grp', 'grplocal': (18, 17.25, 0),
+                       'targs':['Brow_Up_Out_L', 'Brow_Down_Out_L'],
+                       'lim': [(0, 0), (-5, 5), (0, 0)],
+                       'lock': ['tx','tz','rx','ry','rz','sx','sy','sz','v']}}
+
+
 
     targets =  {'Jaw_UP': {'label': 'jaw_up', 'tar': 'Jaw_UP', 'Driver': 'Jaw', 'Key': [('ty',0,0), ('ty',5,1)]},
                     'Jaw_Down': {'label': 'jaw_down', 'tar': 'Jaw_Down', 'Driver': 'Jaw', 'Key': [('ty',0,0), ('ty',-5,1)]},
                         'Jaw_Move_R': {'label': 'jaw_move_r', 'tar': 'Jaw_Move_R', 'Driver': 'Jaw', 'Key': [('tx',0,0), ('tx',-7,1)]},
-                            'Jaw_Move_L': {'label': 'jaw_move_l', 'tar': 'Jaw_Move_L', 'Driver': 'Jaw', 'Key': [('tx',0,0), ('tx',7,1)]}}
+                            'Jaw_Move_L': {'label': 'jaw_move_l', 'tar': 'Jaw_Move_L', 'Driver': 'Jaw', 'Key': [('tx',0,0), ('tx',7,1)]},
+                'Mouth_Shrink_R': {'label': 'mouth_shrink_r', 'tar': 'Mouth_Shrink_R', 'Driver': 'Mouth_Corner_R', 'Key': [('tx',0,0), ('tx',5,1)]},
+                    'Mouth_Extend_R': {'label': 'mouth_extend_r', 'tar': 'Mouth_Extend_R', 'Driver': 'Mouth_Corner_R', 'Key': [('tx',0,0), ('tx',-5,1)]},
+                        'Mouth_Smile_R': {'label': 'mouth_smile_r', 'tar': 'Mouth_Smile_R', 'Driver': 'Mouth_Corner_R', 'Key': [('ty',0,0), ('ty',5,1)]},
+                            'Mouth_Depressed_R': {'label': 'mouth_depressed_r', 'tar': 'Mouth_Depressed_R', 'Driver': 'Mouth_Corner_R', 'Key': [('ty',0,0), ('ty',-5,1)]},
+                'Mouth_Shrink_L': {'label': 'mouth_shrink_l', 'tar': 'Mouth_Shrink_L', 'Driver': 'Mouth_Corner_L', 'Key': [('tx',0,0), ('tx',-5,1)]},
+                    'Mouth_Extend_L': {'label': 'mouth_extend_l', 'tar': 'Mouth_Extend_L', 'Driver': 'Mouth_Corner_L', 'Key': [('tx',0,0), ('tx',5,1)]},
+                        'Mouth_Smile_L': {'label': 'mouth_smile_l', 'tar': 'Mouth_Smile_L', 'Driver': 'Mouth_Corner_L', 'Key': [('ty',0,0), ('ty',5,1)]},
+                            'Mouth_Depressed_L': {'label': 'mouth_depressed_l', 'tar': 'Mouth_Depressed_L', 'Driver': 'Mouth_Corner_L', 'Key': [('ty',0,0), ('ty',-5,1)]},
+                'Mouth_Smile': {'label': 'mouth_smile', 'tar': 'Mouth_Smile', 'Driver': 'Mouth_Smile_Depressed', 'Key': [('ty',0,0), ('ty',5,1)]},
+                    'Mouth_Depressed': {'label': 'mouth_depressed', 'tar': 'Mouth_Depressed', 'Driver': 'Mouth_Smile_Depressed', 'Key': [('ty',0,0), ('ty',-5,1)]},
+                'Brow_Up_In_R': {'label': 'brow_up_in_r', 'tar': 'Brow_Up_In_R', 'Driver': 'Brow_Up_Angry_In_R', 'Key': [('ty',0,0), ('ty',5,1)]},
+                    'Brow_Angry_R': {'label': 'brow_angry_r', 'tar': 'Brow_Angry_R', 'Driver': 'Brow_Up_Angry_In_R', 'Key': [('ty',0,0), ('ty',-5,1)]},
+                'Brow_Up_In_L': {'label': 'brow_up_in_l', 'tar': 'Brow_Up_In_L', 'Driver': 'Brow_Up_Angry_In_L', 'Key': [('ty',0,0), ('ty',5,1)]},
+                    'Brow_Angry_L': {'label': 'brow_angry_l', 'tar': 'Brow_Angry_L', 'Driver': 'Brow_Up_Angry_In_L', 'Key': [('ty',0,0), ('ty',-5,1)]},
+                'Brow_Up_Out_R': {'label': 'brow_up_out_r', 'tar': 'Brow_Up_Out_R', 'Driver': 'Brow_Up_Down_Out_R', 'Key': [('ty',0,0), ('ty',5,1)]},
+                    'Brow_Down_Out_R': {'label': 'brow_down_out_r', 'tar': 'Brow_Down_Out_R', 'Driver': 'Brow_Up_Down_Out_R', 'Key': [('ty',0,0), ('ty',-5,1)]},
+                'Brow_Up_Out_L': {'label': 'brow_up_out_l', 'tar': 'Brow_Up_Out_L', 'Driver': 'Brow_Up_Down_Out_L', 'Key': [('ty',0,0), ('ty',5,1)]},
+                    'Brow_Down_Out_L': {'label': 'brow_down_out_l', 'tar': 'Brow_Down_Out_L', 'Driver': 'Brow_Up_Down_Out_L', 'Key': [('ty',0,0), ('ty',-5,1)]}}
+
+
 
     targetsx  =  {
-                'Mouth_Shrink_R': 'Mouth_Shrink_R',
-                    'Mouth_Shrink_L': 'Mouth_Shrink_L',
-                        'Mouth_Extend_R': 'Mouth_Extend_R',
-                            'Mouth_Extend_L': 'Mouth_Extend_L',
-                'Mouth_Smile': 'Mouth_Smile',
-                    'Mouth_Smile_R': 'Mouth_Smile_R',
-                        'Mouth_Smile_L': 'Mouth_Smile_L',
-                            'Mouth_Depressed': 'Mouth_Depressed',
-                                'Mouth_Depressed_R': 'Mouth_Depressed_R',
-                                    'Mouth_Depressed_L': 'Mouth_Depressed_L',
                 'Mouth_Jeer_Down': 'Mouth_Jeer_Down',
                     'Mouth_Jeer_Down_R': 'Mouth_Jeer_Down_R',
                         'Mouth_Jeer_Down_L': 'Mouth_Jeer_Down_L',
                             'Mouth_Jeer_Up': 'Mouth_Jeer_Up',
                                 'Mouth_Jeer_Up_R': 'Mouth_Jeer_Up_R',
                                     'Mouth_Jeer_Up_L': 'Mouth_Jeer_Up_L',
-                'Brow_Up_In_R': 'Brow_Up_In_R',
+
                     'Brow_Up_In_L': 'Brow_Up_In_L',
-                        'Brow_Up_Out_R': 'Brow_Up_Out_R',
+
                             'Brow_Up_Out_L': 'Brow_Up_Out_L',
-                                'Brow_Down_Out_R': 'Brow_Down_Out_R',
+
                                     'Brow_Down_Out_L': 'Brow_Down_Out_L',
-                                        'Brow_Angry_R': 'Brow_Angry_R',
+
                                             'Brow_Angry_L': 'Brow_Angry_L',
                 'LowerEyelid_Half_R': 'LowerEyelid_Half_R',
                     'LowerEyelid_Half_L': 'LowerEyelid_Half_L',
@@ -168,9 +229,13 @@ def facialHandles(name, handles, targs):
 
     for handName, handle in handles.iteritems():
         handleName = name+'_'+handName
-        points = handle['points']
-        d = handle['d']
-        handleCurve = pm.curve(n=handleName, d=d, p=points)
+        if handle.has_key('points'):
+            points = handle['points']
+            d = handle['d']
+            handleCurve = pm.curve(n=handleName, d=d, p=points)
+        else:
+            handleCurve = pm.python(handle['cmd'])[0]
+            handleCurve = pm.rename(handleCurve, handleName)
 
         if handle.has_key('decorate'):
             pm.setAttr(handleCurve+'.template', 1)
@@ -187,7 +252,7 @@ def facialHandles(name, handles, targs):
             for attr in handle['lock']:
                 pm.setAttr(handleCurve+'.'+attr, l=True, k=False, cb=False)
 
-            handle_grp = pm.group(handleCurve, name=handleName+'grp')
+            handle_grp = pm.group(handleCurve, name=handleName+'_grp')
             handle['grp'] = handle_grp
             pm.setAttr(handle_grp+'.t', handle['grplocal'])
             pm.parent(handle_grp, headGrp_curve)
