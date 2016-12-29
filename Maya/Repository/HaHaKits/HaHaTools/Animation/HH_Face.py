@@ -35,42 +35,42 @@ def HH_Face(name='HHExpr', textScale=10, font='Times New Roman|h-13|w400|c0'):
                                  (3.830259825, -7, 0),
                                  (0.794751525, -7, 0),
                                  (0, -7, 0)],
-                       'd': 3, 'grp': 'Jaw_grp', 'grplocal': (0,-31.5,0),
+                       'd': 3, 'grp': 'Jaw_grp', 'grplocal': (0,-31.5,0), 'name':None,
                        'targs':['Jaw_UP', 'Jaw_Down', 'Jaw_Move_R', 'Jaw_Move_L'],
                        'lim': [(-7, 7), (-5, 5), (0, 0)],
                        'lock': ['tz','rx','ry','rz','sx','sy','sz','v']},
                 'Jaw_Scope': {'points': [(-17.346979, 12, 0), (17.346979, 12, 0), (17.346979, -12, 0), (-17.346979, -12, 0), (-17.346979, 12, 0)],
-                                'd': 1, 'decorate': True, 'local': (0,-31.5,0)},
+                                'd': 1, 'decorate': True, 'local': (0,-31.5,0), 'name':None},
                 'Mouth_Corner_R': {'cmd': 'pm.circle(c=(0,0,0), nr=(0,0,1), sw=360, r=3, d=3, ut=False, tol=0.01, s=8, ch=False)',
-                                'grp': 'Mouth_Corner_R_grp', 'grplocal': (-20, -15, 0),
+                                'grp': 'Mouth_Corner_R_grp', 'grplocal': (-20, -15, 0), 'name':None,
                                 'targs':['Mouth_Shrink_R', 'Mouth_Extend_R', 'Mouth_Smile_R', 'Mouth_Depressed_R'],
                                 'lim': [(-5, 5), (-5, 5), (0, 0)],
                                 'lock': ['tz','rx','ry','rz','sx','sy','sz','v']},
                 'Mouth_Corner_R_Scope': {'points': [(-8, 8, 0), (8, 8, 0), (8, -8, 0), (-8, -8, 0), (-8, 8, 0)],
-                                'd': 1, 'decorate': True, 'local': (-20, -15, 0)},
+                                'd': 1, 'decorate': True, 'local': (-20, -15, 0), 'name':None},
                 'Mouth_Corner_L': {'cmd': 'pm.circle(c=(0,0,0), nr=(0,0,1), sw=360, r=3, d=3, ut=False, tol=0.01, s=8, ch=False)',
-                                'grp': 'Mouth_Corner_L_grp', 'grplocal': (20, -15, 0),
+                                'grp': 'Mouth_Corner_L_grp', 'grplocal': (20, -15, 0), 'name':None,
                                 'targs':['Mouth_Shrink_L', 'Mouth_Extend_L', 'Mouth_Smile_L', 'Mouth_Depressed_L'],
                                 'lim': [(-5, 5), (-5, 5), (0, 0)],
                                 'lock': ['tz','rx','ry','rz','sx','sy','sz','v']},
                 'Mouth_Corner_L_Scope': {'points': [(-8, 8, 0), (8, 8, 0), (8, -8, 0), (-8, -8, 0), (-8, 8, 0)],
-                                'd': 1, 'decorate': True, 'local': (20, -15, 0)},
+                                'd': 1, 'decorate': True, 'local': (20, -15, 0), 'name':None},
                 'Mouth_Smile_Depressed': {'points': [(0, 1, 0), (12, 0, 0), (0, -1, 0), (-12, 0, 0), (0, 1, 0)],
-                       'd': 1, 'grp': 'Mouth_Smile_Depressed_grp', 'grplocal': (0,-18,0),
+                       'd': 1, 'grp': 'Mouth_Smile_Depressed_grp', 'grplocal': (0,-18,0), 'name':None,
                        'targs':['Mouth_Smile', 'Mouth_Depressed'],
                        'lim': [(0, 0), (-5, 5), (0, 0)],
                        'lock': ['tx','tz','rx','ry','rz','sx','sy','sz','v']},
                 'Brow_Up_Angry_In_R': {'points': [(-2.64187375, 1.5, 0), (-0.38591175, 1.5, 0), (2.42005555, 1.5, 0), (3.53625575, 1.5, 0),
                                             (3.53625575, -0.2001944, 0), (3.53625575, -1.5, 0), (2.29304305, -1.5, 0), (-1.37289515, -1.5, 0),
                                             (-3.53625575, -1.5, 0), (-3.52202905, 0.0411871, 0), (-3.48646255, 1.5, 0), (-2.68887295, 1.5, 0)],
-                       'd': 3, 'grp': 'Brow_Up_Angry_In_R_grp', 'grplocal': (-9, 18, 0),
+                       'd': 3, 'grp': 'Brow_Up_Angry_In_R_grp', 'grplocal': (-9, 18, 0), 'name':None,
                        'targs':['Brow_Up_In_R', 'Brow_Angry_R'],
                        'lim': [(0, 0), (-5, 5), (0, 0)],
                        'lock': ['tx','tz','rx','ry','rz','sx','sy','sz','v']},
                 'Brow_Up_Angry_In_L': {'points': [(2.64187375, 1.5, 0), (0.38591175, 1.5, 0), (-2.42005555, 1.5, 0), (-3.53625575, 1.5, 0),
                                             (-3.53625575, -0.2001944, 0), (-3.53625575, -1.5, 0), (-2.29304305, -1.5, 0), (1.37289515, -1.5, 0),
                                             (3.53625575, -1.5, 0), (3.52202905, 0.0411871, 0), (3.48646255, 1.5, 0), (2.68887295, 1.5, 0)],
-                       'd': 3, 'grp': 'Brow_Up_Angry_In_L_grp', 'grplocal': (9, 18, 0),
+                       'd': 3, 'grp': 'Brow_Up_Angry_In_L_grp', 'grplocal': (9, 18, 0), 'name':None,
                        'targs':['Brow_Up_In_L', 'Brow_Angry_L'],
                        'lim': [(0, 0), (-5, 5), (0, 0)],
                        'lock': ['tx','tz','rx','ry','rz','sx','sy','sz','v']},
@@ -78,7 +78,7 @@ def HH_Face(name='HHExpr', textScale=10, font='Times New Roman|h-13|w400|c0'):
                                                 (3.2437022, -0.77373025, 0), (0.510237, -0.77373025, 0), (-2.4830579, -1.42728325, 0), (-4.7418461, -2.22626975, 0),
                                                 (-4.0198353, -1.19287575, 0), (-2.7139715, 0.10882665, 0), (-0.9053917, 1.52675825, 0), (2.3845528, 2.22626975, 0),
                                                 (2.7161625, 2.22626975, 0), (4.6651644, 2.22626975, 0), (4.6214182, 2.12377205, 0)],
-                       'd': 3, 'grp': 'Brow_Up_Down_Out_R_grp', 'grplocal': (-18, 17.25, 0),
+                       'd': 3, 'grp': 'Brow_Up_Down_Out_R_grp', 'grplocal': (-18, 17.25, 0), 'name':None,
                        'targs':['Brow_Up_Out_R', 'Brow_Down_Out_R'],
                        'lim': [(0, 0), (-5, 5), (0, 0)],
                        'lock': ['tx','tz','rx','ry','rz','sx','sy','sz','v']},
@@ -86,12 +86,88 @@ def HH_Face(name='HHExpr', textScale=10, font='Times New Roman|h-13|w400|c0'):
                                                 (-3.2437022, -0.77373025, 0), (-0.510237, -0.77373025, 0), (2.4830579, -1.42728325, 0), (4.7418461, -2.22626975, 0),
                                                 (4.0198353, -1.19287575, 0), (2.7139715, 0.10882665, 0), (0.9053917, 1.52675825, 0), (-2.3845528, 2.22626975, 0),
                                                 (-2.7161625, 2.22626975, 0), (-4.6651644, 2.22626975, 0), (-4.6214182, 2.12377205, 0)],
-                       'd': 3, 'grp': 'Brow_Up_Down_Out_L_grp', 'grplocal': (18, 17.25, 0),
+                       'd': 3, 'grp': 'Brow_Up_Down_Out_L_grp', 'grplocal': (18, 17.25, 0), 'name':None,
                        'targs':['Brow_Up_Out_L', 'Brow_Down_Out_L'],
                        'lim': [(0, 0), (-5, 5), (0, 0)],
-                       'lock': ['tx','tz','rx','ry','rz','sx','sy','sz','v']}}
+                       'lock': ['tx','tz','rx','ry','rz','sx','sy','sz','v']},
+                'UpperEyelid_R': {'points': [(0, 1.6579173, 0), (-2.00430075, 1.6579173, 0), (-6.01290215, 0.3615243, 0), (-8.50352775, -1.6579173, 0),
+                                            (-6.01290215, -1.0424714, 0), (0, 0.320564, 0), (6.01290215, -1.0424714, 0), (8.50352775, -1.6579173, 0),
+                                            (6.01290215, 0.3615243, 0), (2.00430075, 1.6579173, 0), (0, 1.6579173, 0)],
+                       'd': 3, 'grp': 'UpperEyelid_R_grp', 'grplocal': (-14, 8, 0), 'name':None,
+                       'targs':['UpperEyelid_Half_R', 'UpperEyelid_R'],
+                       'lim': [(0, 0), (-5, 0), (0, 0)],
+                       'lock': ['tx','tz','rx','ry','rz','sx','sy','sz','v']},
+                'Eyeball_Scope_R': {'cmd': 'pm.circle(c=(0,0,0), nr=(0,0,1), sw=360, r=5, d=3, ut=False, tol=0.01, s=8, ch=False)',
+                                'decorate': True, 'local': (-14, 3, 0), 'name':None},
+                'UpperEyelid_L': {'points': [(0, 1.6579173, 0), (-2.00430075, 1.6579173, 0), (-6.01290215, 0.3615243, 0), (-8.50352775, -1.6579173, 0),
+                                            (-6.01290215, -1.0424714, 0), (0, 0.320564, 0), (6.01290215, -1.0424714, 0), (8.50352775, -1.6579173, 0),
+                                            (6.01290215, 0.3615243, 0), (2.00430075, 1.6579173, 0), (0, 1.6579173, 0)],
+                       'd': 3, 'grp': 'UpperEyelid_L_grp', 'grplocal': (14, 8, 0), 'name':None,
+                       'targs':['UpperEyelid_Half_L', 'UpperEyelid_L'],
+                       'lim': [(0, 0), (-5, 0), (0, 0)],
+                       'lock': ['tx','tz','rx','ry','rz','sx','sy','sz','v']},
+                'Eyeball_Scope_L': {'cmd': 'pm.circle(c=(0,0,0), nr=(0,0,1), sw=360, r=5, d=3, ut=False, tol=0.01, s=8, ch=False)',
+                                'decorate': True, 'local': (14, 3, 0), 'name':None},
+                'LowerEyelid_Half_R': {'points': [(0, -1.6579173, 0), (-2.00430075, -1.6579173, 0), (-6.01290215, -0.3615243, 0), (-8.50352775, 1.6579173, 0),
+                                            (-6.01290215, 1.0424714, 0), (0, -0.320564, 0), (6.01290215, 1.0424714, 0), (8.50352775, 1.6579173, 0),
+                                            (6.01290215, -0.3615243, 0), (2.00430075, -1.6579173, 0), (0, -1.6579173, 0)],
+                       'd': 3, 'grp': 'LowerEyelid_Half_R_grp', 'grplocal': (-14, -2, 0), 'name':None,
+                       'targs':['LowerEyelid_Half_R'],
+                       'lim': [(0, 0), (0, 5), (0, 0)],
+                       'lock': ['tx','tz','rx','ry','rz','sx','sy','sz','v']},
+                'LowerEyelid_Half_L': {'points': [(0, -1.6579173, 0), (-2.00430075, -1.6579173, 0), (-6.01290215, -0.3615243, 0), (-8.50352775, 1.6579173, 0),
+                                            (-6.01290215, 1.0424714, 0), (0, -0.320564, 0), (6.01290215, 1.0424714, 0), (8.50352775, 1.6579173, 0),
+                                            (6.01290215, -0.3615243, 0), (2.00430075, -1.6579173, 0), (0, -1.6579173, 0)],
+                       'd': 3, 'grp': 'LowerEyelid_Half_L_grp', 'grplocal': (14, -2, 0), 'name':None,
+                       'targs':['LowerEyelid_Half_L'],
+                       'lim': [(0, 0), (0, 5), (0, 0)],
+                       'lock': ['tx','tz','rx','ry','rz','sx','sy','sz','v']},
+                'Nose': {'points': [(0.0001465857859, -3.337852213, 0), (1.246356174, -3.289741011, 0), (3.527873904, -1.419334091, 0), (4.78994104, -0.1961448399, 0),
+                                    (4.95457028, 0.4292957024, 0), (4.67518235, 0.921071964, 0), (3.21027754, 1.875868602, 0), (0, 3.180869549, 0),
+                                    (-3.210277531, 1.875868602, 0), (-4.675182346, 0.9210719639, 0), (-4.954570278, 0.4292957023, 0), (-4.789941036, -0.1961448396, 0),
+                                    (-3.527873892, -1.419334091, 0), (-1.246356135, -3.289741011, 0), (-0.0001465761081, -3.337852213, 0)],
+                       'd': 3, 'grp': 'Nose_grp', 'grplocal': (0, -6, 0), 'name':None,
+                       'targs':['Nose_Move_L', 'Nose_Move_R', 'Nose_Up', 'Nose_Down'],
+                       'lim': [(-2, 2), (-3, 3), (0, 0)],
+                       'lock': ['tz','rx','ry','rz','sx','sy','sz','v']},
+                'Nose_Scope': {'points': [(0, -3.437671488, 0), (1.305939268, -3.437671488, 0), (3.917817803, -1.197674208, 0), (5.540631079, 0.373621081, 0),
+                                        (3.917817803, 1.648674652, 0), (0, 3.437671488, 0), (-3.917817794, 1.648674652, 0), (-5.540631079, 0.373621081, 0),
+                                        (-3.917817794, -1.197674208, 0), (-1.305939229, -3.437671488, 0), (0, -3.437671488, 0)],
+                                'd': 3, 'decorate': True, 'local': (0, -6, 0), 'name':None, 'parent': 'Nose'},
+                'Nose_Enlarge': {'cmd': 'pm.circle(c=(0,0,0), nr=(0,0,1), sw=360, r=1, d=3, ut=False, tol=0.01, s=8, ch=False)',
+                       'd': 3, 'grp': 'Nose_Enlarge_grp', 'grplocal': (0, -3.25, 0), 'name':None, 'parent': 'Nose',
+                       'targs':['Nose_Enlarge'],
+                       'lim': [(0, 0), (0, 2), (0, 0)],
+                       'lock': ['tx','tz','rx','ry','rz','sx','sy','sz','v']},
+                'Nose_Enlarge_Slot': {'points': [(0, 2.75, 0), (0, 4.75, 0)],
+                                'd': 1, 'decorate': True, 'local': (0, -6, 0), 'name':None, 'parent': 'Nose'},
+                'Nose_Up_R': {'cmd': 'pm.circle(c=(0,0,0), nr=(0,0,1), sw=360, r=1.5, d=3, ut=False, tol=0.01, s=8, ch=False)',
+                       'd': 3, 'grp': 'Nose_Up_R_grp', 'grplocal': (-4, -8, 0), 'name':None, 'parent': 'Nose',
+                       'targs':['Nose_Up_R'],
+                       'lim': [(0, 0), (0, 2), (0, 0)],
+                       'lock': ['tx','tz','rx','ry','rz','sx','sy','sz','v']},
+                'Nose_Up_L': {'cmd': 'pm.circle(c=(0,0,0), nr=(0,0,1), sw=360, r=1.5, d=3, ut=False, tol=0.01, s=8, ch=False)',
+                       'd': 3, 'grp': 'Nose_Up_L_grp', 'grplocal': (4, -8, 0), 'name':None, 'parent': 'Nose',
+                       'targs':['Nose_Up_L'],
+                       'lim': [(0, 0), (0, 2), (0, 0)],
+                       'lock': ['tx','tz','rx','ry','rz','sx','sy','sz','v']},
+                'Jeer_ConstraintPlane_R': {'cmd': 'pm.listRelatives(pm.surface(du=1, dv=1, ku=(0,1), kv=(0,1), p=[(-5, 5, 0), (5, 0, 0), (-5, -5, 0), (5, 0, 0)]), p=True)',
+                                'decorate': True, 'local': (-40, -15, 0), 'name':None},
+                'Jeer_ConstraintPlane_L': {'cmd': 'pm.listRelatives(pm.surface(du=1, dv=1, ku=(0,1), kv=(0,1), p=[(-5, 0, 0), (5, 5, 0), (-5, 0, 0), (5, -5, 0)]), p=True)',
+                                'decorate': True, 'local': (40, -15, 0), 'name':None},
+                'Mouth_Jeer_R': {'cmd': 'pm.circle(c=(0,0,0), nr=(0,0,1), sw=360, r=3, d=3, ut=False, tol=0.01, s=8, ch=False)',
+                       'd': 3, 'grp': 'Mouth_Jeer_R_grp', 'grplocal': (-35, -15, 0), 'name':None,
+                       'targs':[],
+                       'lim': [(-10, 0), (-5, 5), (0, 0)],
+                       'lock': ['tz','rx','ry','rz','sx','sy','sz','v']},
+                'Mouth_Jeer_L': {'cmd': 'pm.circle(c=(0,0,0), nr=(0,0,1), sw=360, r=3, d=3, ut=False, tol=0.01, s=8, ch=False)',
+                       'd': 3, 'grp': 'Mouth_Jeer_L_grp', 'grplocal': (35, -15, 0), 'name':None,
+                       'targs':[],
+                       'lim': [(0, 10), (-5, 5), (0, 0)],
+                       'lock': ['tz','rx','ry','rz','sx','sy','sz','v']}}
 
-
+    handleRules = [{'Driver': 'Nose_Enlarge', 'Driven': 'Nose_Scope',
+                    'Key': [('ty',0,'sx',1), ('ty',2,'sx',1.67), ('ty',0,'sy',1), ('ty',2,'sy',1.67), ('ty',0,'sz',1), ('ty',2,'sz',1.67)]}]
 
     targets =  {'Jaw_UP': {'label': 'jaw_up', 'tar': 'Jaw_UP', 'Driver': 'Jaw', 'Key': [('ty',0,0), ('ty',5,1)]},
                     'Jaw_Down': {'label': 'jaw_down', 'tar': 'Jaw_Down', 'Driver': 'Jaw', 'Key': [('ty',0,0), ('ty',-5,1)]},
@@ -109,45 +185,35 @@ def HH_Face(name='HHExpr', textScale=10, font='Times New Roman|h-13|w400|c0'):
                     'Mouth_Depressed': {'label': 'mouth_depressed', 'tar': 'Mouth_Depressed', 'Driver': 'Mouth_Smile_Depressed', 'Key': [('ty',0,0), ('ty',-5,1)]},
                 'Brow_Up_In_R': {'label': 'brow_up_in_r', 'tar': 'Brow_Up_In_R', 'Driver': 'Brow_Up_Angry_In_R', 'Key': [('ty',0,0), ('ty',5,1)]},
                     'Brow_Angry_R': {'label': 'brow_angry_r', 'tar': 'Brow_Angry_R', 'Driver': 'Brow_Up_Angry_In_R', 'Key': [('ty',0,0), ('ty',-5,1)]},
-                'Brow_Up_In_L': {'label': 'brow_up_in_l', 'tar': 'Brow_Up_In_L', 'Driver': 'Brow_Up_Angry_In_L', 'Key': [('ty',0,0), ('ty',5,1)]},
-                    'Brow_Angry_L': {'label': 'brow_angry_l', 'tar': 'Brow_Angry_L', 'Driver': 'Brow_Up_Angry_In_L', 'Key': [('ty',0,0), ('ty',-5,1)]},
+                        'Brow_Up_In_L': {'label': 'brow_up_in_l', 'tar': 'Brow_Up_In_L', 'Driver': 'Brow_Up_Angry_In_L', 'Key': [('ty',0,0), ('ty',5,1)]},
+                            'Brow_Angry_L': {'label': 'brow_angry_l', 'tar': 'Brow_Angry_L', 'Driver': 'Brow_Up_Angry_In_L', 'Key': [('ty',0,0), ('ty',-5,1)]},
                 'Brow_Up_Out_R': {'label': 'brow_up_out_r', 'tar': 'Brow_Up_Out_R', 'Driver': 'Brow_Up_Down_Out_R', 'Key': [('ty',0,0), ('ty',5,1)]},
                     'Brow_Down_Out_R': {'label': 'brow_down_out_r', 'tar': 'Brow_Down_Out_R', 'Driver': 'Brow_Up_Down_Out_R', 'Key': [('ty',0,0), ('ty',-5,1)]},
-                'Brow_Up_Out_L': {'label': 'brow_up_out_l', 'tar': 'Brow_Up_Out_L', 'Driver': 'Brow_Up_Down_Out_L', 'Key': [('ty',0,0), ('ty',5,1)]},
-                    'Brow_Down_Out_L': {'label': 'brow_down_out_l', 'tar': 'Brow_Down_Out_L', 'Driver': 'Brow_Up_Down_Out_L', 'Key': [('ty',0,0), ('ty',-5,1)]}}
+                        'Brow_Up_Out_L': {'label': 'brow_up_out_l', 'tar': 'Brow_Up_Out_L', 'Driver': 'Brow_Up_Down_Out_L', 'Key': [('ty',0,0), ('ty',5,1)]},
+                            'Brow_Down_Out_L': {'label': 'brow_down_out_l', 'tar': 'Brow_Down_Out_L', 'Driver': 'Brow_Up_Down_Out_L', 'Key': [('ty',0,0), ('ty',-5,1)]},
+                'UpperEyelid_Half_R': {'label': 'uppereyelid_half_r', 'tar': 'UpperEyelid_Half_R', 'Driver': 'UpperEyelid_R', 'Key': [('ty',0,0), ('ty',-2.5,1), ('ty',-5,0)]},
+                    'UpperEyelid_R': {'label': 'uppereyelid_r', 'tar': 'UpperEyelid_R', 'Driver': 'UpperEyelid_R', 'Key': [('ty',-2.5,0), ('ty',-5,1)]},
+                        'UpperEyelid_Half_L': {'label': 'uppereyelid_half_l', 'tar': 'UpperEyelid_Half_L', 'Driver': 'UpperEyelid_L', 'Key': [('ty',0,0), ('ty',-2.5,1), ('ty',-5,0)]},
+                            'UpperEyelid_L': {'label': 'uppereyelid_l', 'tar': 'UpperEyelid_L', 'Driver': 'UpperEyelid_L', 'Key': [('ty',-2.5,0), ('ty',-5,1)]},
+                                'LowerEyelid_Half_R': {'label': 'lowereyelid_half_r', 'tar': 'LowerEyelid_Half_R', 'Driver': 'LowerEyelid_Half_R', 'Key': [('ty',0,0), ('ty',5,1)]},
+                                    'LowerEyelid_Half_L': {'label': 'lowereyelid_half_l', 'tar': 'LowerEyelid_Half_L', 'Driver': 'LowerEyelid_Half_L', 'Key': [('ty',0,0), ('ty',5,1)]},
+                'Nose_Move_L': {'label': 'nose_move_l', 'tar': 'Nose_Move_L', 'Driver': 'Nose', 'Key': [('tx',0,0), ('tx',2,1)]},
+                    'Nose_Move_R': {'label': 'nose_move_r', 'tar': 'Nose_Move_R', 'Driver': 'Nose', 'Key': [('tx',0,0), ('tx',-2,1)]},
+                        'Nose_Up': {'label': 'nose_up', 'tar': 'Nose_Up', 'Driver': 'Nose', 'Key': [('ty',0,0), ('ty',3,1)]},
+                            'Nose_Down': {'label': 'nose_down', 'tar': 'Nose_Down', 'Driver': 'Nose', 'Key': [('ty',0,0), ('ty',-3,1)]},
+                                'Nose_Enlarge': {'label': 'nose_enlarge', 'tar': 'Nose_Enlarge', 'Driver': 'Nose_Enlarge', 'Key': [('ty',0,0), ('ty',2,1)]},
+                                    'Nose_Up_R': {'label': 'nose_up_r', 'tar': 'Nose_Up_R', 'Driver': 'Nose_Up_R', 'Key': [('ty',0,0), ('ty',3,1)]},
+                                        'Nose_Up_L': {'label': 'nose_up_l', 'tar': 'Nose_Up_L', 'Driver': 'Nose_Up_L', 'Key': [('ty',0,0), ('ty',3,1)]},
+                'Mouth_Jeer_Down_R': {'label': 'mouth_jeer_down_r', 'tar': 'Mouth_Jeer_Down_R', 'Driver': '', 'Key': []},
+                    'Mouth_Jeer_Down_L': {'label': 'mouth_jeer_down_l', 'tar': 'Mouth_Jeer_Down_L', 'Driver': '', 'Key': []},
+                        'Mouth_Jeer_Up_R': {'label': 'mouth_jeer_up_r', 'tar': 'Mouth_Jeer_Up_R', 'Driver': '', 'Key': []},
+                            'Mouth_Jeer_Up_L': {'label': 'mouth_jeer_up_l', 'tar': 'Mouth_Jeer_Up_L', 'Driver': '', 'Key': []}}
 
 
-
-    targetsx  =  {
-                'Mouth_Jeer_Down': 'Mouth_Jeer_Down',
-                    'Mouth_Jeer_Down_R': 'Mouth_Jeer_Down_R',
-                        'Mouth_Jeer_Down_L': 'Mouth_Jeer_Down_L',
-                            'Mouth_Jeer_Up': 'Mouth_Jeer_Up',
-                                'Mouth_Jeer_Up_R': 'Mouth_Jeer_Up_R',
-                                    'Mouth_Jeer_Up_L': 'Mouth_Jeer_Up_L',
-
-                    'Brow_Up_In_L': 'Brow_Up_In_L',
-
-                            'Brow_Up_Out_L': 'Brow_Up_Out_L',
-
-                                    'Brow_Down_Out_L': 'Brow_Down_Out_L',
-
-                                            'Brow_Angry_L': 'Brow_Angry_L',
-                'LowerEyelid_Half_R': 'LowerEyelid_Half_R',
-                    'LowerEyelid_Half_L': 'LowerEyelid_Half_L',
-                        'UpperEyelid_Half_R': 'UpperEyelid_Half_R',
-                            'UpperEyelid_Half_L': 'UpperEyelid_Half_L',
-                                'UpperEyelid_R': 'UpperEyelid_R',
-                                    'UpperEyelid_L': 'UpperEyelid_L',
-                                        'LowerEyelid_Look_Up': 'LowerEyelid_Look_Up',
-                                            'UpperEyelid_Look_Down': 'UpperEyelid_Look_Down',
-                'Nose_Enlarge': 'Nose_Enlarge',
-                    'Nose_Down': 'Nose_Down',
-                        'Nose_Up': 'Nose_Up',
-                            'Nose_Up_R': 'Nose_Up_R',
-                                'Nose_Up_L': 'Nose_Up_L',
-                                    'Nose_Move_R': 'Nose_Move_R',
-                                        'Nose_Move_L': 'Nose_Move_L'}
+    otherTargets  =  {'Mouth_Jeer_Down': 'Mouth_Jeer_Down',
+                        'Mouth_Jeer_Up': 'Mouth_Jeer_Up',
+                            'LowerEyelid_Look_Up': 'LowerEyelid_Look_Up',
+                                'UpperEyelid_Look_Down': 'UpperEyelid_Look_Down'}
 
     exprBlender = None
     if pm.objExists(baseMesh):
@@ -163,21 +229,38 @@ def HH_Face(name='HHExpr', textScale=10, font='Times New Roman|h-13|w400|c0'):
     pronounciation_grp, p = pronExpression(p, name, exprBlender, baseMesh, textScale, font, pronTargs)
     pm.parent(pronounciation_grp, expressionCtrl_rootGrp)
 
-    # Create Pronounciation Controls
+    # Create Facial Handles
     #
-    headGrp_curve, hbox, targets = facialHandles(name, handles, targets)
+    headGrp_curve, targets = facialHandles(name, handles, handleRules, targets)
 
     # Create Facial BlendShape Targets
     #
     p = facialBlender(p, name, exprBlender, baseMesh, targets)
     pm.parent(headGrp_curve, expressionCtrl_rootGrp)
 
+    # Create Jeer Expressions
+    #
+    exprecmd_Mouth_Jeer_R = "float $inst = 1.0 - linstep(-10, 0, " + handles['Mouth_Jeer_R']['name'] + ".tx);\n" + \
+        exprBlender +'.'+ targets['Mouth_Jeer_Up_R']['label'] + " = linstep(-5, 5, " + handles['Mouth_Jeer_R']['name'] + ".ty) * $inst;\n" + \
+        exprBlender +'.'+ targets['Mouth_Jeer_Down_R']['label'] + " = (1.0 - linstep(-5, 5, " + handles['Mouth_Jeer_R']['name'] + ".ty)) * $inst;"
+    pm.expression(s=exprecmd_Mouth_Jeer_R, n='expression' + handles['Mouth_Jeer_R']['name'])
+    pm.geometryConstraint(handles['Jeer_ConstraintPlane_L']['name'], handles['Mouth_Jeer_L']['name'], weight=1)
+
+    exprecmd_Mouth_Jeer_L = "float $inst = linstep(0, 10, " + handles['Mouth_Jeer_L']['name'] + ".tx);\n" + \
+        exprBlender +'.'+ targets['Mouth_Jeer_Up_L']['label'] + " = linstep(-5, 5, " + handles['Mouth_Jeer_L']['name'] + ".ty) * $inst;\n" + \
+        exprBlender +'.'+ targets['Mouth_Jeer_Down_L']['label'] + " = (1.0 - linstep(-5, 5, " + handles['Mouth_Jeer_L']['name'] + ".ty)) * $inst;"
+    pm.expression(s=exprecmd_Mouth_Jeer_L, n='expression' + handles['Mouth_Jeer_L']['name'])
+    pm.geometryConstraint(handles['Jeer_ConstraintPlane_R']['name'], handles['Mouth_Jeer_R']['name'], weight=1)
+
+
+
     bbox = pm.exactWorldBoundingBox(baseMesh)
+    hbox = pm.exactWorldBoundingBox(headGrp_curve)
     xpos = bbox[0] - hbox[3] - .2*(bbox[3]-bbox[0])
     ypos = bbox[1] - hbox[1]
     pm.setAttr((headGrp_curve+".t"), (xpos, ypos, 0))
 
-def facialHandles(name, handles, targs):
+def facialHandles(name, handles, handleRules, targs):
     # Create headGrp Curve
     hadpoints = [(0, 30.6789418, 0),
                 (-2.14157775, 30.5893632, 0),
@@ -236,6 +319,7 @@ def facialHandles(name, handles, targs):
         else:
             handleCurve = pm.python(handle['cmd'])[0]
             handleCurve = pm.rename(handleCurve, handleName)
+        handle['name'] = handleCurve
 
         if handle.has_key('decorate'):
             pm.setAttr(handleCurve+'.template', 1)
@@ -256,7 +340,23 @@ def facialHandles(name, handles, targs):
             handle['grp'] = handle_grp
             pm.setAttr(handle_grp+'.t', handle['grplocal'])
             pm.parent(handle_grp, headGrp_curve)
-    return headGrp_curve, hbox, targs
+
+    for handName, handle in handles.iteritems():
+        if handle.has_key('parent'):
+            parent = handles[handle['parent']]['name']
+            if not parent is None:
+                if handle.has_key('grp'):
+                    pm.parent(handle['grp'], parent)
+                else:
+                    pm.parent(handle['name'], parent)
+
+    for rule in handleRules:
+        for key in rule['Key']:
+            driver = handles[rule['Driver']]['name']+"."+key[0]
+            driven = handles[rule['Driven']]['name']+"."+key[2]
+            pm.setDrivenKeyframe(driven, cd=driver, dv=key[1], v=key[3], itt='linear', ott='linear')
+
+    return headGrp_curve, targs
 
 def facialBlender(p, name, blender, baseMesh, targs):
     for tarName, expr in targs.iteritems():
@@ -269,7 +369,7 @@ def facialBlender(p, name, blender, baseMesh, targs):
                 driver = expr['Driver']+'.'+expr['Key'][i][0]
                 driverValue = expr['Key'][i][1]
                 value = expr['Key'][i][2]
-                pm.setDrivenKeyframe(driven, cd=driver, dv=driverValue, v=value, itt='linear', ott='linear', )
+                pm.setDrivenKeyframe(driven, cd=driver, dv=driverValue, v=value, itt='linear', ott='linear')
             p += 1
         else:
             pm.warning('The target mesh "'+expr['tar']+'" does not exists! Skiped.')
