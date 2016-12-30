@@ -204,6 +204,7 @@ class PipelineSetup(object):
     #                             os.path.join(the3rdDest, the3rdfile))
 
     def createMenu(self):
+        self.menus.clear()
         for root, dirs, files in os.walk(self.repositoryDest):
             parent = os.path.split(root)[-1]
 
@@ -283,6 +284,7 @@ class PipelineSetup(object):
 
         # Update
         updateCmd = self.repositoryName+'_pipset.update()\n'
+        #updateCmd += 'pm.refresh\n'
         updateCmd += self.getRefreshCmd()
         updateCmd += self.getRefreshCmd()
         updateCmd += "print 'Updated!'"
