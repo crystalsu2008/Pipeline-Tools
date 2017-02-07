@@ -103,27 +103,37 @@ def fixFitSkeleton():
     # Wing
     pm.move('frontRump', -0.666333, 15.298425, 1.362798, rpr=True); pm.refresh()
     pm.rename('frontRump', 'Scapula')
+    pm.setAttr('Scapula.type', 0)
+    pm.setAttr('Scapula.drawLabel', 0)
+
     pm.move('frontHip', -1.643369, 18.64079, 0.838308, rpr=True); pm.refresh()
     pm.rename('frontHip', 'Shoulder')
+    pm.setAttr('Shoulder.type', 0)
+    pm.setAttr('Shoulder.drawLabel', 0)
+
     pm.move('frontKnee', -6.397075, 18.277728, 0.120228, rpr=True); pm.refresh()
     pm.rename('frontKnee', 'Elbow')
     pm.move('frontAnkle', -6.695856, 23.580604, -0.582982, rpr=True); pm.refresh()
     pm.deleteAttr('frontAnkle.worldOrient')
     pm.rename('frontAnkle', 'Wrist')
-    pm.move('frontToes', -9.598403, 23.358922, -1.021432, rpr=True); pm.refresh()
+    pm.setAttr('Wrist.type', 0)
+    pm.setAttr('Wrist.drawLabel', 0)
 
-    '''
+    pm.move('frontToes', -9.598403, 23.358922, -1.021432, rpr=True); pm.refresh()
     pm.rename('frontToes', 'IndexFinger1')
     pm.setAttr('IndexFinger1.fat', 0.15)
     pm.move('frontToesEnd', -11.673251, 23.200457, -1.334852, rpr=True); pm.refresh()
     pm.rename('frontToesEnd', 'IndexFinger2')
     pm.setAttr('IndexFinger2.fat', 0.15)
 
-    pm.move('frontHeel', -7.212854, 24.022878, -0.582982, rpr=True); pm.refresh()
+    mel.eval('asFitModeManualUpdate')
+    pm.setAttr('Wrist.jointOrientX', 0)
+
+    pm.move('frontHeel', -7.229807, 24.041113, -0.725583, rpr=True); pm.refresh()
     pm.rename('frontHeel', 'Alula1')
     pm.setAttr('Alula1.fat', 0.15)
 
-    pm.joint(p=(-8.586265, 24.126656, -0.582982), n='Alula2'); pm.refresh()
+    pm.joint(p=(-8.607068, 24.216244, -0.968267), n='Alula2'); pm.refresh()
     pm.parent('Alula2', 'Alula1')
     pm.joint('Alula2', e=True, zso=True, oj='xyz', sao='yup')
     pm.addAttr('Alula2', longName='fat', at='float', k=True)
@@ -234,9 +244,10 @@ def fixFitSkeleton():
     pm.setAttr('JawEnd.jointOrient', (0, 0, 0))
     pm.setAttr('EyeEnd.jointOrient', (0, 0, 0))
     pm.setAttr('EarEnd.jointOrient', (0, 0, 0))
-    pm.setAttr('Wrist.jointOrientX', 0)
     pm.setAttr('IndexFinger1.jointOrientX', 0)
     pm.setAttr('IndexFinger2.jointOrient', (0, 0, 0))
+    pm.setAttr('Alula1.jointOrientX', 0)
+    pm.setAttr('Alula2.jointOrient', (0, 0, 0))
     pm.setAttr('BigToe1.jointOrient', (180, 15, -40))
     pm.setAttr('LongToe1.jointOrientX', 0)
     pm.setAttr('MiddleToe1.jointOrientX', 0)
@@ -246,5 +257,4 @@ def fixFitSkeleton():
     pm.setAttr('MiddleToe5.jointOrient', (0, 0, 0))
     pm.setAttr('RingToe5.jointOrient', (0, 0, 0))
 
-    pm.move('Root', 0, -.8, 0, r=True)
-    '''
+    #pm.move('Root', 0, -.8, 0, r=True)
