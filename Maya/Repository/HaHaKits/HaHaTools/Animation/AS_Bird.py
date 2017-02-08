@@ -3,6 +3,7 @@ import maya.mel as mel
 
 def AS_Bird():
     fixFitSkeleton()
+    feathersFitSkeleton()
 
 def fixFitSkeleton():
     pm.move('Root', 0, 15.457028, -5.948403, rpr=True); pm.refresh()
@@ -30,14 +31,15 @@ def fixFitSkeleton():
     pm.move('Spine1', 0, 16.529027, -4.206971, rpr=True); pm.refresh()
     pm.move('Chest', 0, 17.066826, -2.969545, rpr=True); pm.refresh()
     pm.setAttr('Chest.fat', 2.5)
-    pm.move('Neck', 0, 18.391344, 0.326219, rpr=True); pm.refresh()
-    pm.move('Head', 0, 27.782901, 3.483267, rpr=True); pm.refresh()
-    pm.setAttr('Head.fat', 0.5)
-    pm.move('HeadEnd', 0, 29.321882, 3.483267, rpr=True); pm.refresh()
 
-    pm.deleteAttr('Neck.inbetweenJoints')
-    pm.setAttr('Neck.fat', 1.5)
-    tmpjoint = pm.insertJoint('Neck')
+    pm.move('Neck', 0, 18.391344, 0.326219, rpr=True); pm.refresh()
+    pm.rename('Neck', 'Neck0')
+    pm.setAttr('Neck0.type', 18)
+    pm.setAttr('Neck0.otherType', '0', type='string')
+    pm.setAttr('Neck0.drawLabel', 1)
+    pm.deleteAttr('Neck0.inbetweenJoints')
+    pm.setAttr('Neck0.fat', 1.5)
+    tmpjoint = pm.insertJoint('Neck0')
     pm.rename(tmpjoint, 'Neck1')
     pm.joint('Neck1', e=True, co=True, p=(0, 18.696437, 1.095583)); pm.refresh()
     pm.addAttr('Neck1', longName='fat', at='float', k=True)
@@ -57,6 +59,10 @@ def fixFitSkeleton():
     pm.joint('Neck4', e=True, co=True, p=(0, 20.500465, 3.576122)); pm.refresh()
     pm.addAttr('Neck4', longName='fat', at='float', k=True)
     pm.setAttr('Neck4.fat', 0.9)
+    pm.setAttr('Neck4.type', 18)
+    pm.setAttr('Neck4.otherType', '1', type='string')
+    pm.setAttr('Neck4.drawLabel', 1)
+
     tmpjoint = pm.insertJoint('Neck4')
     pm.rename(tmpjoint, 'Neck5')
     pm.joint('Neck5', e=True, co=True, p=(0, 21.641248, 3.668976)); pm.refresh()
@@ -77,6 +83,10 @@ def fixFitSkeleton():
     pm.joint('Neck8', e=True, co=True, p=(0, 24.678912, 2.979201)); pm.refresh()
     pm.addAttr('Neck8', longName='fat', at='float', k=True)
     pm.setAttr('Neck8.fat', 0.7)
+    pm.setAttr('Neck8.type', 18)
+    pm.setAttr('Neck8.otherType', '2', type='string')
+    pm.setAttr('Neck8.drawLabel', 1)
+
     tmpjoint = pm.insertJoint('Neck8')
     pm.rename(tmpjoint, 'Neck9')
     pm.joint('Neck9', e=True, co=True, p=(0, 25.554396, 2.833287)); pm.refresh()
@@ -84,18 +94,25 @@ def fixFitSkeleton():
     pm.setAttr('Neck9.fat', 0.65)
     tmpjoint = pm.insertJoint('Neck9')
     pm.rename(tmpjoint, 'Neck10')
-    pm.joint('Neck10', e=True, co=True, p=(0, 26.416615, 2.766962)); pm.refresh()
+    pm.joint('Neck10', e=True, co=True, p=(0, 26.364346, 2.819231)); pm.refresh()
     pm.addAttr('Neck10', longName='fat', at='float', k=True)
     pm.setAttr('Neck10.fat', 0.6)
     tmpjoint = pm.insertJoint('Neck10')
     pm.rename(tmpjoint, 'Neck11')
-    pm.joint('Neck11', e=True, co=True, p=(0, 27.13292, 3.072055)); pm.refresh()
+    pm.joint('Neck11', e=True, co=True, p=(0, 27.164281, 3.040694)); pm.refresh()
     pm.addAttr('Neck11', longName='fat', at='float', k=True)
     pm.setAttr('Neck11.fat', 0.55)
+    pm.move('Head', 0, 27.782901, 3.483267, rpr=True); pm.refresh()
+    pm.setAttr('Head.fat', 0.5)
+    pm.move('HeadEnd', 0, 29.321882, 3.483267, rpr=True); pm.refresh()
+    pm.setAttr('Head.type', 18)
+    pm.setAttr('Head.otherType', '3', type='string')
+    pm.setAttr('Head.drawLabel', 1)
 
     # Head
     pm.move('Jaw', 0, 27.233845, 4.684155, rpr=True); pm.refresh()
     pm.move('JawEnd', 0, 27.343004, 8.089177, rpr=True); pm.refresh()
+    pm.setAttr('JawEnd.fat', 0.1)
     pm.move('Eye', -0.702294, 28.482938, 5.56851, rpr=True); pm.refresh()
     pm.move('EyeEnd', -1.776226, 28.43113, 5.776239, rpr=True); pm.refresh()
     pm.move('Ear', -1.070843, 28.702831, 4.284751, rpr=True); pm.refresh()
@@ -105,39 +122,58 @@ def fixFitSkeleton():
     pm.rename('frontRump', 'Scapula')
     pm.setAttr('Scapula.type', 0)
     pm.setAttr('Scapula.drawLabel', 0)
+    pm.parent('Scapula', w=True)
+    pm.setAttr('Scapula.jointOrient', (90,0,180))
 
-    pm.move('frontHip', -1.643369, 18.64079, 0.838308, rpr=True); pm.refresh()
+    pm.move('frontHip', -4.106932, 15.298425, 1.362798, rpr=True); pm.refresh()
     pm.rename('frontHip', 'Shoulder')
-    pm.setAttr('Shoulder.type', 0)
-    pm.setAttr('Shoulder.drawLabel', 0)
+    pm.setAttr('Shoulder.type', 10)
+    pm.setAttr('Shoulder.drawLabel', 1)
+    pm.setAttr('Shoulder.jointOrient', (0,0,0))
 
-    pm.move('frontKnee', -6.397075, 18.277728, 0.120228, rpr=True); pm.refresh()
+    pm.move('frontKnee', -8.130809, 15.298425, 1.362798, rpr=True); pm.refresh()
     pm.rename('frontKnee', 'Elbow')
-    pm.move('frontAnkle', -6.695856, 23.580604, -0.582982, rpr=True); pm.refresh()
+    pm.setAttr('Elbow.jointOrient', (0,0,0))
+    pm.move('frontAnkle', -13.453836, 15.298425, 1.362798, rpr=True); pm.refresh()
     pm.deleteAttr('frontAnkle.worldOrient')
     pm.rename('frontAnkle', 'Wrist')
-    pm.setAttr('Wrist.type', 0)
-    pm.setAttr('Wrist.drawLabel', 0)
+    pm.setAttr('Wrist.jointOrient', (0,0,0))
+    pm.setAttr('Wrist.type', 12)
+    pm.setAttr('Wrist.drawLabel', 1)
 
-    pm.move('frontToes', -9.598403, 23.358922, -1.021432, rpr=True); pm.refresh()
+    pm.move('frontToes', -16.77636, 15.298425, 1.362798, rpr=True); pm.refresh()
     pm.rename('frontToes', 'IndexFinger1')
+    pm.setAttr('IndexFinger1.jointOrient', (0,0,0))
     pm.setAttr('IndexFinger1.fat', 0.15)
-    pm.move('frontToesEnd', -11.673251, 23.200457, -1.334852, rpr=True); pm.refresh()
+    pm.setAttr('IndexFinger1.type', 0)
+    pm.setAttr('IndexFinger1.drawLabel', 0)
+
+    pm.move('frontToesEnd', -18.598683, 15.298425, 1.362798, rpr=True); pm.refresh()
     pm.rename('frontToesEnd', 'IndexFinger2')
+    pm.setAttr('IndexFinger2.jointOrient', (0,0,0))
     pm.setAttr('IndexFinger2.fat', 0.15)
+    pm.setAttr('IndexFinger2.type', 0)
+    pm.setAttr('IndexFinger2.drawLabel', 0)
 
-    mel.eval('asFitModeManualUpdate')
-    pm.setAttr('Wrist.jointOrientX', 0)
-
-    pm.move('frontHeel', -7.229807, 24.041113, -0.725583, rpr=True); pm.refresh()
+    pm.move('frontHeel', -13.746735, 15.298425, 1.876919, rpr=True); pm.refresh()
     pm.rename('frontHeel', 'Alula1')
+    pm.setAttr('Alula1.jointOrient', (0,0,0))
     pm.setAttr('Alula1.fat', 0.15)
+    pm.setAttr('Alula1.type', 0)
+    pm.setAttr('Alula1.drawLabel', 0)
 
-    pm.joint(p=(-8.607068, 24.216244, -0.968267), n='Alula2'); pm.refresh()
+    pm.joint(p=(-15.070372, 15.298425, 2.061097), n='Alula2'); pm.refresh()
     pm.parent('Alula2', 'Alula1')
     pm.joint('Alula2', e=True, zso=True, oj='xyz', sao='yup')
+    pm.setAttr('Alula2.jointOrient', (0,0,0))
     pm.addAttr('Alula2', longName='fat', at='float', k=True)
     pm.setAttr('Alula2.fat', 0.15)
+
+    pm.setAttr('Scapula.jointOrient', (-180,0,110))
+    pm.setAttr('Shoulder.jointOrient', (0,0,-68))
+    pm.setAttr('Elbow.jointOrient', (0,0,55))
+    pm.setAttr('Wrist.jointOrient', (0,0,-23))
+    pm.parent('Scapula', 'Chest')
 
     # Claw
     pm.joint(p=(-2.88102, 2.485656, 0.575177), n='BigToe1'); pm.refresh()
@@ -246,8 +282,6 @@ def fixFitSkeleton():
     pm.setAttr('EarEnd.jointOrient', (0, 0, 0))
     pm.setAttr('IndexFinger1.jointOrientX', 0)
     pm.setAttr('IndexFinger2.jointOrient', (0, 0, 0))
-    pm.setAttr('Alula1.jointOrientX', 0)
-    pm.setAttr('Alula2.jointOrient', (0, 0, 0))
     pm.setAttr('BigToe1.jointOrient', (180, 15, -40))
     pm.setAttr('LongToe1.jointOrientX', 0)
     pm.setAttr('MiddleToe1.jointOrientX', 0)
@@ -258,3 +292,20 @@ def fixFitSkeleton():
     pm.setAttr('RingToe5.jointOrient', (0, 0, 0))
 
     #pm.move('Root', 0, -.8, 0, r=True)
+
+def feathersFitSkeleton():
+    # Primaries
+    featherjoints = createfeatherJoint('primarie0',\
+                                    (-8.967984, 22.957743, 1.362798),\
+                                    (-17.095809, 17.033809, 1.362798),\
+                                    2)
+
+def createfeatherJoint(name, pos1, pos2, sample):
+    pm.select(cl=True)
+    increment = 
+    pm.joint(p=pos1, n=name+'_0'); pm.refresh()
+    pm.joint(p=pos2, n=name+'_1'); pm.refresh()
+    pm.joint('primarie0_0', e=True, zso=True, oj='xyz', sao='yup')
+    pm.addAttr('primarie0_0', 'primarie0_1', longName='fat', at='float', k=True)
+    pm.setAttr('primarie0_0.fat', 0.1)
+    pm.setAttr('primarie0_1.fat', 0.1)
