@@ -35,7 +35,7 @@ def fixFitSkeleton():
     pm.move('Neck', 0, 18.391344, 0.326219, rpr=True); pm.refresh()
     pm.rename('Neck', 'Neck0')
     pm.setAttr('Neck0.type', 18)
-    pm.setAttr('Neck0.otherType', '0', type='string')
+    pm.setAttr('Neck0.otherType', '0Neck', type='string')
     pm.setAttr('Neck0.drawLabel', 1)
     pm.deleteAttr('Neck0.inbetweenJoints')
     pm.setAttr('Neck0.fat', 1.5)
@@ -148,12 +148,19 @@ def fixFitSkeleton():
     pm.setAttr('IndexFinger1.type', 0)
     pm.setAttr('IndexFinger1.drawLabel', 0)
 
-    pm.move('frontToesEnd', -18.598683, 15.298425, 1.362798, rpr=True); pm.refresh()
+    pm.move('frontToesEnd', -17.998683, 15.298425, 1.362798, rpr=True); pm.refresh()
     pm.rename('frontToesEnd', 'IndexFinger2')
     pm.setAttr('IndexFinger2.jointOrient', (0,0,0))
     pm.setAttr('IndexFinger2.fat', 0.15)
     pm.setAttr('IndexFinger2.type', 0)
     pm.setAttr('IndexFinger2.drawLabel', 0)
+
+    pm.joint(p=(-18.998683, 15.298425, 1.362798), n='IndexFingerEnd'); pm.refresh()
+    pm.parent('IndexFingerEnd', 'IndexFinger2')
+    pm.joint('IndexFinger2', e=True, zso=True, oj='xyz', sao='yup')
+    pm.setAttr('IndexFingerEnd.jointOrient', (0,0,0))
+    pm.addAttr('IndexFingerEnd', longName='fat', at='float', k=True)
+    pm.setAttr('IndexFingerEnd.fat', 0.15)
 
     pm.move('frontHeel', -13.746735, 15.298425, 1.876919, rpr=True); pm.refresh()
     pm.rename('frontHeel', 'Alula1')
@@ -162,15 +169,17 @@ def fixFitSkeleton():
     pm.setAttr('Alula1.type', 0)
     pm.setAttr('Alula1.drawLabel', 0)
 
-    pm.joint(p=(-15.070372, 15.298425, 2.061097), n='Alula2'); pm.refresh()
-    pm.parent('Alula2', 'Alula1')
-    pm.joint('Alula2', e=True, zso=True, oj='xyz', sao='yup')
-    pm.setAttr('Alula2.jointOrient', (0,0,0))
-    pm.addAttr('Alula2', longName='fat', at='float', k=True)
-    pm.setAttr('Alula2.fat', 0.15)
+    pm.joint(p=(-15.070372, 15.298425, 2.061097), n='AlulaEnd'); pm.refresh()
+    pm.parent('AlulaEnd', 'Alula1')
+    pm.joint('Alula1', e=True, zso=True, oj='xyz', sao='yup')
+    pm.setAttr('AlulaEnd.jointOrient', (0,0,0))
+    pm.setAttr('Alula1.jointOrientX', 0)
+    pm.addAttr('AlulaEnd', longName='fat', at='float', k=True)
+    pm.setAttr('AlulaEnd.fat', 0.15)
 
     pm.setAttr('Scapula.jointOrient', (-180,0,110))
-    pm.setAttr('Shoulder.jointOrient', (0,0,-68))
+    #pm.setAttr('Shoulder.jointOrient', (0,0,-68))
+    pm.setAttr('Shoulder.jointOrient', (-90,0,-70))
     pm.setAttr('Elbow.jointOrient', (0,0,55))
     pm.setAttr('Wrist.jointOrient', (0,0,-23))
     pm.parent('Scapula', 'Chest')
@@ -281,7 +290,8 @@ def fixFitSkeleton():
     pm.setAttr('EyeEnd.jointOrient', (0, 0, 0))
     pm.setAttr('EarEnd.jointOrient', (0, 0, 0))
     pm.setAttr('IndexFinger1.jointOrientX', 0)
-    pm.setAttr('IndexFinger2.jointOrient', (0, 0, 0))
+    pm.setAttr('IndexFinger2.jointOrientX', 0)
+    pm.setAttr('IndexFingerEnd.jointOrient', (0, 0, 0))
     pm.setAttr('BigToe1.jointOrient', (180, 15, -40))
     pm.setAttr('LongToe1.jointOrientX', 0)
     pm.setAttr('MiddleToe1.jointOrientX', 0)
@@ -295,17 +305,77 @@ def fixFitSkeleton():
 
 def feathersFitSkeleton():
     # Primaries
-    featherjoints = createfeatherJoint('primarie0',\
-                                    (-8.967984, 22.957743, 1.362798),\
-                                    (-17.095809, 17.033809, 1.362798),\
-                                    2)
+    primariesInfo= [[(-12.86360345, 18.53153049, 8.306063085), (-26.06981827, 18.53153049, 12.02674499), 'IndexFinger2'],\
+                    [(-12.0106408, 18.53153049, 7.70310673), (-26.84924966, 18.53153049, 10.6590635), 'IndexFinger1'],\
+                    [(-11.81945952, 18.53153049, 7.350156668), (-26.68748088, 18.53153049, 8.997256957), 'IndexFinger1'],\
+                    [(-10.5547218, 18.53153049, 6.864850333), (-25.43744941, 18.53153049, 7.320744163), 'Wrist'],\
+                    [(-10.01059045, 18.53153049, 6.526606523), (-23.76093662, 18.53153049, 5.5412876), 'Wrist'],\
+                    [(-9.642934138, 18.53153049, 6.203068966), (-22.14324883, 18.53153049, 3.820656048), 'Wrist'],\
+                    [(-9.378221591, 18.53153049, 6.011887683), (-20.45202978, 18.53153049, 2.482387063), 'Wrist'],\
+                    [(-9.14292155, 18.53153049, 5.776587642), (-18.71669198, 18.53153049, 0.8794055321), 'Wrist'],\
+                    [(-8.967984, 18.53153049, 5.539010509), (-17.095809, 18.53153049, -0.3849234914), 'Elbow']]
+    priJoints=[]
+    for i in range(len(primariesInfo)):
+        priJoints.append(createfeatherJoint('Primary'+str(i),\
+                                    primariesInfo[i][0],\
+                                    primariesInfo[i][1],\
+                                    primariesInfo[i][2], 3))
+    priCtrl = pm.curve(p=[(-27.1491891127, 18.53153049, 13.0764591394),\
+                    	(-27.4982296082, 18.53153049, 7.6532459788),\
+                    	(-23.3200995313, 18.53153049, 1.71173650929),\
+                    	(-17.2458531438, 18.53153049, -1.241109745)],\
+                    	n='PrimariesCtrl')
 
-def createfeatherJoint(name, pos1, pos2, sample):
+    # Secondaries
+    secondariesInfo =  [[(-8.694386056, 18.53153049, 5.092613863), (-15.41586672, 18.53153049, -1.4838331), 'Elbow'],\
+                        [(-8.486922066, 18.53153049, 4.750908469), (-14.69589146, 18.53153049, -2.115390347), 'Elbow'],\
+                        [(-8.328273134, 18.53153049, 4.262757906), (-13.84960475, 18.53153049, -2.974308202), 'Elbow'],\
+                        [(-8.084197852, 18.53153049, 3.725792286), (-13.05384262, 18.53153049, -3.643758883), 'Elbow'],\
+                        [(-7.803511278, 18.53153049, 3.237641723), (-12.4854411, 18.53153049, -4.010062086), 'Elbow'],\
+                        [(-7.583843525, 18.53153049, 2.810509981), (-11.87914614, 18.53153049, -4.313209564), 'Elbow'],\
+                        [(-7.303156951, 18.53153049, 2.383378238), (-11.34863806, 18.53153049, -4.692143912), 'Elbow'],\
+                        [(-6.998062849, 18.53153049, 1.992857788), (-10.67918738, 18.53153049, -5.159496274), 'Elbow'],\
+                        [(-6.656357455, 18.53153049, 1.626744865), (-9.921318681, 18.53153049, -5.412119173), 'Elbow'],\
+                        [(-6.387874646, 18.53153049, 1.321650763), (-9.27713029, 18.53153049, -5.588955202), 'Elbow'],\
+                        [(-6.156003128, 18.53153049, 1.187409359), (-8.25400755, 18.53153049, -5.412119173), 'Elbow'],\
+                        [(-5.960742903, 18.53153049, 1.016556662), (-7.281409391, 18.53153049, -5.083709405), 'Elbow']]
+    secJoints=[]
+    for i in range(len(secondariesInfo)):
+        secJoints.append(createfeatherJoint('Secondary'+str(i),\
+                                    secondariesInfo[i][0],\
+                                    secondariesInfo[i][1],\
+                                    secondariesInfo[i][2], 3))
+    secCtrl = pm.curve(p=[(-16.5246216252, 18.53153049, -1.62038791504),\
+                    	(-14.9866453017, 18.53153049, -4.66487943424),\
+                    	(-11.1286870108, 18.53153049, -6.76245024149),\
+                    	(-7.29458769468, 18.53153049, -5.94298120383)],\
+                    	n='PrimariesCtrl')
+
+    # Tertiaris
+    tertiarisInfo= [[(-5.417453545, 18.53153049, 1.016556662), (-6.260171785, 18.53153049, -4.545627746), 'Shoulder'],\
+                    [(-4.398227473, 18.53153049, 0.9751366524), (-5.326210969, 18.53153049, -3.986066628), 'Shoulder'],\
+                    [(-3.428735181, 18.53153049, 0.9513619387), (-4.495570592, 18.53153049, -3.174867282), 'Shoulder'],\
+                    [(-2.475140002, 18.53153049, 0.9275872249), (-3.79244802, 18.53153049, -2.385826872), 'Shoulder']]
+    terJoints=[]
+    for i in range(len(tertiarisInfo)):
+        terJoints.append(createfeatherJoint('Tertiary'+str(i),\
+                                    tertiarisInfo[i][0],\
+                                    tertiarisInfo[i][1],\
+                                    tertiarisInfo[i][2], 3))
+
+def createfeatherJoint(name, pos1, pos2, parent, sample):
     pm.select(cl=True)
-    increment = 
-    pm.joint(p=pos1, n=name+'_0'); pm.refresh()
-    pm.joint(p=pos2, n=name+'_1'); pm.refresh()
-    pm.joint('primarie0_0', e=True, zso=True, oj='xyz', sao='yup')
-    pm.addAttr('primarie0_0', 'primarie0_1', longName='fat', at='float', k=True)
-    pm.setAttr('primarie0_0.fat', 0.1)
-    pm.setAttr('primarie0_1.fat', 0.1)
+    s=name+'_0'
+    e=name+'_end'
+    pm.joint(p=pos1, n=s); pm.refresh()
+    pm.joint(p=pos2, n=e); pm.refresh()
+    pm.joint(s, e=True, zso=True, oj='xyz', sao='zup')
+    pm.addAttr(s, e, longName='fat', at='float', k=True, dv=0.05)
+    pm.addAttr(s, e, longName='fatY', at='byte', k=True, dv=2)
+    #pm.addAttr(s, longName='inbetweenJoints', at='byte', k=True, dv=sample)
+    pm.addAttr(s, longName='twistJoints', at='byte', k=True, dv=sample)
+    pm.addAttr(s, longName='bendyJoints', at='bool', k=True, dv=True)
+    pm.setAttr(e+'.jointOrient', (0, 0, 0))
+    pm.setAttr(e+'.fatY', 30)
+    pm.parent(s, parent)
+    pm.refresh()

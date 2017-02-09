@@ -1,0 +1,12 @@
+global proc tempMel()
+{
+    string $selobj[] = `ls-sl`;
+    int $len = size($selobj);
+    int $i;
+    for($i; $i<$len; $i+=2)
+    {
+        float $p1[] = `xform -q -ws -t $selobj[$i]`;
+        float $p2[] = `xform -q -ws -t $selobj[$i+1]`;
+        print("[("+$p1[0]+", "+$p1[1]+", "+$p1[2]+"), ("+$p2[0]+", "+$p2[1]+", "+$p2[2]+"), 'Elbow'],\\\n");
+    }
+}
