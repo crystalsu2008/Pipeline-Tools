@@ -304,7 +304,7 @@ def fixFitSkeleton():
     #pm.move('Root', 0, -.8, 0, r=True)
 
 def feathersFitSkeleton():
-    # Primaries
+    # Primaries ================================================================
     primariesInfo= [[(-12.86360345, 18.53153049, 8.306063085), (-26.06981827, 18.53153049, 12.02674499), 'IndexFinger2'],\
                     [(-12.0106408, 18.53153049, 7.70310673), (-26.84924966, 18.53153049, 10.6590635), 'IndexFinger1'],\
                     [(-11.81945952, 18.53153049, 7.350156668), (-26.68748088, 18.53153049, 8.997256957), 'IndexFinger1'],\
@@ -314,19 +314,19 @@ def feathersFitSkeleton():
                     [(-9.378221591, 18.53153049, 6.011887683), (-20.45202978, 18.53153049, 2.482387063), 'Wrist'],\
                     [(-9.14292155, 18.53153049, 5.776587642), (-18.71669198, 18.53153049, 0.8794055321), 'Wrist'],\
                     [(-8.967984, 18.53153049, 5.539010509), (-17.095809, 18.53153049, -0.3849234914), 'Elbow']]
-    priJoints=[]
-    for i in range(len(primariesInfo)):
-        priJoints.append(createfeatherJoint('Primary'+str(i),\
-                                    primariesInfo[i][0],\
-                                    primariesInfo[i][1],\
-                                    primariesInfo[i][2], 3))
     priCtrl = pm.curve(p=[(-27.1491891127, 18.53153049, 13.0764591394),\
                     	(-27.4982296082, 18.53153049, 7.6532459788),\
                     	(-23.3200995313, 18.53153049, 1.71173650929),\
                     	(-17.2458531438, 18.53153049, -1.241109745)],\
                     	n='PrimariesCtrl')
+    priJoints=[]
+    for i in range(len(primariesInfo)):
+        priJoints.append(createfeatherJoint('Primary'+str(i),\
+                                            primariesInfo[i][0],\
+                                            primariesInfo[i][1],\
+                                            primariesInfo[i][2], 3, 0.05, 30, priCtrl))
 
-    # Secondaries
+    # Secondaries ==============================================================
     secondariesInfo =  [[(-8.694386056, 18.53153049, 5.092613863), (-15.41586672, 18.53153049, -1.4838331), 'Elbow'],\
                         [(-8.486922066, 18.53153049, 4.750908469), (-14.69589146, 18.53153049, -2.115390347), 'Elbow'],\
                         [(-8.328273134, 18.53153049, 4.262757906), (-13.84960475, 18.53153049, -2.974308202), 'Elbow'],\
@@ -338,44 +338,71 @@ def feathersFitSkeleton():
                         [(-6.656357455, 18.53153049, 1.626744865), (-9.921318681, 18.53153049, -5.412119173), 'Elbow'],\
                         [(-6.387874646, 18.53153049, 1.321650763), (-9.27713029, 18.53153049, -5.588955202), 'Elbow'],\
                         [(-6.156003128, 18.53153049, 1.187409359), (-8.25400755, 18.53153049, -5.412119173), 'Elbow'],\
-                        [(-5.960742903, 18.53153049, 1.016556662), (-7.281409391, 18.53153049, -5.083709405), 'Elbow']]
-    secJoints=[]
-    for i in range(len(secondariesInfo)):
-        secJoints.append(createfeatherJoint('Secondary'+str(i),\
-                                    secondariesInfo[i][0],\
-                                    secondariesInfo[i][1],\
-                                    secondariesInfo[i][2], 3))
+                        [(-5.960742903, 18.53153049, 1.016556662), (-7.281409391, 18.53153049, -5.083709405), 'Shoulder']]
     secCtrl = pm.curve(p=[(-16.5246216252, 18.53153049, -1.62038791504),\
                     	(-14.9866453017, 18.53153049, -4.66487943424),\
                     	(-11.1286870108, 18.53153049, -6.76245024149),\
                     	(-7.29458769468, 18.53153049, -5.94298120383)],\
-                    	n='PrimariesCtrl')
+                    	n='SecondariesCtrl')
+    secJoints=[]
+    for i in range(len(secondariesInfo)):
+        secJoints.append(createfeatherJoint('Secondary'+str(i),\
+                                            secondariesInfo[i][0],\
+                                            secondariesInfo[i][1],\
+                                            secondariesInfo[i][2], 3, 0.05, 30, secCtrl))
 
-    # Tertiaris
-    tertiarisInfo= [[(-5.417453545, 18.53153049, 1.016556662), (-6.260171785, 18.53153049, -4.545627746), 'Shoulder'],\
+    # Tertiaris ================================================================
+    tertiarisInfo= [[(-5.223763545, 18.53153049, 1.027956662), (-6.260171785, 18.53153049, -4.545627746), 'Shoulder'],\
                     [(-4.398227473, 18.53153049, 0.9751366524), (-5.326210969, 18.53153049, -3.986066628), 'Shoulder'],\
                     [(-3.428735181, 18.53153049, 0.9513619387), (-4.495570592, 18.53153049, -3.174867282), 'Shoulder'],\
                     [(-2.475140002, 18.53153049, 0.9275872249), (-3.79244802, 18.53153049, -2.385826872), 'Shoulder']]
+    terCtrl = pm.curve(p=[(-3.50762228058, 18.53153049, -2.58540533101),\
+                    	(-4.20619320952, 18.53153049, -3.64221776197),\
+                    	(-5.33465394088, 18.53153049, -4.66320604273),\
+                    	(-6.51685089755, 18.53153049, -5.36177697167)],\
+                    	n='TertiarisCtrl')
     terJoints=[]
     for i in range(len(tertiarisInfo)):
         terJoints.append(createfeatherJoint('Tertiary'+str(i),\
-                                    tertiarisInfo[i][0],\
-                                    tertiarisInfo[i][1],\
-                                    tertiarisInfo[i][2], 3))
+                                            tertiarisInfo[i][0],\
+                                            tertiarisInfo[i][1],\
+                                            tertiarisInfo[i][2], 3, 0.05, 30, terCtrl))
 
-def createfeatherJoint(name, pos1, pos2, parent, sample):
+    # Primaries Coverts Top ====================================================
+    priCovertsInfo=[[(-11.3947113, 18.83153049, 7.526788519), (-16.09678779, 18.83153049, 9.370112318), 'Wrist'],\
+                    [(-11.15895683, 18.83153049, 7.370109178), (-16.65530952, 18.83153049, 8.738100886), 'Wrist'],\
+                    [(-10.88160853, 18.83153049, 7.194329919), (-16.80228892, 18.83153049, 8.003203872), 'Wrist'],\
+                    [(-10.60206759, 18.83153049, 7.045165817), (-16.49363217, 18.83153049, 6.944952171), 'Wrist'],\
+                    [(-10.24289207, 18.83153049, 6.811982318), (-16.15535741, 18.83153049, 6.099265254), 'Wrist'],\
+                    [(-9.866958792, 18.83153049, 6.599621044), (-15.40833396, 18.83153049, 5.070346172), 'Wrist'],\
+                    [(-9.507849109, 18.83153049, 6.378404418), (-14.56264705, 18.83153049, 4.266943601), 'Wrist']]
+    priCovertsJoints=[]
+    for i in range(len(priCovertsInfo)):
+        priCovertsJoints.append(createfeatherJoint('PrimaryCovert'+str(i),\
+                                                    priCovertsInfo[i][0],\
+                                                    priCovertsInfo[i][1],\
+                                                    priCovertsInfo[i][2], 2, 0.05, 12, priCtrl))
+
+def createfeatherJoint(name, pos1, pos2, parent, sample, fat, endFatY, ctrlCurve):
     pm.select(cl=True)
     s=name+'_0'
     e=name+'_end'
     pm.joint(p=pos1, n=s); pm.refresh()
     pm.joint(p=pos2, n=e); pm.refresh()
     pm.joint(s, e=True, zso=True, oj='xyz', sao='zup')
-    pm.addAttr(s, e, longName='fat', at='float', k=True, dv=0.05)
-    pm.addAttr(s, e, longName='fatY', at='byte', k=True, dv=2)
-    #pm.addAttr(s, longName='inbetweenJoints', at='byte', k=True, dv=sample)
-    pm.addAttr(s, longName='twistJoints', at='byte', k=True, dv=sample)
-    pm.addAttr(s, longName='bendyJoints', at='bool', k=True, dv=True)
+
+    pm.addAttr(s, e, longName='fat', at='float', k=True, dv=fat)
+    pm.addAttr(s, e, longName='fatY', at='float', k=True, dv=2)
+    pm.addAttr(s, e, longName='fatZ', at='float', k=True, dv=1)
+    pm.setAttr(e+'.fatY', endFatY)
+
+    pm.addAttr(s, longName='curveGuide', at='enum', en=ctrlCurve+':', k=True, dv=0)
+    pm.addAttr(s, longName='curveGuideMode', at='enum', en='point:aim', k=True, dv=1)
+
+    pm.addAttr(s, longName='inbetweenJoints', at='byte', k=True, dv=sample)
+    #pm.addAttr(s, longName='twistJoints', at='byte', k=True, dv=sample)
+    #pm.addAttr(s, longName='bendyJoints', at='bool', k=True, dv=True)
+
     pm.setAttr(e+'.jointOrient', (0, 0, 0))
-    pm.setAttr(e+'.fatY', 30)
     pm.parent(s, parent)
     pm.refresh()
