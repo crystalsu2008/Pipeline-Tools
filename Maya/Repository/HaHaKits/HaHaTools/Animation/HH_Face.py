@@ -1,6 +1,6 @@
 import pymel.core as pm
 import maya.mel as mel
-import freezeToOrigin
+#import freezeToOrigin
 
 def HH_Face(name='HHExpr', textScale=10, font='Times New Roman|h-13|w400|c0'):
 
@@ -253,13 +253,22 @@ def HH_Face(name='HHExpr', textScale=10, font='Times New Roman|h-13|w400|c0'):
     pm.expression(s=exprecmd_Mouth_Jeer_L, n='expression' + handles['Mouth_Jeer_L']['name'])
     pm.geometryConstraint(handles['Jeer_ConstraintPlane_R']['name'], handles['Mouth_Jeer_R']['name'], weight=1)
 
+    # Make sure the Drivers exist.
+    #
+    for tarName, expr in targets.iteritems():
+        if not pm.objExists(expr['Driver']) and not expr['Driver'] == '':
+            print tarName
+            print expr['Driver']
+
+
     # Create Eyelid Expressions
     #
+    targ_UpperEyelid_R_Driver = targets['UpperEyelid_R']['Driver'] if pm.objExists(targets['UpperEyelid_R']['Driver']) else '0'
     exprecmd_Eyelid_R = 'float $eyeclose = 1.0-linstep(-5, 0, ' + handles['UpperEyelid_R']['name'] + '.ty);\n' + \
                         'float $eyelower = linstep(0, 5, ' + handles['LowerEyelid_Half_R']['name'] + '.ty);\n' + \
-                        'float $lookup = 1.0-linstep(-25, 0, ' + targets['UpperEyelid_R']['Driver'] + ');\n' + \
+                        'float $lookup = 1.0-linstep(-25, 0, ' + targ_UpperEyelid_R_Driver + ');\n' + \
                         '$lookup = hermite(0,1,1,3,$lookup);\n' + \
-                        'float $lookdown = linstep(0, 25, ' + targets['UpperEyelid_R']['Driver'] + ');\n' + \
+                        'float $lookdown = linstep(0, 25, ' + targ_UpperEyelid_R_Driver + ');\n' + \
                         '$lookdown = hermite(0,1,1,3,$lookdown);\n' + \
                         '$lookup_lid = 1.0-$eyeclose;\n' + \
                         '$weight_upper_look = 0.5*($lookdown-$lookup)*$lookup_lid;\n' + \
@@ -272,11 +281,12 @@ def HH_Face(name='HHExpr', textScale=10, font='Times New Roman|h-13|w400|c0'):
                         exprBlender +'.'+ targets['LowerEyelid_Half_R']['label'] + ' = $weight_lower_half;'
     pm.expression(s=exprecmd_Eyelid_R, n='expression' + handles['UpperEyelid_R']['name'])
 
+    targ_UpperEyelid_L_Driver = targets['UpperEyelid_L']['Driver'] if pm.objExists(targets['UpperEyelid_L']['Driver']) else '0'
     exprecmd_Eyelid_L = 'float $eyeclose = 1.0-linstep(-5, 0, ' + handles['UpperEyelid_L']['name'] + '.ty);\n' + \
                         'float $eyelower = linstep(0, 5, ' + handles['LowerEyelid_Half_L']['name'] + '.ty);\n' + \
-                        'float $lookup = 1.0-linstep(-25, 0, ' + targets['UpperEyelid_L']['Driver'] + ');\n' + \
+                        'float $lookup = 1.0-linstep(-25, 0, ' + targ_UpperEyelid_L_Driver + ');\n' + \
                         '$lookup = hermite(0,1,1,3,$lookup);\n' + \
-                        'float $lookdown = linstep(0, 25, ' + targets['UpperEyelid_L']['Driver'] + ');\n' + \
+                        'float $lookdown = linstep(0, 25, ' + targ_UpperEyelid_L_Driver + ');\n' + \
                         '$lookdown = hermite(0,1,1,3,$lookdown);\n' + \
                         '$lookup_lid = 1.0-$eyeclose;\n' + \
                         '$weight_upper_look = 0.5*($lookdown-$lookup)*$lookup_lid;\n' + \
@@ -289,32 +299,48 @@ def HH_Face(name='HHExpr', textScale=10, font='Times New Roman|h-13|w400|c0'):
                         exprBlender +'.'+ targets['LowerEyelid_Half_L']['label'] + ' = $weight_lower_half;'
     pm.expression(s=exprecmd_Eyelid_L, n='expression' + handles['UpperEyelid_L']['name'])
 
+    if pm.objExists(targets['Brow_Up_In_R']['Driver']):
+        targets_Brow_Up_In_R_Driver_rz = targets['Brow_Up_In_R']['Driver'] + '.rz'
+        targets_Brow_Up_In_R_Driver_ry = targets['Brow_Up_In_R']['Driver'] + '.ry'
+    else:
+        targets_Brow_Up_In_R_Driver_rz = '0'
+        targets_Brow_Up_In_R_Driver_ry = '0'
+    targets_Brow_Angry_R_Driver_rz = targets['Brow_Angry_R']['Driver']+'.rz' if pm.objExists(targets['Brow_Angry_R']['Driver']) else '0'
+    targets_Brow_Up_Out_R_Driver_ry = targets['Brow_Up_Out_R']['Driver']+'.ry' if pm.objExists(targets['Brow_Up_Out_R']['Driver']) else '0'
     exprecmd_Brow_R = 'float $browinup = linstep(0, 5, ' + handles['Brow_Up_Angry_In_R']['name'] + '.ty);\n' + \
                       'float $browoutup = linstep(0, 5, ' + handles['Brow_Up_Down_Out_R']['name'] + '.ty);\n' + \
                       'float $browindown = 1.0-linstep(-5, 0, ' + handles['Brow_Up_Angry_In_R']['name'] + '.ty);\n' + \
                       'float $browoutdown = 1.0-linstep(-5, 0, ' + handles['Brow_Up_Down_Out_R']['name'] + '.ty);\n' + \
-                      'float $lookup = 1.0-linstep(-25, 0, ' + targets['Brow_Up_In_R']['Driver'] + '.rz);\n' + \
+                      'float $lookup = 1.0-linstep(-25, 0, ' + targets_Brow_Up_In_R_Driver_rz + ');\n' + \
                       '$lookup = hermite(0,1,1,3,$lookup);\n' + \
-                      'float $lookdown = linstep(0, 25, ' + targets['Brow_Angry_R']['Driver'] + '.rz);\n' + \
+                      'float $lookdown = linstep(0, 25, ' + targets_Brow_Angry_R_Driver_rz + ');\n' + \
                       '$lookdown = hermite(0,1,1,3,$lookdown);\n' + \
-                      'float $lookright = linstep(-15, 0, ' + targets['Brow_Up_In_R']['Driver'] + '.ry);\n' + \
-                      'float $lookleft = 1.0-linstep(0, 15, ' + targets['Brow_Up_Out_R']['Driver'] + '.ry);\n' + \
+                      'float $lookright = linstep(-15, 0, ' + targets_Brow_Up_In_R_Driver_ry + ');\n' + \
+                      'float $lookleft = 1.0-linstep(0, 15, ' + targets_Brow_Up_Out_R_Driver_ry + ');\n' + \
                       exprBlender +'.'+ targets['Brow_Up_In_R']['label'] + ' = $browinup + .25*$lookup * $lookleft;\n' + \
                       exprBlender +'.'+ targets['Brow_Up_Out_R']['label'] + ' = $browoutup + .25*$lookup * $lookright;\n' + \
                       exprBlender +'.'+ targets['Brow_Angry_R']['label'] + ' = $browindown + .05*$lookdown * $lookleft;\n' + \
                       exprBlender +'.'+ targets['Brow_Down_Out_R']['label'] + ' = $browoutdown + .05*$lookdown * $lookright;'
     pm.expression(s=exprecmd_Brow_R, n='expression' + handles['Brow_Up_Angry_In_R']['name'])
 
+    if pm.objExists(targets['Brow_Up_In_L']['Driver']):
+        targets_Brow_Up_In_L_Driver_rz = targets['Brow_Up_In_L']['Driver'] + '.rz'
+        targets_Brow_Up_In_L_Driver_ry = targets['Brow_Up_In_L']['Driver'] + '.ry'
+    else:
+        targets_Brow_Up_In_L_Driver_rz = '0'
+        targets_Brow_Up_In_L_Driver_ry = '0'
+    targets_Brow_Angry_L_Driver_rz = targets['Brow_Angry_L']['Driver']+'.rz' if pm.objExists(targets['Brow_Angry_L']['Driver']) else '0'
+    targets_Brow_Up_Out_L_Driver_ry = targets['Brow_Up_Out_L']['Driver']+'.ry' if pm.objExists(targets['Brow_Up_Out_L']['Driver']) else '0'
     exprecmd_Brow_L = 'float $browinup = linstep(0, 5, ' + handles['Brow_Up_Angry_In_L']['name'] + '.ty);\n' + \
                       'float $browoutup = linstep(0, 5, ' + handles['Brow_Up_Down_Out_L']['name'] + '.ty);\n' + \
                       'float $browindown = 1.0-linstep(-5, 0, ' + handles['Brow_Up_Angry_In_L']['name'] + '.ty);\n' + \
                       'float $browoutdown = 1.0-linstep(-5, 0, ' + handles['Brow_Up_Down_Out_L']['name'] + '.ty);\n' + \
-                      'float $lookup = 1.0-linstep(-25, 0, ' + targets['Brow_Up_In_L']['Driver'] + '.rz);\n' + \
+                      'float $lookup = 1.0-linstep(-25, 0, ' + targets_Brow_Up_In_L_Driver_rz + ');\n' + \
                       '$lookup = hermite(0,1,1,3,$lookup);\n' + \
-                      'float $lookdown = linstep(0, 25, ' + targets['Brow_Angry_L']['Driver'] + '.rz);\n' + \
+                      'float $lookdown = linstep(0, 25, ' + targets_Brow_Angry_L_Driver_rz + ');\n' + \
                       '$lookdown = hermite(0,1,1,3,$lookdown);\n' + \
-                      'float $lookright = linstep(-15, 0, ' + targets['Brow_Up_In_L']['Driver'] + '.ry);\n' + \
-                      'float $lookleft = 1.0-linstep(0, 15, ' + targets['Brow_Up_Out_L']['Driver'] + '.ry);\n' + \
+                      'float $lookright = linstep(-15, 0, ' + targets_Brow_Up_In_L_Driver_ry + ');\n' + \
+                      'float $lookleft = 1.0-linstep(0, 15, ' + targets_Brow_Up_Out_L_Driver_ry + ');\n' + \
                       exprBlender +'.'+ targets['Brow_Up_In_L']['label'] + ' = $browinup + .25*$lookup * $lookright;\n' + \
                       exprBlender +'.'+ targets['Brow_Up_Out_L']['label'] + ' = $browoutup + .25*$lookup * $lookleft;\n' + \
                       exprBlender +'.'+ targets['Brow_Angry_L']['label'] + ' = $browindown + .05*$lookdown * $lookright;\n' + \
@@ -505,7 +531,38 @@ def sliderDock_curve(name):
 def sliderLabel_curve(label, t, s, font='Times New Roman|h-13|w400|c0'):
     curve = pm.textCurves(n=label, ch=False, f=font, t=label)[0]
     pm.setAttr(curve+'.s', (s, s, s))
-    freezeToOrigin.freezeToOrigin(objects=[str(curve)],cx='mid',cy='mid',cz='mid')
+    freezeToOrigin(objects=[str(curve)],cx='mid',cy='mid',cz='mid')
     pm.setAttr(curve+'.t', t)
     pm.setAttr(curve+'.template', 1)
     return curve
+
+def freezeToOrigin(objects=None,cx='mid',cy='min',cz='mid'):
+    if not objects:
+        objects = pm.ls(sl=True, dag=True, typ="transform")
+    for obj in objects:
+        bbox = pm.exactWorldBoundingBox(obj)
+
+        if cx=='min':
+            x = bbox[0]
+        elif cx=='mid':
+            x = bbox[0] + (bbox[3]-bbox[0])/2
+        else:
+            x = bbox[3]
+
+        if cy=='min':
+            y = bbox[1]
+        elif cy=='mid':
+            y = bbox[1] + (bbox[4]-bbox[1])/2
+        else:
+            y = bbox[4]
+
+        if  cz=='min':
+            z = bbox[2]
+        elif cz=='mid':
+            z = bbox[2] + (bbox[5]-bbox[2])/2
+        else:
+            z = bbox[5]
+
+        pm.move(x,y,z, obj+'.scalePivot', obj+'.rotatePivot', a=True, ws=True, rpr=True, spr=True)
+        pm.move(-x,-y,-z, obj, r=True, ws=True)
+        pm.makeIdentity( apply=True, t=True, r=True, s=True, n=False, pn=True )

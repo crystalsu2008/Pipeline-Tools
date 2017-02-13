@@ -1,7 +1,7 @@
 import pymel.core as pm
 import maya.mel as mel
 
-def AS_Bird():
+def AS_Bird_FitSkeleton():
     fixFitSkeleton()
     feathersFitSkeleton()
 
@@ -313,7 +313,7 @@ def feathersFitSkeleton():
                     [(-9.642934138, 18.53153049, 6.203068966), (-22.14324883, 18.53153049, 3.820656048), 'Wrist'],\
                     [(-9.378221591, 18.53153049, 6.011887683), (-20.45202978, 18.53153049, 2.482387063), 'Wrist'],\
                     [(-9.14292155, 18.53153049, 5.776587642), (-18.71669198, 18.53153049, 0.8794055321), 'Wrist'],\
-                    [(-8.967984, 18.53153049, 5.539010509), (-17.095809, 18.53153049, -0.3849234914), 'Elbow']]
+                    [(-8.967984, 18.53153049, 5.539010509), (-17.095809, 18.53153049, -0.3849234914), 'Wrist']]
     priCtrl = pm.curve(p=[(-27.1491891127, 18.53153049, 13.0764591394),\
                     	(-27.4982296082, 18.53153049, 7.6532459788),\
                     	(-23.3200995313, 18.53153049, 1.71173650929),\
@@ -321,10 +321,10 @@ def feathersFitSkeleton():
                     	n='PrimariesCtrl')
     priJoints=[]
     for i in range(len(primariesInfo)):
-        priJoints.append(createfeatherJoint('Primary'+str(i),\
+        priJoints.append(createfeatherJoint('Primary_'+str(i),\
                                             primariesInfo[i][0],\
                                             primariesInfo[i][1],\
-                                            primariesInfo[i][2], 3, 0.05, 30, priCtrl))
+                                            primariesInfo[i][2], 3, 0.05, 25, priCtrl))
 
     # Secondaries ==============================================================
     secondariesInfo =  [[(-8.694386056, 18.53153049, 5.092613863), (-15.41586672, 18.53153049, -1.4838331), 'Elbow'],\
@@ -338,7 +338,7 @@ def feathersFitSkeleton():
                         [(-6.656357455, 18.53153049, 1.626744865), (-9.921318681, 18.53153049, -5.412119173), 'Elbow'],\
                         [(-6.387874646, 18.53153049, 1.321650763), (-9.27713029, 18.53153049, -5.588955202), 'Elbow'],\
                         [(-6.156003128, 18.53153049, 1.187409359), (-8.25400755, 18.53153049, -5.412119173), 'Elbow'],\
-                        [(-5.960742903, 18.53153049, 1.016556662), (-7.281409391, 18.53153049, -5.083709405), 'Shoulder']]
+                        [(-5.960742903, 18.53153049, 1.016556662), (-7.281409391, 18.53153049, -5.083709405), 'Elbow']]
     secCtrl = pm.curve(p=[(-16.5246216252, 18.53153049, -1.62038791504),\
                     	(-14.9866453017, 18.53153049, -4.66487943424),\
                     	(-11.1286870108, 18.53153049, -6.76245024149),\
@@ -346,10 +346,10 @@ def feathersFitSkeleton():
                     	n='SecondariesCtrl')
     secJoints=[]
     for i in range(len(secondariesInfo)):
-        secJoints.append(createfeatherJoint('Secondary'+str(i),\
+        secJoints.append(createfeatherJoint('Secondary_'+str(i),\
                                             secondariesInfo[i][0],\
                                             secondariesInfo[i][1],\
-                                            secondariesInfo[i][2], 3, 0.05, 30, secCtrl))
+                                            secondariesInfo[i][2], 3, 0.05, 25, secCtrl))
 
     # Tertiaris ================================================================
     tertiarisInfo= [[(-5.223763545, 18.53153049, 1.027956662), (-6.260171785, 18.53153049, -4.545627746), 'Shoulder'],\
@@ -363,10 +363,10 @@ def feathersFitSkeleton():
                     	n='TertiarisCtrl')
     terJoints=[]
     for i in range(len(tertiarisInfo)):
-        terJoints.append(createfeatherJoint('Tertiary'+str(i),\
+        terJoints.append(createfeatherJoint('Tertiary_'+str(i),\
                                             tertiarisInfo[i][0],\
                                             tertiarisInfo[i][1],\
-                                            tertiarisInfo[i][2], 3, 0.05, 30, terCtrl))
+                                            tertiarisInfo[i][2], 3, 0.05, 25, terCtrl))
 
     # Primaries Coverts Top ====================================================
     priCovertsInfo=[[(-11.3947113, 18.83153049, 7.526788519), (-16.09678779, 18.83153049, 9.370112318), 'Wrist'],\
@@ -378,10 +378,10 @@ def feathersFitSkeleton():
                     [(-9.507849109, 18.83153049, 6.378404418), (-14.56264705, 18.83153049, 4.266943601), 'Wrist']]
     priCovertsJoints=[]
     for i in range(len(priCovertsInfo)):
-        priCovertsJoints.append(createfeatherJoint('PrimaryCovert'+str(i),\
+        priCovertsJoints.append(createfeatherJoint('PrimaryCovert_'+str(i),\
                                                     priCovertsInfo[i][0],\
                                                     priCovertsInfo[i][1],\
-                                                    priCovertsInfo[i][2], 2, 0.05, 12, priCtrl))
+                                                    priCovertsInfo[i][2], 2, 0.05, 10, priCtrl))
 
 def createfeatherJoint(name, pos1, pos2, parent, sample, fat, endFatY, ctrlCurve):
     pm.select(cl=True)

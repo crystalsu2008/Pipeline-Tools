@@ -16,3 +16,31 @@ def tempPython():
         pymelscript += "], n='PrimariesCtrl')"
 
         print pymelscript
+
+def AnalyseUE4Error():
+    # Analyse a UE4 error log file to find all problem vertexs
+    f=open('E:/Jobs/Asset/HEYHA_ZOO/kangaroo/scenes/log.txt')
+    allnums=[]
+    vtxs=[]
+    for eachLine in f:
+        line=eachLine.replace('.',' ')
+        for word in line.split(' '):
+            if word.isdigit() and not allnums.count(word):
+                allnums.append(word)
+                vtxs.append('kangaroo_model.vtx['+word+']')
+    f.close()
+    select(cl=True)
+    select (vtxs)
+
+
+    # clear all namespace
+    name_space=namespaceInfo(':',lon=True)
+    name_space.remove('UI')
+    name_space.remove('shared')
+
+    namespace(f=True,mv=('lion_rig', ':'))
+    namespace(rm='lion_rig')
+
+    cmds.dagPose(restore=True, bindPose=True)
+
+    cmds.dagPose(query=True, bindPose=True)

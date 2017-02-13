@@ -10,3 +10,272 @@ global proc tempMel()
         print("[("+$p1[0]+", "+$p1[1]+", "+$p1[2]+"), ("+$p2[0]+", "+$p2[1]+", "+$p2[2]+"), 'Elbow'],\\\n");
     }
 }
+
+global proc ZooAnimalsConvert()
+// HEYHA ZOO Animals rig convert.
+{
+    string $allscene[] = {
+        "E:/Jobs/Asset/HEYHA_ZOO/zebra/scenes/zebra_eat.mb",
+        "E:/Jobs/Asset/HEYHA_ZOO/zebra/scenes/zebra_free.mb",
+        "E:/Jobs/Asset/HEYHA_ZOO/zebra/scenes/zebra_freesit.mb",
+        "E:/Jobs/Asset/HEYHA_ZOO/zebra/scenes/zebra_friend.mb",
+        "E:/Jobs/Asset/HEYHA_ZOO/zebra/scenes/zebra_happy.mb",
+        "E:/Jobs/Asset/HEYHA_ZOO/zebra/scenes/zebra_idlesith.mb",
+        "E:/Jobs/Asset/HEYHA_ZOO/zebra/scenes/zebra_run.mb",
+        "E:/Jobs/Asset/HEYHA_ZOO/zebra/scenes/zebra_sit.mb",
+        "E:/Jobs/Asset/HEYHA_ZOO/zebra/scenes/zebra_standup.mb",
+        "E:/Jobs/Asset/HEYHA_ZOO/zebra/scenes/zebra_walk.mb",
+        "E:/Jobs/Asset/HEYHA_ZOO/zebra/scenes/zebrastand_look.mb"};
+    string $scene;
+
+    for ($scene in $allscene)
+    {
+        file -force -open $scene;
+
+        rename "head|brow_up_R" "brow_up_L";
+        rename "group86|group84" "group";
+        rename "group86|group85" "group0";
+        rename "group|nurbsCircle38" "nurbsCircle";
+        rename "group0|nurbsCircle38" "nurbsCircle0";
+        rename "group84|nurbsCircle38" "nurbsCircle41";
+
+        parent brow_up_R brow_down_R head;
+        parentConstraint -mo -weight 1 nurbsCircle38 brow_up_R;
+        parentConstraint -mo -weight 1 nurbsCircle41 brow_down_R;
+
+        file -save;
+        /////////////////////////////////////////////////////////////////////////////////////////////
+
+        string $timerange = `playbackOptions -q -min`+":"+`playbackOptions -q -max`;
+        bakeResults -simulation true -t $timerange -sampleBy 1 -disableImplicitControl true -preserveOutsideKeys true -sparseAnimCurveBake false -removeBakedAttributeFromLayer false -removeBakedAnimFromLayer false -bakeOnOverrideLayer false -minimizeRotation true -at "tx" -at "ty" -at "tz" -at "rx" -at "ry" -at "rz" -at "sx" -at "sy" -at "sz" tail_top L_foot L_foot_B L_foreKnee L_foreLeg L_foreLeg_knee L_heal L_heal_B L_leg L_leg_knee L_shoulder L_toe L_toe_B R_foot R_foot_B R_foreKnee R_foreLeg R_foreLeg_knee R_heal R_heal_B R_leg R_leg_knee R_shoulder R_toe R_toe_B brow_down_L brow_down_R brow_up_L brow_up_R chest chest1 chest2 ear1_L ear1_R ear2_L ear2_R ear3_L ear3_R earTop_L earTop_R eye_L eye_R head hip mouth mouthTop neck neck1 neck2 neck3 root tail1 tail2 tail3 tail4 tail5 tail6 tail7 tail_root;
+        parent -w root;
+        select `ls -typ "joint"`;
+        InvertSelection;
+        //select -d zebra;
+        //select -d zebra1;
+        doDelete;
+
+        select -r root;// zebra1 zebra;
+        file -force -options "v=0;" -typ "FBX export" -pr -es (dirname(`file -q -sn`)+"/"+basenameEx(`file -q -sn`)+".fbx");
+    }
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    string $allscene[] = {
+        "E:/Jobs/Asset/HEYHA_ZOO/leopard/scenes/leo_ani_free.mb",
+        "E:/Jobs/Asset/HEYHA_ZOO/zebra/scenes/leo_ani_friendly_02.mb",
+        "E:/Jobs/Asset/HEYHA_ZOO/zebra/scenes/leo_ani_O_4.mb",
+        "E:/Jobs/Asset/HEYHA_ZOO/zebra/scenes/leo_ani_run_04.mb",
+        "E:/Jobs/Asset/HEYHA_ZOO/zebra/scenes/leo_ani_sit.mb",
+        "E:/Jobs/Asset/HEYHA_ZOO/zebra/scenes/leo_ani_sit_breath.mb",
+        "E:/Jobs/Asset/HEYHA_ZOO/zebra/scenes/leo_ani_standup.mb",
+        "E:/Jobs/Asset/HEYHA_ZOO/zebra/scenes/leo_ani_walk_04.mb"};
+    string $scene;
+
+    for ($scene in $allscene)
+    {
+        file -force -open $scene;
+
+        string $timerange = `playbackOptions -q -min`+":"+`playbackOptions -q -max`;
+        bakeResults -simulation true -t $timerange -sampleBy 1 -disableImplicitControl true -preserveOutsideKeys true -sparseAnimCurveBake false -removeBakedAttributeFromLayer false -removeBakedAnimFromLayer false -bakeOnOverrideLayer false -minimizeRotation true -at "tx" -at "ty" -at "tz" -at "rx" -at "ry" -at "rz" -at "sx" -at "sy" -at "sz" HIPCENTER ancle_l ancle_r arm_l arm_r chest elbow_l elbow_r eye_l eye_l_top eye_r fingers_l fingers_r fingers_top fingers_top_l foot_l foot_r foot_top foot_top_r hand_l hand_r head head_01 hip jaw joint22 knee_l knee_r leg_l leg_r nick_01 nick_02 rye_r_top shoulder_l shoulder_r spine_01 spine_02 spine_03 spine_04 tails_001 tails_002 tails_003 tails_004 tails_005 tails_006 tails_007 tails_008 tails_009 tails_010 tails_top;
+        parent -w HIPCENTER;
+        select `ls -typ "joint"`;
+        InvertSelection;
+        //select -d leo_model teeth_down pCube1 teeth_up;
+        doDelete;
+        //select -r CL_leo_08_project1 ;
+        //gotoBindPose;
+        //parent -w teeth_down pCube1 teeth_up;
+        //bindSkin teeth_down pCube1 jaw;
+        //bindSkin teeth_up head_01;
+
+        select -r HIPCENTER;// leo_model teeth_down pCube1 teeth_up;
+        file -force -options "v=0;" -typ "FBX export" -pr -es (dirname(`file -q -sn`)+"/"+basenameEx(`file -q -sn`)+".fbx");
+    }
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+    string $allscene[] = {
+    //"E:/Jobs/Asset/HEYHA_ZOO/fox/scenes/fox_ani_sit.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/fox/scenes/fox_eat.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/fox/scenes/fox_Friendly.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/fox/scenes/fox_idlesit.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/fox/scenes/fox_Other1.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/fox/scenes/fox_Other2.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/fox/scenes/fox_run.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/fox/scenes/fox_Sit to Stand.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/fox/scenes/fox_sitWait.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/fox/scenes/fox_Stand to sit.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/fox/scenes/fox_StandWait.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/fox/scenes/fox_walk.mb"};
+    string $scene;
+
+    for ($scene in $allscene)
+    {
+        file -force -open $scene;
+
+        string $timerange = `playbackOptions -q -min`+":"+`playbackOptions -q -max`;
+        bakeResults -simulation true -t $timerange -sampleBy 1 -disableImplicitControl true -preserveOutsideKeys true -sparseAnimCurveBake false -removeBakedAttributeFromLayer false -removeBakedAnimFromLayer false -bakeOnOverrideLayer false -minimizeRotation true -at "tx" -at "ty" -at "tz" -at "rx" -at "ry" -at "rz" -at "sx" -at "sy" -at "sz" LeftLeg2_joint1 LeftLeg2_joint2 LeftLeg2_joint3 LeftLeg2_joint4 LeftLeg2_joint5 LeftLeg2_joint6 LeftLeg2_joint7 LeftLeg2_joint8 LeftLeg2_joint9 LeftLeg2_rig_joint1 LeftLeg2_rig_joint2 LeftLeg2_rig_joint3 LeftLeg2_rig_joint4 LeftLeg2_rig_joint5 LeftLeg_joint1 LeftLeg_joint2 LeftLeg_joint3 LeftLeg_joint4 LeftLeg_joint5 LeftLeg_joint6 LeftLeg_joint7 LeftLeg_joint8 LeftLeg_joint9 LeftLeg_rig_joint1 LeftLeg_rig_joint2 LeftLeg_rig_joint3 LeftLeg_rig_joint4 LeftLeg_rig_joint5 RightLeg2_joint1 RightLeg2_joint2 RightLeg2_joint3 RightLeg2_joint4 RightLeg2_joint5 RightLeg2_joint6 RightLeg2_joint7 RightLeg2_joint8 RightLeg2_joint9 RightLeg2_rig_joint1 RightLeg2_rig_joint2 RightLeg2_rig_joint3 RightLeg2_rig_joint4 RightLeg2_rig_joint5 RightLeg_joint1 RightLeg_joint2 RightLeg_joint3 RightLeg_joint4 RightLeg_joint5 RightLeg_joint6 RightLeg_joint7 RightLeg_joint8 RightLeg_joint9 RightLeg_rig_joint1 RightLeg_rig_joint2 RightLeg_rig_joint3 RightLeg_rig_joint4 RightLeg_rig_joint5 Spine_joint1 Spine_joint2 Spine_joint3 Spine_joint4 Spine_joint5 Spine_joint6 Spine_joint7 Spine_joint8 Spine_rig_joint1 Spine_rig_joint2 Spine_rig_joint3 Spine_rig_joint4 Spine_rig_joint5 Spine_rig_joint6 Spine_rig_joint7 Spine_rig_joint8 TailSeg2_joint1 TailSeg2_joint2 TailSeg2_joint3 TailSeg2_joint4 TailSeg2_joint5 TailSeg2_joint6 TailSeg3_joint1 TailSeg3_joint2 TailSeg3_joint3 TailSeg3_joint4 TailSeg3_joint5 TailSeg3_joint6 TailSeg4_joint1 TailSeg4_joint2 TailSeg4_joint3 TailSeg4_joint4 TailSeg4_joint5 TailSeg4_joint6 TailSeg5_joint1 TailSeg5_joint2 TailSeg5_joint3 TailSeg5_joint4 TailSeg5_joint5 TailSeg5_joint6 Tail_joint1 Tail_joint2 Tail_joint3 Tail_joint4 Tail_joint5 Tail_joint6 ankle2_left ankle2_right ankle_left ankle_right chest ear1_left ear1_right ear2_left ear2_right ear3_left ear3_right eye_left eye_right head head_end jaw_end joint9 knee2_left knee2_right knee_left knee_right leg2_left leg2_right leg_left leg_right neck_01 neck_02 root shoulde2r_left shoulde2r_right shoulder_left shoulder_right spine_01 spine_02 tail_01 tail_02 tail_03 tail_04 tail_05 tail_06 toe2_left toe2_right toeEnd2_left toeEnd2_right toeEnd_left toeEnd_right toe_left toe_right zeroWeightJoint;
+        //parent -w root;
+        select `ls -typ "joint"`;
+        InvertSelection;
+        //select -d fox fox_1;
+        doDelete;
+
+        select -r root;// fox fox_1;
+        file -force -options "v=0;" -typ "FBX export" -pr -es (dirname(`file -q -sn`)+"/"+basenameEx(`file -q -sn`)+".fbx");
+    }
+
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+    string $allscene[] = {
+    "E:/Jobs/Asset/HEYHA_ZOO/kangaroo/scenes/roo_run_fixde.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/kangaroo/scenes/roo_sitbreath.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/kangaroo/scenes/roo_standlook.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/kangaroo/scenes/roo_walk_fixed.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/kangaroo/scenes/roo_tianshouzhang.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/kangaroo/scenes/roo_youhao.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/kangaroo/scenes/roo_zhanzhuanzuo.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/kangaroo/scenes/roo_zuozhuanzhan.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/kangaroo/scenes/roo_zuo.mb"};
+    string $scene;
+
+    for ($scene in $allscene)
+    {
+        file -force -open $scene;
+
+        rename "transform1|R_handFingerE_1|R_handFingerE_1" "R_handFingerE_2";
+        rename "L_hand_mid|L_handFingerE_1|L_handFingerE_1" "L_handFingerE_2";
+
+        string $timerange = `playbackOptions -q -min`+":"+`playbackOptions -q -max`;
+        bakeResults -simulation true -t $timerange -sampleBy 1 -disableImplicitControl true -preserveOutsideKeys true -sparseAnimCurveBake false -removeBakedAttributeFromLayer false -bakeOnOverrideLayer false -minimizeRotation true -at "tx" -at "ty" -at "tz" -at "rx" -at "ry" -at "rz" -at "sx" -at "sy" -at "sz" L_arm L_brow_down L_brow_up L_ear1 L_ear2 L_ear3 L_ear_top L_eye L_finger L_fingerA_1 L_fingerA_2 L_fingerA_3 L_fingerB_1 L_fingerB_2 L_fingerB_3 L_fingerB_4 L_fingerC_1 L_fingerC_2 L_fingerC_3 L_foot L_foreArm L_hand L_handFingerA_1 L_handFingerA_2 L_handFingerA_3 L_handFingerA_4 L_handFingerB_1 L_handFingerB_2 L_handFingerB_3 L_handFingerB_4 L_handFingerC_1 L_handFingerC_2 L_handFingerC_3 L_handFingerC_4 L_handFingerD_1 L_handFingerD_2 L_handFingerD_3 L_handFingerD_4 L_handFingerE_1 L_handFingerE_2 L_handFingerE_3 L_handFingerE_4 L_hand_mid L_hip L_knee L_leg L_shoulder L_toe R_arm R_brow_down R_brow_up R_ear1 R_ear2 R_ear3 R_ear_top R_eye R_finger R_fingerA_1 R_fingerA_2 R_fingerA_3 R_fingerB_1 R_fingerB_2 R_fingerB_3 R_fingerB_4 R_fingerC_1 R_fingerC_2 R_fingerC_3 R_foot R_foreArm R_hand R_handFingerA_1 R_handFingerA_2 R_handFingerA_3 R_handFingerA_4 R_handFingerB_1 R_handFingerB_2 R_handFingerB_3 R_handFingerB_4 R_handFingerC_1 R_handFingerC_2 R_handFingerC_3 R_handFingerC_4 R_handFingerD_1 R_handFingerD_2 R_handFingerD_3 R_handFingerD_4 R_handFingerE_1 R_handFingerE_2 R_handFingerE_3 R_handFingerE_4 R_hand_mid R_hip R_knee R_leg R_shoulder R_toe chest chest1 chest2 head hip mouth mouth_top neck root tail1 tail2 tail3 tail4 tail5 tail6 tail7 tail_top;
+        parent -w root;
+        select `ls -typ "joint"`;
+        InvertSelection;
+        doDelete;
+        delete group148 group142 group136 group130 group124 group168 ;
+
+        select -r root;
+        file -force -options "v=0;" -typ "FBX export" -pr -es (dirname(`file -q -sn`)+"/"+basenameEx(`file -q -sn`)+".fbx");
+    }
+
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+    string $allscene[] = {
+    //"E:/Jobs/Asset/HEYHA_ZOO/lion/scenes/lion_ani_eatting.mb",
+    //"E:/Jobs/Asset/HEYHA_ZOO/lion/scenes/lion_ani_free.mb",
+    //"E:/Jobs/Asset/HEYHA_ZOO/lion/scenes/lion_ani_freesiti.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/lion/scenes/lion_ani_friendly.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/lion/scenes/lion_ani_idlesit.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/lion/scenes/lion_ani_run.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/lion/scenes/lion_ani_sit.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/lion/scenes/lion_ani_standup.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/lion/scenes/lion_ani_trembling.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/lion/scenes/lion_ani_walk.mb"};
+    string $scene;
+
+    for ($scene in $allscene)
+    {
+        file -force -open $scene;
+
+        if (`namespace -ex lion_rig`) {
+            namespace -f -mv "lion_rig" ":";
+            namespace -rm "lion_rig";
+        }
+
+        string $timerange = `playbackOptions -q -min`+":"+`playbackOptions -q -max`;
+        bakeResults -simulation true -t $timerange -sampleBy 1 -disableImplicitControl true -preserveOutsideKeys true -sparseAnimCurveBake false -removeBakedAttributeFromLayer false -removeBakedAnimFromLayer false -bakeOnOverrideLayer false -minimizeRotation true -at "tx" -at "ty" -at "tz" -at "rx" -at "ry" -at "rz" -at "sx" -at "sy" -at "sz" L_brow_down L_brow_up L_ear1 L_ear2 L_ear_top L_eye L_foot L_foreFoot L_foreHeal L_foreKnee L_foreLeg L_foreToe L_foreToe_top L_fur1 L_fur2 L_fur3 L_fur4 L_heal L_knee L_leg L_shoulder L_toe L_toe_top R_brow_down R_brow_up R_ear1 R_ear2 R_ear_top R_eye R_foot R_foreFoot R_foreHeal R_foreKnee R_foreLeg R_foreToe R_foreToe_top R_fur1 R_fur2 R_fur3 R_fur4 R_heal R_knee R_leg R_shoulder R_toe R_toe_top chest1 chest2 chest3 chest4 head hip joint94 joint95 joint96 joint97 joint98 mouth mouth_top neck1 neck2 root tail1 tail2 tail3 tail4 tail5 tail6 tail7 tail8 tail9 tail10 tail11 tail_top;
+        parent -w root;
+        select `ls -typ "joint"`;
+        InvertSelection;
+        doDelete;
+
+        select -r root;
+        file -force -options "v=0;" -typ "FBX export" -pr -es (dirname(`file -q -sn`)+"/"+basenameEx(`file -q -sn`)+".fbx");
+    }
+
+    select -r lion_body.vtx[2670] ;
+    select -r lion_body.vtx[857] ;
+    select -tgl lion_body.vtx[1960] ;
+    select -tgl lion_body.vtx[1954] ;
+    select -tgl lion_body.vtx[814] ;
+
+
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+    string $allscene[] = {
+    "E:/Jobs/Asset/HEYHA_ZOO/panda/scenes/panda_cengyang.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/panda/scenes/panda_down.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/panda/scenes/panda_eating.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/panda/scenes/panda_look.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/panda/scenes/panda_running.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/panda/scenes/panda_sit_breath.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/panda/scenes/panda_tianshouzhang.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/panda/scenes/panda_up.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/panda/scenes/panda_walking.mb",
+    "E:/Jobs/Asset/HEYHA_ZOO/panda/scenes/pandea_angentou.mb"};
+    string $scene;
+
+    for ($scene in $allscene)
+    {
+        file -force -open $scene;
+
+        rename "group34|group33|nurbsCircle17" "nurbsCircle";
+        rename "group35|group33|nurbsCircle17" "nurbsCircle0";
+        rename "group36|group33|nurbsCircle17" "nurbsCircle15";
+        rename "group144|group141|group140|nurbsCircle65" "nurbsCircle71";
+        rename "group39|group38|curve1" "curve";
+        rename "group40|group38|curve1" "curve0";
+        rename "group41|group38|curve1" "curve3";
+        rename "main_ctrl|nurbsCircle18" "nurbsCircle72";
+        rename "group39|group38" "group";
+        rename "group40|group38" "group0";
+        rename "group41|group38" "group29";
+        rename "transform29|joint105" "joint";
+        rename "group34|group33" "group30";
+        rename "group35|group33" "group142";
+        rename "group36|group33" "group143";
+        rename "group144|group141|group140" "group150";
+        rename "group144|group141" "group152";
+        rename "joint21" "root";
+
+        file -save;
+        /////////////////////////////////////////////////////////////////////////////////////////////
+
+
+        string $timerange = `playbackOptions -q -min`+":"+`playbackOptions -q -max`;
+        bakeResults -simulation true -t $timerange -sampleBy 1 -disableImplicitControl true -preserveOutsideKeys true -sparseAnimCurveBake false -removeBakedAttributeFromLayer false -bakeOnOverrideLayer false -minimizeRotation true -at "tx" -at "ty" -at "tz" -at "rx" -at "ry" -at "rz" -at "sx" -at "sy" -at "sz" joint joint1 joint2 joint3 joint4 joint5 joint6 joint7 joint8 joint9 joint10 joint11 joint12 joint13 joint14 joint15 joint16 joint17 joint18 joint19 joint20 joint22 joint23 joint24 joint25 joint26 joint27 joint28 joint29 joint30 joint31 joint32 joint33 joint34 joint35 joint36 joint37 joint38 joint39 joint40 joint41 joint42 joint43 joint44 joint45 joint46 joint47 joint48 joint49 joint50 joint51 joint52 joint53 joint54 joint55 joint56 joint57 joint58 joint59 joint60 joint61 joint62 joint63 joint64 joint65 joint66 joint67 joint68 joint69 joint70 joint71 joint72 joint73 joint74 joint75 joint76 joint77 joint78 joint79 joint80 joint81 joint82 joint83 joint84 joint85 joint86 joint87 joint88 joint89 joint90 joint91 joint92 joint93 joint94 joint95 joint96 joint97 joint98 joint99 joint100 joint101 joint102 joint103 joint104 joint105 joint106 joint107 joint108 root;
+        parent -w root;
+        select `ls -typ "joint"`;
+        InvertSelection;
+        doDelete;
+
+        select -r root;
+        file -force -options "v=0;" -typ "FBX export" -pr -es (dirname(`file -q -sn`)+"/"+basenameEx(`file -q -sn`)+".fbx");
+    }
+}
