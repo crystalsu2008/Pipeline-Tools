@@ -336,8 +336,8 @@ class PipelineSetup(object):
         startupCmd = 'import sys\n'
 
         syspathStr = ''
-        importStr = '\nimport pymel.core as pm\n'
-        importStr += '\nimport maya.mel as mel\n'
+        importStr = '\nimport pymel.core as pm'
+        importStr += '\nimport maya.mel as mel\n\n'
 
         for k, menu in self.menus.iteritems():
             if 'file' in menu:
