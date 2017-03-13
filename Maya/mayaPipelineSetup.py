@@ -138,7 +138,7 @@ class PipelineSetup(object):
 
         return info
 
-    def installRepository(self, update=False):
+    def updateRepository(self, force):
         for root, dirs, files in os.walk(self.repositorySour):
             #parent = os.path.split(root)[-1]
             # Make Repository Directory
@@ -189,6 +189,39 @@ class PipelineSetup(object):
             destinationFile = os.path.join(self.repositoryDest, 'mayaPipelineSetup.py')
             shutil.copy(sourceFile, destinationFile)
             print "Copy '" + sourceFile + "'\n  to '" + destinationFile + "'."
+
+    def copyRepository(self, force):
+        copyOperation = 'Copy'
+
+        # Confirm Dialog
+        if not force and os.path.exists(self.repositoryDest):
+            title = 'Overwrite Repository Dialog'
+            message = 'There is a same Repository "'+self.repositoryName+'" exists in "' +self.source+ '" directory. ' +\
+                'All the files and subdirectories under that directory will be deleted and overwrited. ' +\
+                'Would you like to contiune Overwrite or Update?'
+            copyOperation = pm.confirmDialog(title=title, message=message, button=['Overwrit','Update', 'Cnacel'],\
+                defaultButton='Overwrit', cancelButton='Cnacel', dismissString='Cnacel' )
+
+        # Copy Operation
+        if copyOperation == 'Cancel':
+            print 'Canceled.'
+        else:
+            if copyOperation == 'Update':
+                # Update Rpository.
+                print 'Update.'
+            else:
+                if copyOperation == 'Overwrit':
+                    # Delet Old Repository.
+                    shutil.rmtree(self.repositoryDest)
+                # Copy Repository.
+                shutil.copytree(self.repositorySour, self.repositoryDest, True)
+                print 'Copy "' + self.repositoryName + '".'
+                # Copy mayaPipelineSetup.py to Repository
+                sourceFile = os.path.join(self.source, 'mayaPipelineSetup.py')
+                destinationFile = os.path.join(self.repositoryDest, 'mayaPipelineSetup.py')
+                shutil.copy(sourceFile, destinationFile)
+                print 'Copy "' + sourceFile + '"\n  to "' + destinationFile + '".'
+        return copyOperation
 
     # def install3rd(self):
     #     the3rdSour = os.path.join(self.source, '3rd')
@@ -248,7 +281,7 @@ class PipelineSetup(object):
                 + "reload ("+self.repositoryName+".pipelineStartup)\n"
         return refreshCmd
 
-    def update(self):
+    def update(self, force=False):
         if not os.path.exists(self.repositorySour):
             print "There're no repository source path exists: '"+self.repositorySour+"'."
             return
@@ -258,7 +291,7 @@ class PipelineSetup(object):
             return
 
         # Reinstall Repository Files
-        self.installRepository(update=True);
+        self.updateRepository(force);
 
         # Create Menus
         self.createMenu()
@@ -417,13 +450,11 @@ class PipelineSetup(object):
         # Cleaning userSetup
         self.userSetup_mel(uninstall=True)
 
-    def install(self):
-        # Make Repository Directory
-        if not os.path.exists(self.repositoryDest):
-            os.mkdir(self.repositoryDest)
-
+    def install(self, force=False):
         # Copy Repository Files
-        self.installRepository()
+        operation = self.copyRepository(force)
+        if operation == 'Cancel':
+            return 'Canceled'
 
         # Create Menus
         self.createMenu()
@@ -448,7 +479,7 @@ def install( source, destination ):
     # Initial
     if pipset is None:
         pipset = PipelineSetup()
-        pipset.installInitial( source, destination )
+        pipset.installInitial(source, destination)
 
     pipset.install()
     return pipset.repositoryName
