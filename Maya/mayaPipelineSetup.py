@@ -19,7 +19,7 @@ class PipelineSetup(object):
     repositoryName = None
     updateWhenStartup = True
 
-    update_type = ['.py', '.PY', '.inf', '.INF', '.mel', '.MEL']
+    ignore_type = ['.pyc']
 
     baseflags = ['name', 'l', 'c', 'type']
     extendflags = ['file']
@@ -140,7 +140,7 @@ class PipelineSetup(object):
 
         return info
 
-    def updateRepository(self, force):
+    def updateRepository(self):
         # Copy and Update New files
         for root, dirs, files in os.walk(self.repositorySour):
             # Build Repository Directory
@@ -176,7 +176,7 @@ class PipelineSetup(object):
                     sourceFile = os.path.join(sourPath, removefile)
 
                     suffix = os.path.splitext(removefile)[-1]
-                    is_update_type = suffix in self.update_type
+                    is_update_type = suffix not in self.ignore_type
 
                     if is_update_type and not os.path.exists(sourceFile):
                         os.remove(destinationFile)
@@ -188,6 +188,8 @@ class PipelineSetup(object):
         if not filecmp.cmp(sourceFile, destinationFile):
             shutil.copy(sourceFile, destinationFile)
             print "Copy '" + sourceFile + "'\n  to '" + destinationFile + "'."
+
+        print 'Updated!'
 
     def copyRepository(self, force):
         copyOperation = 'Copy'
@@ -203,11 +205,11 @@ class PipelineSetup(object):
 
         # Copy Operation
         if copyOperation == 'Cancel':
-            print 'Canceled.'
+            print 'Canceled Copy Repository.'
         else:
             if copyOperation == 'Update':
                 # Update Rpository.
-                print 'Update.'
+                self.updateRepository()
             else:
                 if copyOperation == 'Overwrit':
                     # Delet Old Repository.
@@ -269,16 +271,16 @@ class PipelineSetup(object):
                         if 'c' in info:
                             pm.menuItem( info['name'], e=True, c=info['c'] )
 
-    def getRefreshCmd(self):
-        refreshCmd = "import sys\n" \
-                + "Dir = '" + self.destination + "'\n" \
-                + "if Dir not in sys.path:\n" \
-                + "\tsys.path.append(Dir)\n" \
-                + "import "+self.repositoryName+"\n" \
-                + "reload("+self.repositoryName+")\n" \
-                + "from "+self.repositoryName+".pipelineStartup import *\n" \
-                + "reload ("+self.repositoryName+".pipelineStartup)\n"
-        return refreshCmd
+    # def getRefreshCmd(self):
+    #     refreshCmd = "import sys\n" \
+    #             + "Dir = '" + self.destination + "'\n" \
+    #             + "if Dir not in sys.path:\n" \
+    #             + "\tsys.path.append(Dir)\n" \
+    #             + "import "+self.repositoryName+"\n" \
+    #             + "reload("+self.repositoryName+")\n" \
+    #             + "from "+self.repositoryName+".pipelineStartup import *\n" \
+    #             + "reload ("+self.repositoryName+".pipelineStartup)\n"
+    #     return refreshCmd
 
     def update(self, force=False):
         if not os.path.exists(self.repositorySour):
@@ -290,7 +292,7 @@ class PipelineSetup(object):
             return
 
         # Reinstall Repository Files
-        self.updateRepository(force);
+        self.updateRepository()
 
         # Create Menus
         self.createMenu()
@@ -304,42 +306,31 @@ class PipelineSetup(object):
         # Rewrite userSetup.mel
         self.userSetup_mel()
 
-    def reinstall(self):
-        if os.path.exists(self.source):
-            self.install()
-        else:
-            print "There're no source path exists: '"+self.source+"'."
-
     def manageMenuItem(self):
         parent = self.mainMenu
         pm.menuItem(divider=True, p=parent)
 
         # Update
         updateCmd = self.repositoryName+'_pipset.update()\n'
-        #updateCmd += 'pm.refresh\n'
-        updateCmd += self.getRefreshCmd()
-        updateCmd += self.getRefreshCmd()
-        updateCmd += "print 'Updated!'"
+        updateCmd += self.pipelineStartup_py(refresh=True)
+        #updateCmd += self.pipelineStartup_py(refresh=True)
         pm.menuItem('update', l='Update', c=updateCmd, p=parent)
 
         # Refresh
-        refreshCmd = self.getRefreshCmd()
-        refreshCmd = self.getRefreshCmd()
+        refreshCmd = self.pipelineStartup_py(refresh=True)
+        #refreshCmd += self.pipelineStartup_py(refresh=True)
         refreshCmd +=  "print 'Refreshed!'"
         pm.menuItem('refresh', l='Refresh', c=refreshCmd, p=parent)
 
         # Reinstall
         reinstallCmd = self.repositoryName+'_pipset.reinstall()\n'
-        reinstallCmd += self.getRefreshCmd()
-        reinstallCmd += self.getRefreshCmd()
-        reinstallCmd += "print 'Reinstalled!'"
+        reinstallCmd += self.pipelineStartup_py(refresh=True)
+        #reinstallCmd += self.pipelineStartup_py(refresh=True)
         pm.menuItem('reinstall', l='Reinstall', c=reinstallCmd, p=parent)
 
         # Uninstall
         uninstallCmd = self.repositoryName+'_pipset.uninstall()\n'
-        uninstallCmd += "print 'Ueinstalled!'"
         pm.menuItem('uninstall', l='Uninstall', c=uninstallCmd, p=parent)
-
         pm.menuItem(divider=True, p=parent)
 
         # Update When Maya Startup
@@ -347,8 +338,6 @@ class PipelineSetup(object):
         updateWhenStartCmd = 'update = pm.menuItem("'+updateWhenStartupMenu+'", q=True, cb=True)\n'
         updateWhenStartCmd += self.repositoryName+'_pipset.setUpdateWhenStartup(update)\n'
         updateWhenStartCmd += self.repositoryName+'_pipset.pipelineStartup_py()\n'
-        #updateWhenStartCmd += self.getRefreshCmd()
-        #updateWhenStartCmd += self.getRefreshCmd()
         pm.menuItem(updateWhenStartupMenu, e=True, c=updateWhenStartCmd)
 
     def setSource(self, source):
@@ -364,7 +353,7 @@ class PipelineSetup(object):
     def setUpdateWhenStartup(self, update):
         self.updateWhenStartup = update
 
-    def pipelineStartup_py(self):
+    def pipelineStartup_py(self, refresh=False):
         startupCmd = 'import sys\n'
 
         syspathStr = ''
@@ -397,15 +386,21 @@ class PipelineSetup(object):
         startupCmd += self.repositoryName+'_pipset.setRepositoryDest(\'' + pm.encodeString(self.repositoryDest) + '\')\n'
         startupCmd += self.repositoryName+'_pipset.setUpdateWhenStartup(' + pm.encodeString(self.updateWhenStartup) + ')\n'
 
-        if self.updateWhenStartup:
-            startupCmd += self.repositoryName+'_pipset.update()\n'
+        if not refresh:
+            if self.updateWhenStartup:
+                startupCmd += self.repositoryName+'_pipset.update()\n'
+            else:
+                startupCmd += self.repositoryName+'_pipset.createMenu()\n'
+                startupCmd += self.repositoryName+'_pipset.manageMenuItem()\n'
+
+            pipStartup = open(os.path.join(self.repositoryDest, 'pipelineStartup.py'), 'w')
+            pipStartup.write( startupCmd )
+            pipStartup.close()
+            return
         else:
             startupCmd += self.repositoryName+'_pipset.createMenu()\n'
             startupCmd += self.repositoryName+'_pipset.manageMenuItem()\n'
-
-        pipStartup = open(os.path.join(self.repositoryDest, 'pipelineStartup.py'), 'w')
-        pipStartup.write( startupCmd )
-        pipStartup.close()
+            return startupCmd
 
     def userSetup_mel(self, uninstall=False):
         mayaScriptPath = os.path.join(toNativePath(pm.internalVar(uad=True)), 'scripts', 'userSetup.mel')
@@ -416,7 +411,17 @@ class PipelineSetup(object):
             filepath = versionScriptPath
 
         flag = '//'+self.repositoryName+'_PIPELINESTARTUP'
-        statupcmd = '\npython( "'+pm.encodeString(self.getRefreshCmd())+'" ); '+flag
+
+        statuppymel = "import sys\n" \
+                + "Dir = '" + self.destination + "'\n" \
+                + "if Dir not in sys.path:\n" \
+                + "\tsys.path.append(Dir)\n" \
+                + "import "+self.repositoryName+"\n" \
+                + "reload("+self.repositoryName+")\n" \
+                + "from "+self.repositoryName+".pipelineStartup import *\n" \
+                + "reload ("+self.repositoryName+".pipelineStartup)\n"
+
+        statupcmd = '\npython( "'+pm.encodeString(statuppymel)+'" ); '+flag
 
         cmds=''
         if not os.path.exists(filepath):
@@ -448,6 +453,13 @@ class PipelineSetup(object):
             shutil.rmtree(self.repositoryDest)
         # Cleaning userSetup
         self.userSetup_mel(uninstall=True)
+        print 'Ueinstalled!'
+
+    def reinstall(self):
+        if os.path.exists(self.source):
+            self.install()
+        else:
+            print "There're no source path exists: '"+self.source+"'."
 
     def install(self, force=False):
         # Copy Repository Files
