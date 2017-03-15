@@ -19,7 +19,9 @@ class PipelineSetup(object):
     repositoryName = None
     updateWhenStartup = True
 
-    ignore_type = ['.pyc']
+    ignore_filetype = ['.pyc']
+    ignore_filename = ['__init__']
+    menu_filetype = ['.py', '.PY', '.mel', '.MEL']
 
     baseflags = ['name', 'l', 'c', 'type']
     extendflags = ['file']
@@ -60,85 +62,51 @@ class PipelineSetup(object):
             print 'The Source directory "'+reposDir+'" does not exist!'
             return False
 
-    def analyzeInfo(self, menufile):
-        root, filename = os.path.split(menufile)
-        menu, suffix = os.path.splitext(filename)
+    def setSource(self, source):
+        self.source = source
+    def setDestination(self, destination):
+        self.destination = destination
+    def setRepositoryName(self, name):
+        self.repositoryName = name
+    def setRepositorySour(self, sour):
+        self.repositorySour = sour
+    def setRepositoryDest(self, dest):
+        self.repositoryDest = dest
+    def setUpdateWhenStartup(self, update):
+        self.updateWhenStartup = update
 
-        info = {}
-        if suffix in ['.inf', '.INF', '.py', '.PY', '.mel', '.MEL'] and not filename == '__init__.py':
+    def copyRepository(self, force):
+        copyOperation = 'Copy'
 
-            if suffix in ['.py', '.PY'] and not os.path.exists(os.path.join(root, menu+'.inf')) and not os.path.exists(os.path.join(root, menu+'.INF')):
-                info['name'] = menu
-                info['l'] = mel.eval('interToUI( "'+menu+'" )')
-                info['c'] = menu+'.'+menu+'()'
-                info['type'] = 'python'
-                info['file'] = menufile
+        # Confirm Dialog
+        if not force and os.path.exists(self.repositoryDest):
+            title = 'Overwrite Repository Dialog'
+            message = 'There is a same Repository "'+self.repositoryName+'" exists in "' +self.source+ '" directory. ' +\
+                'All the files and subdirectories under that directory will be deleted and overwrited. ' +\
+                'Would you like to contiune Overwrite or Update?'
+            copyOperation = pm.confirmDialog(title=title, message=message, button=['Overwrit','Update', 'Cnacel'],\
+                defaultButton='Overwrit', cancelButton='Cnacel', dismissString='Cnacel' )
 
-            elif suffix in ['.mel', '.MEL'] and not os.path.exists(os.path.join(root, menu+'.inf')) and not os.path.exists(os.path.join(root, menu+'.INF')):
-                info['name'] = menu
-                info['l'] = mel.eval('interToUI( "'+menu+'" )')
-                info['c'] = 'mel.eval(\'' + menu + '\')'
-                info['type'] = 'mel'
-                info['file'] = menufile
-
-            elif suffix in ['.inf', '.INF']:
-                info['name'] = menu
-
-                # Analyz Info File
-                inf = open(menufile, 'r')
-                for eachLine in inf:
-                    parts = eachLine.split(',')
-                    for eachPart in parts:
-                        flags = self.baseflags + self.extendflags
-                        for flag in flags:
-                            if (flag+':') in eachPart:
-                                info[flag] = eachPart.partition(flag+':')[2].strip()
-                inf.close()
-
-                if 'l' not in info:
-                    info['l'] = mel.eval('interToUI( "'+info['name']+'" )')
-
-                if 'type' in info and 'file' not in info:
-                    info['file'] = os.path.join(root, menu+type2ext[info['type']])
-
-                if 'file' not in info:
-                    info['file'] = os.path.join(root, menu+'.py')
-                    if os.path.exists(info['file']):
-                        info['type'] = 'python'
-                    else:
-                        info['file'] = os.path.join(root, menu+'.PY')
-                        if os.path.exists(info['file']):
-                            info['type'] = 'python'
-                        else:
-                            info['file'] = os.path.join(root, menu+'.mel')
-                            if os.path.exists(info['file']):
-                                info['type'] = 'mel'
-                            else:
-                                info['file'] = os.path.join(root, menu+'.MEL')
-                                if os.path.exists(info['file']):
-                                    info['type'] = 'mel'
-                                else:
-                                    print('There is no module '+menu+' exist. Menu "'+menu+'" will not be created!')
-                                    info = None
-                else:
-                    baseFile = os.path.split(info['file'])[-1]
-                    info['file'] =  os.path.join(root, baseFile)
-                    if os.path.exists(info['file']):
-                        module, filesuffix = os.path.splitext(baseFile)
-                        info['type'] = self.ext2Type[filesuffix]
-                        if 'c' not in info:
-                            info['c'] = module+'.'+info['name']+'()'
-                    else:
-                        print('There is no file '+info['file']+' exist. Menu "'+menu+'" will not be created!')
-                        info = None
-
-                if info:
-                    if 'c' not in info:
-                        info['c'] = menu+'.'+info['name']+'()'
+        # Copy Operation
+        if copyOperation == 'Cancel':
+            print 'Canceled Copy Repository.'
         else:
-            info = None
-
-        return info
+            if copyOperation == 'Update':
+                # Update Rpository.
+                self.updateRepository()
+            else:
+                if copyOperation == 'Overwrit':
+                    # Delet Old Repository.
+                    shutil.rmtree(self.repositoryDest)
+                # Copy Repository.
+                shutil.copytree(self.repositorySour, self.repositoryDest, True)
+                print 'Copy "' + self.repositoryName + '".'
+                # Copy mayaPipelineSetup.py to Repository
+                sourceFile = os.path.join(self.source, 'mayaPipelineSetup.py')
+                destinationFile = os.path.join(self.repositoryDest, 'mayaPipelineSetup.py')
+                shutil.copy(sourceFile, destinationFile)
+                print 'Copy "' + sourceFile + '"\n  to "' + destinationFile + '".'
+        return copyOperation
 
     def updateRepository(self):
         # Copy and Update New files
@@ -176,7 +144,7 @@ class PipelineSetup(object):
                     sourceFile = os.path.join(sourPath, removefile)
 
                     suffix = os.path.splitext(removefile)[-1]
-                    is_update_type = suffix not in self.ignore_type
+                    is_update_type = suffix not in self.ignore_filetype
 
                     if is_update_type and not os.path.exists(sourceFile):
                         os.remove(destinationFile)
@@ -191,51 +159,85 @@ class PipelineSetup(object):
 
         print 'Updated!'
 
-    def copyRepository(self, force):
-        copyOperation = 'Copy'
+    def analyzeInfo(self, root, menu, suffix):
+        #root, filename = os.path.split(menufile)
+        #menu, suffix = os.path.splitext(filename)
+        menufile = os.path.join(root, (menu+suffix))
 
-        # Confirm Dialog
-        if not force and os.path.exists(self.repositoryDest):
-            title = 'Overwrite Repository Dialog'
-            message = 'There is a same Repository "'+self.repositoryName+'" exists in "' +self.source+ '" directory. ' +\
-                'All the files and subdirectories under that directory will be deleted and overwrited. ' +\
-                'Would you like to contiune Overwrite or Update?'
-            copyOperation = pm.confirmDialog(title=title, message=message, button=['Overwrit','Update', 'Cnacel'],\
-                defaultButton='Overwrit', cancelButton='Cnacel', dismissString='Cnacel' )
+        info = {}
 
-        # Copy Operation
-        if copyOperation == 'Cancel':
-            print 'Canceled Copy Repository.'
+        if os.path.exists(os.path.join(root, menu+'.sub')) or os.path.exists(os.path.join(root, menu+'.SUB')):
+            info['type'] = 'submenu'
+            info['name'] = menu
+            info['l'] = mel.eval('interToUI( "'+menu+'" )')
+            info['file'] = menufile
         else:
-            if copyOperation == 'Update':
-                # Update Rpository.
-                self.updateRepository()
-            else:
-                if copyOperation == 'Overwrit':
-                    # Delet Old Repository.
-                    shutil.rmtree(self.repositoryDest)
-                # Copy Repository.
-                shutil.copytree(self.repositorySour, self.repositoryDest, True)
-                print 'Copy "' + self.repositoryName + '".'
-                # Copy mayaPipelineSetup.py to Repository
-                sourceFile = os.path.join(self.source, 'mayaPipelineSetup.py')
-                destinationFile = os.path.join(self.repositoryDest, 'mayaPipelineSetup.py')
-                shutil.copy(sourceFile, destinationFile)
-                print 'Copy "' + sourceFile + '"\n  to "' + destinationFile + '".'
-        return copyOperation
+            if suffix in ['.py', '.PY']:
+                info['type'] = 'python'
+                info['name'] = menu
+                info['l'] = mel.eval('interToUI( "'+menu+'" )')
+                info['c'] = menu+'.'+menu+'()'
+                info['file'] = menufile
+            elif suffix in ['.mel', '.MEL']:
+                info['type'] = 'mel'
+                info['name'] = menu
+                info['l'] = mel.eval('interToUI( "'+menu+'" )')
+                info['c'] = 'mel.eval(\'' + menu + '\')'
+                info['file'] = menufile
 
-    # def install3rd(self):
-    #     the3rdSour = os.path.join(self.source, '3rd')
-    #     the3rdDest = os.path.join(self.destination, '3rd')
-    #     if not os.path.exists(the3rdDest):
-    #         os.mkdir(the3rdDest)
-    #
-    #     for root, dirs, files in os.walk(the3rdSour):
-    #         for the3rdfile in files:
-    #             suffix = os.path.splitext(the3rdfile)[-1]
-    #             if suffix in ['.py', '.PY', '.inf', '.INF', '.mel', '.MEL']:
-    #                 shutil.copy(os.path.join(root, the3rdfile),\
-    #                             os.path.join(the3rdDest, the3rdfile))
+            # Analyz Info File
+            # inf = open(menufile, 'r')
+            # for eachLine in inf:
+            #     parts = eachLine.split(',')
+            #     for eachPart in parts:
+            #         flags = self.baseflags + self.extendflags
+            #         for flag in flags:
+            #             if (flag+':') in eachPart:
+            #                 info[flag] = eachPart.partition(flag+':')[2].strip()
+            # inf.close()
+            #
+            # if 'l' not in info:
+            #     info['l'] = mel.eval('interToUI( "'+info['name']+'" )')
+            #
+            # if 'type' in info and 'file' not in info:
+            #     info['file'] = os.path.join(root, menu+type2ext[info['type']])
+            #
+            # if 'file' not in info:
+            #     info['file'] = os.path.join(root, menu+'.py')
+            #     if os.path.exists(info['file']):
+            #         info['type'] = 'python'
+            #     else:
+            #         info['file'] = os.path.join(root, menu+'.PY')
+            #         if os.path.exists(info['file']):
+            #             info['type'] = 'python'
+            #         else:
+            #             info['file'] = os.path.join(root, menu+'.mel')
+            #             if os.path.exists(info['file']):
+            #                 info['type'] = 'mel'
+            #             else:
+            #                 info['file'] = os.path.join(root, menu+'.MEL')
+            #                 if os.path.exists(info['file']):
+            #                     info['type'] = 'mel'
+            #                 else:
+            #                     print('There is no module '+menu+' exist. Menu "'+menu+'" will not be created!')
+            #                     info = None
+            # else:
+            #     baseFile = os.path.split(info['file'])[-1]
+            #     info['file'] =  os.path.join(root, baseFile)
+            #     if os.path.exists(info['file']):
+            #         module, filesuffix = os.path.splitext(baseFile)
+            #         info['type'] = self.ext2Type[filesuffix]
+            #         if 'c' not in info:
+            #             info['c'] = module+'.'+info['name']+'()'
+            #     else:
+            #         print('There is no file '+info['file']+' exist. Menu "'+menu+'" will not be created!')
+            #         info = None
+            #
+            # if info:
+            #     if 'c' not in info:
+            #         info['c'] = menu+'.'+info['name']+'()'
+
+        return info
 
     def createMenu(self):
         self.menus.clear()
@@ -249,62 +251,35 @@ class PipelineSetup(object):
                 if parent==self.repositoryName:
                     mayaMainWin = mel.eval('$tempMelVar=$gMainWindow')
                     self.menus[menu]={'object': pm.menu( menu, l=label, p=mayaMainWin, to=True )}
-                    self.menus[menu]['type'] = 'menu'
+                    self.menus[menu]['type'] = 'mainmenu'
                     if not self.mainMenu:
                         self.mainMenu = self.menus[menu]['object']
                 else:
                     self.menus[menu]={'object': pm.menuItem( menu, sm=True, l=label, p=parent, to=True )}
-                    self.menus[menu]['type'] = 'submenu'
+                    self.menus[menu]['type'] = 'menu'
                 self.menus[menu]['dir'] = os.path.join(root, menu)
 
             if not parent==self.repositoryName:
                 for menufile in files:
-                    info = self.analyzeInfo( os.path.join(root, menufile) )
-                    if info:
-                        # Create MenuItem
-                        if pm.menuItem( info['name'], ex=True ):
-                            pm.deleteUI( info['name'] )
-                        self.menus[info['name']]={'object': pm.menuItem( info['name'], l=info['l'], p=parent )}
-                        self.menus[info['name']]['type'] = info['type']
-                        self.menus[info['name']]['file'] = info['file']
+                    menu, suffix = os.path.splitext(menufile)
+                    if menu not in self.ignore_filename and suffix in self.menu_filetype:
 
-                        if 'c' in info:
-                            pm.menuItem( info['name'], e=True, c=info['c'] )
+                        #info = self.analyzeInfo( os.path.join(root, menufile) )
+                        info = self.analyzeInfo(root, menu, suffix)
 
-    # def getRefreshCmd(self):
-    #     refreshCmd = "import sys\n" \
-    #             + "Dir = '" + self.destination + "'\n" \
-    #             + "if Dir not in sys.path:\n" \
-    #             + "\tsys.path.append(Dir)\n" \
-    #             + "import "+self.repositoryName+"\n" \
-    #             + "reload("+self.repositoryName+")\n" \
-    #             + "from "+self.repositoryName+".pipelineStartup import *\n" \
-    #             + "reload ("+self.repositoryName+".pipelineStartup)\n"
-    #     return refreshCmd
+                        if info:
+                            if info['type'] == 'submenu':
+                                pass
+                            else:
+                                # Create MenuItem
+                                if pm.menuItem( info['name'], ex=True ):
+                                    pm.deleteUI( info['name'] )
+                                self.menus[info['name']]={'object': pm.menuItem( info['name'], l=info['l'], p=parent )}
+                                self.menus[info['name']]['type'] = info['type']
+                                self.menus[info['name']]['file'] = info['file']
 
-    def update(self, force=False):
-        if not os.path.exists(self.repositorySour):
-            print "There're no repository source path exists: '"+self.repositorySour+"'."
-            return
-
-        if not os.path.exists(self.repositoryDest):
-            print "There're no repository destination path exists: '"+self.repositoryDest+"'."
-            return
-
-        # Reinstall Repository Files
-        self.updateRepository()
-
-        # Create Menus
-        self.createMenu()
-
-        # Create manager menu items
-        self.manageMenuItem()
-
-        # Rewrite pipelineStartup.py
-        self.pipelineStartup_py()
-
-        # Rewrite userSetup.mel
-        self.userSetup_mel()
+                                if 'c' in info:
+                                    pm.menuItem( info['name'], e=True, c=info['c'] )
 
     def manageMenuItem(self):
         parent = self.mainMenu
@@ -340,18 +315,29 @@ class PipelineSetup(object):
         updateWhenStartCmd += self.repositoryName+'_pipset.pipelineStartup_py()\n'
         pm.menuItem(updateWhenStartupMenu, e=True, c=updateWhenStartCmd)
 
-    def setSource(self, source):
-        self.source = source
-    def setDestination(self, destination):
-        self.destination = destination
-    def setRepositoryName(self, name):
-        self.repositoryName = name
-    def setRepositorySour(self, sour):
-        self.repositorySour = sour
-    def setRepositoryDest(self, dest):
-        self.repositoryDest = dest
-    def setUpdateWhenStartup(self, update):
-        self.updateWhenStartup = update
+    # def getRefreshCmd(self):
+    #     refreshCmd = "import sys\n" \
+    #             + "Dir = '" + self.destination + "'\n" \
+    #             + "if Dir not in sys.path:\n" \
+    #             + "\tsys.path.append(Dir)\n" \
+    #             + "import "+self.repositoryName+"\n" \
+    #             + "reload("+self.repositoryName+")\n" \
+    #             + "from "+self.repositoryName+".pipelineStartup import *\n" \
+    #             + "reload ("+self.repositoryName+".pipelineStartup)\n"
+    #     return refreshCmd
+
+    # def install3rd(self):
+    #     the3rdSour = os.path.join(self.source, '3rd')
+    #     the3rdDest = os.path.join(self.destination, '3rd')
+    #     if not os.path.exists(the3rdDest):
+    #         os.mkdir(the3rdDest)
+    #
+    #     for root, dirs, files in os.walk(the3rdSour):
+    #         for the3rdfile in files:
+    #             suffix = os.path.splitext(the3rdfile)[-1]
+    #             if suffix in ['.py', '.PY', '.inf', '.INF', '.mel', '.MEL']:
+    #                 shutil.copy(os.path.join(root, the3rdfile),\
+    #                             os.path.join(the3rdDest, the3rdfile))
 
     def pipelineStartup_py(self, refresh=False):
         startupCmd = 'import sys\n'
@@ -442,6 +428,30 @@ class PipelineSetup(object):
             userSetup.close()
             if not cmds:
                 os.remove(filepath)
+
+    def update(self, force=False):
+        if not os.path.exists(self.repositorySour):
+            print "There're no repository source path exists: '"+self.repositorySour+"'."
+            return
+
+        if not os.path.exists(self.repositoryDest):
+            print "There're no repository destination path exists: '"+self.repositoryDest+"'."
+            return
+
+        # Reinstall Repository Files
+        self.updateRepository()
+
+        # Create Menus
+        self.createMenu()
+
+        # Create manager menu items
+        self.manageMenuItem()
+
+        # Rewrite pipelineStartup.py
+        self.pipelineStartup_py()
+
+        # Rewrite userSetup.mel
+        self.userSetup_mel()
 
     def uninstall(self):
         # Delete Menus

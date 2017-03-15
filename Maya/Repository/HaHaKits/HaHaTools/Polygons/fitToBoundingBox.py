@@ -35,3 +35,9 @@ def fitToBoundingBox(fitType = None):
 
         pm.scale( objs[-1], scalex, scaley, scalez, p=(cx, cy, cz), r=True )
         pm.move( cxfit-cx, cyfit-cy, czfit-cz, objs[-1], r=True )
+
+def fitToBoundingBoxMax():
+    fitToBoundingBox(fitType = 'max')
+
+def fitToBoundingBoxMin():
+    fitToBoundingBox(fitType = 'min')
