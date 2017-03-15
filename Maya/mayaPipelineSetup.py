@@ -166,11 +166,16 @@ class PipelineSetup(object):
 
         info = {}
 
-        if os.path.exists(os.path.join(root, menu+'.sub')) or os.path.exists(os.path.join(root, menu+'.SUB')):
+        if os.path.exists(os.path.join(root, menu+'.sub')):
             info['type'] = 'submenu'
             info['name'] = menu
             info['l'] = mel.eval('interToUI( "'+menu+'" )')
             info['file'] = menufile
+
+            subInfo = self.analyzeSubmenu(os.path.join(root, menu+'.sub'))
+            if not subInfo:
+                subInfo = self.analyzeSubmenu(menufile)
+
         else:
             if suffix in ['.py', '.PY']:
                 info['type'] = 'python'
@@ -238,6 +243,32 @@ class PipelineSetup(object):
             #         info['c'] = menu+'.'+info['name']+'()'
 
         return info
+
+    def analyzeSubmenu(self, subfilename):
+        subfile = open(subfilename, 'r')
+        subinfo = []
+        i=0
+        for eachLine in subfile:
+            if not eachLine == '':
+                i += 1
+        subfile.close()
+
+        if i == 0:
+            return None
+        '''
+            parts = eachLine.split(',')
+            for eachPart in parts:
+                subdate = eachPart.split(':')
+                subinfo[i][subdate[0].strip()] = subdate[1].strip()
+
+                flags = self.baseflags + self.extendflags
+                for flag in flags:
+                    if (flag+':') in eachPart:
+                        info[flag] = eachPart.partition(flag+':')[2].strip()
+        '''
+
+    def analyzeSubmenuFile(self, submenufilename):
+        pass
 
     def createMenu(self):
         self.menus.clear()
