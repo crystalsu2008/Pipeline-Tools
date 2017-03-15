@@ -19,6 +19,8 @@ class PipelineSetup(object):
     repositoryName = None
     updateWhenStartup = True
 
+    update_type = ['.py', '.PY', '.inf', '.INF', '.mel', '.MEL']
+
     baseflags = ['name', 'l', 'c', 'type']
     extendflags = ['file']
     ext2Type = {'.py': 'python', '.PY': 'python', '.mel': 'mel', '.MEL': 'mel'}
@@ -139,54 +141,51 @@ class PipelineSetup(object):
         return info
 
     def updateRepository(self, force):
+        # Copy and Update New files
         for root, dirs, files in os.walk(self.repositorySour):
-            #parent = os.path.split(root)[-1]
-            # Make Repository Directory
+            # Build Repository Directory
             relativePath = root.partition(self.repositorySour)[-1]
             destPath = self.repositoryDest + relativePath
             if not os.path.exists(destPath):
                 os.mkdir(destPath)
 
+            # Copy files
             for copyfile in files:
-                suffix = os.path.splitext(copyfile)[-1]
-                if suffix in ['.py', '.PY', '.inf', '.INF', '.mel', '.MEL']:
-                    sourceFile = os.path.join(root, copyfile)
-                    destinationFile = os.path.join(destPath, copyfile)
+                sourceFile = os.path.join(root, copyfile)
+                destinationFile = os.path.join(destPath, copyfile)
 
-                    doCopy = not os.path.exists(destinationFile)
-                    if not doCopy:
-                        doCopy = not update or not filecmp.cmp(sourceFile, destinationFile)
+                if os.path.exists(destinationFile):
+                    if filecmp.cmp(sourceFile, destinationFile):
+                        continue
 
-                    if doCopy:
-                        shutil.copy(sourceFile, destinationFile)
-                        print "Copy '" + sourceFile + "'\n  to '" + destinationFile + "'."
+                shutil.copy(sourceFile, destinationFile)
+                print "Copy '" + sourceFile + "'\n  to '" + destinationFile + "'."
 
-        if update:
-            for root, dirs, files in os.walk(self.repositoryDest):
-                relativePath = root.partition(self.repositoryDest)[-1]
-                sourPath = self.repositorySour + relativePath
-                if not os.path.exists(sourPath):
-                    shutil.rmtree(root)
-                elif not root == self.repositoryDest:
-                    for removefile in files:
-                        suffix = os.path.splitext(removefile)[-1]
-                        if suffix in ['.py', '.PY', '.inf', '.INF', '.mel', '.MEL']:
-                            destinationFile = os.path.join(root, removefile)
-                            sourceFile = os.path.join(sourPath, removefile)
-                            if not os.path.exists(sourceFile):
-                                os.remove(destinationFile)
-                                print "Remove '" + destinationFile + "'."
-                else:
-                    # Copy mayaPipelineSetup.py to Repository
-                    sourceFile = os.path.join(self.source, 'mayaPipelineSetup.py')
-                    destinationFile = os.path.join(root, 'mayaPipelineSetup.py')
-                    if not filecmp.cmp(sourceFile, destinationFile):
-                        shutil.copy(sourceFile, destinationFile)
-                        print "Copy '" + sourceFile + "'\n  to '" + destinationFile + "'."
-        else:
-            # Copy mayaPipelineSetup.py to Repository
-            sourceFile = os.path.join(self.source, 'mayaPipelineSetup.py')
-            destinationFile = os.path.join(self.repositoryDest, 'mayaPipelineSetup.py')
+        # Delete invalid directories & files
+        for root, dirs, files in os.walk(self.repositoryDest):
+            relativePath = root.partition(self.repositoryDest)[-1]
+            sourPath = self.repositorySour + relativePath
+            if not os.path.exists(sourPath):
+                # Delete invalid directory
+                shutil.rmtree(root)
+                print "Remove '" + root + "'."
+            elif not root == self.repositoryDest:
+                # Delete invalid files
+                for removefile in files:
+                    destinationFile = os.path.join(root, removefile)
+                    sourceFile = os.path.join(sourPath, removefile)
+
+                    suffix = os.path.splitext(removefile)[-1]
+                    is_update_type = suffix in self.update_type
+
+                    if is_update_type and not os.path.exists(sourceFile):
+                        os.remove(destinationFile)
+                        print "Remove '" + destinationFile + "'."
+
+        # Copy mayaPipelineSetup.py to Repository
+        sourceFile = os.path.join(self.source, 'mayaPipelineSetup.py')
+        destinationFile = os.path.join(self.repositoryDest, 'mayaPipelineSetup.py')
+        if not filecmp.cmp(sourceFile, destinationFile):
             shutil.copy(sourceFile, destinationFile)
             print "Copy '" + sourceFile + "'\n  to '" + destinationFile + "'."
 
