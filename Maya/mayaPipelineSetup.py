@@ -17,7 +17,7 @@ class PipelineSetup(object):
     repositorySour = None
     repositoryDest = None
     repositoryName = None
-    updateWhenStartup = True
+    updateAtStartup = True
 
     ignore_filetype = ['.pyc']
     ignore_filename = ['__init__']
@@ -72,8 +72,8 @@ class PipelineSetup(object):
         self.repositorySour = sour
     def setRepositoryDest(self, dest):
         self.repositoryDest = dest
-    def setUpdateWhenStartup(self, update):
-        self.updateWhenStartup = update
+    def setupdateAtStartup(self, update):
+        self.updateAtStartup = update
 
     def copyRepository(self, force):
         copyOperation = 'Copy'
@@ -342,12 +342,21 @@ class PipelineSetup(object):
         pm.menuItem('uninstall', l='Uninstall', c=uninstallCmd, p=parent)
         pm.menuItem(divider=True, p=parent)
 
-        # Update When Maya Startup
-        updateWhenStartupMenu = pm.menuItem('updateWhenStart', l='Update When Maya Startup', cb=self.updateWhenStartup, p=parent)
-        updateWhenStartCmd = 'update = pm.menuItem("'+updateWhenStartupMenu+'", q=True, cb=True)\n'
-        updateWhenStartCmd += self.repositoryName+'_pipset.setUpdateWhenStartup(update)\n'
-        updateWhenStartCmd += self.repositoryName+'_pipset.pipelineStartup_py()\n'
-        pm.menuItem(updateWhenStartupMenu, e=True, c=updateWhenStartCmd)
+        # Update At Maya Startup
+        updateAtStartupMenu = pm.menuItem('updateAtStart', l='Update At Maya Startup', cb=self.updateAtStartup, p=parent)
+        updateAtStartCmd = 'update = pm.menuItem("'+updateAtStartupMenu+'", q=True, cb=True)\n'
+        updateAtStartCmd += "updateIdentify = os.path.join('"+toNativePath(self.repositoryDest)+"', 'updateAtStart')\n"
+        updateAtStartCmd += "print updateIdentify\n"
+        updateAtStartCmd += 'if update:\n'
+        updateAtStartCmd += "\tf = open(updateIdentify, 'w');f.close()\n"
+        updateAtStartCmd += 'else:\n'
+        updateAtStartCmd += '\tif os.path.exists(updateIdentify):\n'
+        updateAtStartCmd += '\t\tos.remove(updateIdentify)\n'
+
+        updateAtStartCmd += self.repositoryName+'_pipset.setupdateAtStartup(update)\n'
+        updateAtStartCmd += self.repositoryName+'_pipset.pipelineStartup_py()\n'
+        print updateAtStartCmd
+        pm.menuItem(updateAtStartupMenu, e=True, c=updateAtStartCmd)
 
     # def getRefreshCmd(self):
     #     refreshCmd = "import sys\n" \
@@ -404,10 +413,10 @@ class PipelineSetup(object):
         startupCmd += self.repositoryName+'_pipset.setRepositoryName(\'' + pm.encodeString(self.repositoryName) + '\')\n'
         startupCmd += self.repositoryName+'_pipset.setRepositorySour(\'' + pm.encodeString(self.repositorySour) + '\')\n'
         startupCmd += self.repositoryName+'_pipset.setRepositoryDest(\'' + pm.encodeString(self.repositoryDest) + '\')\n'
-        startupCmd += self.repositoryName+'_pipset.setUpdateWhenStartup(' + pm.encodeString(self.updateWhenStartup) + ')\n'
+        startupCmd += self.repositoryName+'_pipset.setupdateAtStartup(' + pm.encodeString(self.updateAtStartup) + ')\n'
 
         if not refresh:
-            if self.updateWhenStartup:
+            if self.updateAtStartup:
                 startupCmd += self.repositoryName+'_pipset.update()\n'
             else:
                 startupCmd += self.repositoryName+'_pipset.createMenu()\n'
