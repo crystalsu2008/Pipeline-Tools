@@ -1,14 +1,3 @@
-'''
-import sys
-Dir = 'C:/Users/Administrator/Documents/DEV/MayaMiscTools/my_pipe'
-if Dir not in sys.path:
-    sys.path.append(Dir)
-
-import advancedToKinect;reload(advancedToKinect)
-
-advancedToKinect.createKinect2()
-'''
-
 import pymel.core as pm
 import maya.mel as mel
 
@@ -300,7 +289,7 @@ class Advanced2Kinect(object):
             if not len(pm.listConnections(x)):
                 pm.delete(x)
 
-def createAvatar():
+def createAvatarBaseOnAdvanced():
     global a2k
     if a2k is None:
         a2k = Advanced2Kinect()
@@ -308,7 +297,7 @@ def createAvatar():
     a2k.duplicateSkinObjects()
     a2k.copySkinWeights()
 
-def createKinect2():
+def createKinect2BaseOnAdvanced():
     global a2k
     if a2k is None:
         a2k = Advanced2Kinect()

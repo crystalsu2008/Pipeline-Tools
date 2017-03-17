@@ -158,88 +158,49 @@ class PipelineSetup(object):
             print "Copy '" + sourceFile + "'\n  to '" + destinationFile + "'."
 
         print 'Updated!'
-
-    def analyzeInfo(self, root, menu, suffix):
-        #root, filename = os.path.split(menufile)
-        #menu, suffix = os.path.splitext(filename)
-        menufile = os.path.join(root, (menu+suffix))
-
+#------------------------------------------------------------------------------#
+    def analyzeInfo(self, menufilepath, isdir=False):
         info = {}
-        if suffix in ['.py', '.PY']:
-            info['type'] = 'python'
+        namepath, suffix = os.path.splitext(menufilepath)
+        parentpath, menu = os.path.split(namepath)
+        rootpath, parent = os.path.split(parentpath)
+        if isdir:
             info['name'] = menu
             info['l'] = mel.eval('interToUI( "'+menu+'" )')
-            info['c'] = menu+'.'+menu+'()'
-            info['file'] = menufile
-        elif suffix in ['.mel', '.MEL']:
-            info['type'] = 'mel'
-            info['name'] = menu
-            info['l'] = mel.eval('interToUI( "'+menu+'" )')
-            info['c'] = 'mel.eval(\'' + menu + '\')'
-            info['file'] = menufile
-
-        if os.path.exists(os.path.join(root, menu+'.sub')):
-            info['sub'] = True
-            info.pop('c')
-        else:
+            info['dir'] = namepath
+            info['parent'] = parent
             info['sub'] = False
+        else:
+            if menu not in self.ignore_filename and suffix in self.menu_filetype:
+                if suffix in ['.py', '.PY']:
+                    info['type'] = 'python'
+                    info['name'] = menu
+                    info['l'] = mel.eval('interToUI( "'+menu+'" )')
+                    info['c'] = menu+'.'+menu+'()'
+                    info['file'] = menufilepath
+                    info['parent'] = parent
+                elif suffix in ['.mel', '.MEL']:
+                    info['type'] = 'mel'
+                    info['name'] = menu
+                    info['l'] = mel.eval('interToUI( "'+menu+'" )')
+                    info['c'] = 'mel.eval(\'' + menu + '\')'
+                    info['file'] = menufilepath
+                    info['parent'] = parent
 
-            # Analyz Info File
-            # inf = open(menufile, 'r')
-            # for eachLine in inf:
-            #     parts = eachLine.split(',')
-            #     for eachPart in parts:
-            #         flags = self.baseflags + self.extendflags
-            #         for flag in flags:
-            #             if (flag+':') in eachPart:
-            #                 info[flag] = eachPart.partition(flag+':')[2].strip()
-            # inf.close()
-            #
-            # if 'l' not in info:
-            #     info['l'] = mel.eval('interToUI( "'+info['name']+'" )')
-            #
-            # if 'type' in info and 'file' not in info:
-            #     info['file'] = os.path.join(root, menu+type2ext[info['type']])
-            #
-            # if 'file' not in info:
-            #     info['file'] = os.path.join(root, menu+'.py')
-            #     if os.path.exists(info['file']):
-            #         info['type'] = 'python'
-            #     else:
-            #         info['file'] = os.path.join(root, menu+'.PY')
-            #         if os.path.exists(info['file']):
-            #             info['type'] = 'python'
-            #         else:
-            #             info['file'] = os.path.join(root, menu+'.mel')
-            #             if os.path.exists(info['file']):
-            #                 info['type'] = 'mel'
-            #             else:
-            #                 info['file'] = os.path.join(root, menu+'.MEL')
-            #                 if os.path.exists(info['file']):
-            #                     info['type'] = 'mel'
-            #                 else:
-            #                     print('There is no module '+menu+' exist. Menu "'+menu+'" will not be created!')
-            #                     info = None
-            # else:
-            #     baseFile = os.path.split(info['file'])[-1]
-            #     info['file'] =  os.path.join(root, baseFile)
-            #     if os.path.exists(info['file']):
-            #         module, filesuffix = os.path.splitext(baseFile)
-            #         info['type'] = self.ext2Type[filesuffix]
-            #         if 'c' not in info:
-            #             info['c'] = module+'.'+info['name']+'()'
-            #     else:
-            #         print('There is no file '+info['file']+' exist. Menu "'+menu+'" will not be created!')
-            #         info = None
-            #
-            # if info:
-            #     if 'c' not in info:
-            #         info['c'] = menu+'.'+info['name']+'()'
-
+                subfile = os.path.join(namepath+'.sub')
+                if os.path.exists(subfile):
+                    info['sub'] = True
+                    info['subfile'] = subfile
+                    info['name'] += 'sub'
+                    info.pop('c')
+                else:
+                    info['sub'] = False
+            else:
+                info = None
         return info
 
-    def analyzeSubmenu(self, subfilename):
-        subfile = open(subfilename, 'r')
+    def analyzeSubmenu(self, subfilepath):
+        subfile = open(subfilepath, 'r')
         subinfo = []
         i=0
         for eachLine in subfile:
@@ -261,10 +222,13 @@ class PipelineSetup(object):
                         info[flag] = eachPart.partition(flag+':')[2].strip()
         '''
 
-    def analyzeSubmenuFile(self, root, menu, suffix):
-        menufile = os.path.join(root, (menu+suffix))
+    def analyzeSubmenuFile(self, parentInfo, menufilepath):
+        namepath, suffix = os.path.splitext(menufilepath)
+        parentpath, menu = os.path.split(namepath)
+        rootpath, parent = os.path.split(parentpath)
+
         subinfo = []
-        pyfile = open(menufile, 'r')
+        pyfile = open(menufilepath, 'r')
         for eachLine in pyfile:
             if eachLine[:4] == 'def ':
                 function = eachLine[4:].partition('(')[0].rstrip()
@@ -272,7 +236,8 @@ class PipelineSetup(object):
                 info = {}
                 info['name'] = function
                 info['l'] = mel.eval('interToUI( "'+function+'" )')
-                info['file'] = menufile
+                info['file'] = menufilepath
+                info['parent'] = parentInfo['name']
 
                 if suffix in ['.py', '.PY']:
                     info['type'] = 'python'
@@ -284,33 +249,33 @@ class PipelineSetup(object):
                 subinfo.append(info)
         return subinfo
 
-    def add_a_menu(self, root, parent, menu, info=None):
-        label = mel.eval('interToUI( "'+menu+'" )')
+    def add_a_menu(self, info):
+        menu = info['name']
         if pm.menu( menu, ex=True ):
             pm.deleteUI( menu )
-        if parent==self.repositoryName:
+        if info['parent']==self.repositoryName:
             mayaMainWin = mel.eval('$tempMelVar=$gMainWindow')
-            self.menus[menu]={'object': pm.menu( menu, l=label, p=mayaMainWin, to=True )}
+            self.menus[menu]={'object': pm.menu( menu, l=info['l'], p=mayaMainWin, to=True )}
             self.menus[menu]['sub'] = False
             self.menus[menu]['type'] = 'mainmenu'
             if not self.mainMenu:
                 self.mainMenu = self.menus[menu]['object']
-            self.menus[menu]['dir'] = os.path.join(root, menu)
+            self.menus[menu]['dir'] = info['dir']
         else:
-            self.menus[menu]={'object': pm.menuItem( menu, sm=True, l=label, p=parent, to=True )}
-            if info and info['sub']:
+            self.menus[menu]={'object': pm.menuItem( menu, sm=True, l=info['l'], p=info['parent'], to=True )}
+            if info['sub']:
                 self.menus[menu]['sub'] = True
                 self.menus[menu]['type'] = info['type']
                 self.menus[menu]['file'] = info['file']
             else:
                 self.menus[menu]['sub'] = False
                 self.menus[menu]['type'] = 'menu'
-                self.menus[menu]['dir'] = os.path.join(root, menu)
+                self.menus[menu]['dir'] = info['dir']
 
-    def add_a_menucmd(self, parent, info):
+    def add_a_menucmd(self, info):
         if pm.menuItem( info['name'], ex=True ):
             pm.deleteUI( info['name'] )
-        self.menus[info['name']]={'object': pm.menuItem( info['name'], l=info['l'], p=parent )}
+        self.menus[info['name']]={'object': pm.menuItem( info['name'], l=info['l'], p=info['parent'] )}
         self.menus[info['name']]['type'] = info['type']
         self.menus[info['name']]['file'] = info['file']
 
@@ -322,30 +287,34 @@ class PipelineSetup(object):
         for root, dirs, files in os.walk(self.repositoryDest):
             parent = os.path.split(root)[-1]
 
+            # Create Menus
             for menu in dirs:
-                self.add_a_menu(root, parent, menu)
+                menudirpath = os.path.join(root, menu)
+                info = self.analyzeInfo(menudirpath, True)
+                if info:
+                    self.add_a_menu(info)
 
             if not parent==self.repositoryName:
                 for menufile in files:
-                    menu, suffix = os.path.splitext(menufile)
-                    if menu not in self.ignore_filename and suffix in self.menu_filetype:
+                    menufilepath = os.path.join(root, menufile)
+                    info = self.analyzeInfo(menufilepath, False)
 
-                        info = self.analyzeInfo(root, menu, suffix)
+                    if info:
+                        if info['sub']:
+                            # Create Submenu
+                            self.add_a_menu(info)
 
-                        if info:
-                            if info['sub']:
-                                self.add_a_menu(root, parent, info['name']+'sub', info)
+                            # Create Submenu Commands
+                            subInfos = self.analyzeSubmenu(info['subfile'])
+                            if not subInfos:
+                                subInfos = self.analyzeSubmenuFile(info, menufilepath)
+                            for subInfo in subInfos:
+                                self.add_a_menucmd(subInfo)
 
-                                subInfos = self.analyzeSubmenu(os.path.join(root, menu+'.sub'))
-                                if not subInfos:
-                                    subInfos = self.analyzeSubmenuFile(root, menu, suffix)
-                                for subInfo in subInfos:
-                                    self.add_a_menucmd(info['name']+'sub', subInfo)
-
-                            else:
-                                # Create MenuItem
-                                self.add_a_menucmd(parent, info)
-
+                        else:
+                            # Create Menu Commands
+                            self.add_a_menucmd(info)
+#------------------------------------------------------------------------------#
     def manageMenuItem(self):
         parent = self.mainMenu
         pm.menuItem(divider=True, p=parent)
