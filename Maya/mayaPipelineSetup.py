@@ -196,7 +196,7 @@ class PipelineSetup(object):
                 info = None
         return info
 
-    def analyzeSubmenu(self, subfilepath):
+    def readSubmenu(self, subfilepath):
         subfile = open(subfilepath, 'r')
         subinfo = []
         i=0
@@ -219,31 +219,37 @@ class PipelineSetup(object):
                         info[flag] = eachPart.partition(flag+':')[2].strip()
         '''
 
-    def analyzeSubmenuFile(self, parentInfo, menufilepath):
+    def analyzeSubmenu(self, parentInfo, menufilepath):
         namepath, suffix = os.path.splitext(menufilepath)
         parentpath, menu = os.path.split(namepath)
         rootpath, parent = os.path.split(parentpath)
 
         subinfo = []
-        pyfile = open(menufilepath, 'r')
-        for eachLine in pyfile:
-            if eachLine[:4] == 'def ':
-                function = eachLine[4:].partition('(')[0].rstrip()
-
-                info = {}
-                info['name'] = function
-                info['l'] = mel.eval('interToUI( "'+function+'" )')
-                info['file'] = menufilepath
-                info['parent'] = parentInfo['name']
-
-                if suffix in ['.py', '.PY']:
+        analyzfile = open(menufilepath, 'r')
+        if suffix in ['.py', '.PY']:
+            for eachLine in analyzfile:
+                if eachLine[:4] == 'def ':
+                    function = eachLine[4:].partition('(')[0].rstrip()
+                    info = {}
+                    info['name'] = function
+                    info['l'] = mel.eval('interToUI( "'+function+'" )')
+                    info['file'] = menufilepath
+                    info['parent'] = parentInfo['name']
                     info['type'] = 'python'
                     info['c'] = menu+'.'+function+'()'
-                elif suffix in ['.mel', '.MEL']:
+                    subinfo.append(info)
+        elif suffix in ['.mel', '.MEL']:
+            for eachLine in analyzfile:
+                if eachLine[:12] == 'global proc ':
+                    function = eachLine[12:].partition('(')[0].rstrip()
+                    info = {}
+                    info['name'] = function
+                    info['l'] = mel.eval('interToUI( "'+function+'" )')
+                    info['file'] = menufilepath
+                    info['parent'] = parentInfo['name']
                     info['type'] = 'mel'
                     info['c'] = 'mel.eval(\'' + function + '\')'
-
-                subinfo.append(info)
+                    subinfo.append(info)
         return subinfo
 
     def add_a_menu(self, info):
@@ -302,9 +308,9 @@ class PipelineSetup(object):
                             self.add_a_menu(info)
 
                             # Create Submenu Commands
-                            subInfos = self.analyzeSubmenu(info['subfile'])
+                            subInfos = self.readSubmenu(info['subfile'])
                             if not subInfos:
-                                subInfos = self.analyzeSubmenuFile(info, menufilepath)
+                                subInfos = self.analyzeSubmenu(info, menufilepath)
                             for subInfo in subInfos:
                                 self.add_a_menucmd(subInfo)
 
