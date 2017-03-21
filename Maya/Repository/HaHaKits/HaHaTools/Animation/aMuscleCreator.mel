@@ -1,0 +1,524 @@
+//aMuscleCreator("Mus", 5, 8, "backRump_R", "IKXbackKnee_R", 1)
+global proc aMuscleCreator(string $baseName, int $nMidControls, int $nAround, string $attachStart, string $attachEnd, int $bMakeMO)
+{
+	/*string $baseName = "Mus" ;
+	int $nMidControls = 5 ;
+	int $nAround = 8 ;
+	string $attachStart = "backRump_L" ;
+	string $attachEnd = "IKXbackKnee_L" ;
+	int $bMakeMO = 1 ;*/
+    //if(cMuscle_MuscleExists($baseName)) {
+    //    error (uiRes("m_cMuscleCreatorUI.kMuscleAlreadyExists"));
+    //    return;
+    //}
+
+	aMuscle_createCreatorMuscleFromSel( $baseName, $nMidControls, $nAround, $attachStart, $attachEnd, $bMakeMO) ;
+}
+
+
+
+/*
+ * cMuscle_createCreatorMuscleFromSel() - Creates a cMuscleCreator style
+ *		muscle based on 4 select CV's or points etc...
+ */
+global proc string[] aMuscle_createCreatorMuscleFromSel(string $baseName, int $nMidControls, int $nAround,
+				string $attachStart, string $attachEnd, int $bMakeMO )
+{
+	string $origSel[] = `ls -fl -sl` ;
+	int $nSel = size($origSel) ;
+//	if ($nSel < 4)
+//		error -sl 0 ("You must select 4 Transforms, CV's, Faces, or Double-Edges or a combination thereof that will result in 4 transforms/cMuscleSurfAttach nodes!") ;
+
+	// I decided it just makes sense to always create the locators...then that way one can just move/adjust later as needed and then reset the
+	// lengths as needed anyhow...less work/confusion for the rigger...simpler UI...and easier to deal with, since always the same.
+	// Users can always reparent the locators to other stuff if desired...
+	// HOWEVER....this works only if less than 4 items are selected...if something is selected...then it's assuming the user is choosing edges
+	// or points or something to use as an attach,...like locators/transforms...
+	if ($nSel < 4)
+		{
+		aMuscle_createCreatorLocsCB($baseName, $attachStart, $attachEnd) ;
+		$origSel = `ls -fl -sl` ;
+		$nSel = size($origSel) ;
+		}
+
+    return {""};
+
+	string $attaches[] ;
+	int $a = 0 ;
+	int $i ;
+	for ($i=0; $i < $nSel; ++$i)
+		{
+		if (gmatch($origSel[$i], "*.uv*") || (gmatch($origSel[$i], "*.f*")))
+			{
+			select -r $origSel[$i] ;
+			cMuscleSurfAttachSetup() ;		// First convert selection to attach nodes...
+			string $temp[] = `ls -sl` ;
+			$attaches[$a] = $temp[0] ;		// Store this attach node
+			++$a ;
+			}
+		else if (gmatch($origSel[$i], "*.e*"))	// We should have -2- Edges!
+			{
+			select -r $origSel[$i] $origSel[$i+1] ;
+			cMuscleSurfAttachSetup() ;		// First convert selection to attach nodes...
+			string $temp[] = `ls -sl` ;
+			$attaches[$a] = $temp[0] ;		// Store this attach node
+			++$a ;
+			++$i ;		// do this too since we grabbed two off!
+			}
+		else			// else assume it's a transform...
+			{
+			$attaches[$a] = $origSel[$i] ;
+			++$a ;
+			}
+		}
+
+
+	// Make the Node and Surface!
+	//
+	string $creator = `createNode cMuscleCreator -n ("cMuscleCreator"+$baseName+"#")` ;
+	string $surf = 	`createNode nurbsSurface -n ("cMuscleSurfaceShape"+$baseName+"#")` ;
+	string $parents[] = `listRelatives -p $surf` ;
+	string $xform = $parents[0] ;
+
+	// Store some internal attrs so we can mirror easily later...
+	addAttr -ln "nMidControls" -at "long" -k 0 -dv $nMidControls $creator ;
+	addAttr -ln "nAround" -at "long" -k 0 -dv $nAround $creator ;
+
+	int $nPrimaryAxis = cMuscle_guessPrimaryAxis($attachStart, $attachEnd) ;
+
+	// Make in nice hierarchy
+	string $grpMain ;
+	if (objExists("grp"+$xform+"RIG"))
+		$grpMain = `group -em -w -n ("grp"+$xform+"RIG#")` ;
+	else
+		$grpMain = `group -em -w -n ("grp"+$xform+"RIG")` ;
+	parent $xform $grpMain ;
+
+	if (objExists("grpMUSCLES") != true)
+		{
+		group -em -w -n "grpMUSCLES" ;
+		}
+	parent $grpMain "grpMUSCLES" ;
+
+	string $grpCTRLs = `group -em -w -n ("grp"+$xform+"Controls#")` ;
+	string $grpATTACHs = `group -em -w -n ("grp"+$xform+"Attaches#")` ;
+	parent $grpCTRLs $grpMain ;
+	parent $grpATTACHs $grpMain ;
+
+	// Lock down nicely since it should never really move...
+	setAttr ($grpMain+".inheritsTransform") 0 ;
+	setAttr ($xform+".inheritsTransform") 0 ;
+	setAttr -l 1 -k 0 ($xform+".tx") ;
+	setAttr -l 1 -k 0 ($xform+".ty") ;
+	setAttr -l 1 -k 0 ($xform+".tz") ;
+	setAttr -l 1 -k 0 ($xform+".rx") ;
+	setAttr -l 1 -k 0 ($xform+".ry") ;
+	setAttr -l 1 -k 0 ($xform+".rz") ;
+	setAttr -l 1 -k 0 ($xform+".sx") ;
+	setAttr -l 1 -k 0 ($xform+".sy") ;
+	setAttr -l 1 -k 0 ($xform+".sz") ;
+
+
+	float $fWidthStart = cMuscle_objDist($attaches[0], $attaches[1]) ;
+	float $fWidthEnd = cMuscle_objDist($attaches[2], $attaches[3]) ;
+
+	setAttr ($creator+".defWidthStart") ( $fWidthStart ) ;
+	setAttr ($creator+".defWidthEnd") ( $fWidthEnd ) ;
+
+	// Get avg length and scale curves nicely
+	float $fDist = (cMuscle_objDist($attaches[0], $attaches[2]) + cMuscle_objDist($attaches[1], $attaches[3])) /2.0 ;
+	float $fRadius = 0.3 * ($fWidthStart + $fWidthEnd) /2.0 ;
+
+
+	// Make the  Start/End Parents up...
+	string $startParent = `curve -d 1 -p 0 1 0 -p 0 -1 0 -p 0 0 0 -p -1 0 0 -p 1 0 0 -p 0 0 0 -p 0 0 1 -p 0 0 -1 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7
+			-n ("StartParent"+$baseName+"#")` ;
+	string $endParent = `curve -d 1 -p 0 1 0 -p 0 -1 0 -p 0 0 0 -p -1 0 0 -p 1 0 0 -p 0 0 0 -p 0 0 1 -p 0 0 -1 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7
+			-n ("EndParent"+$baseName+"#")` ;
+	cMuscle_snapBetween($attaches[0], $attaches[1], $startParent) ;
+	cMuscle_snapBetween($attaches[2], $attaches[3], $endParent) ;
+
+	select -r ($startParent+".cv[*]") ;
+	xform -r -os -s ($fDist*0.2) ($fDist*0.2) ($fDist*0.2) ;
+	select -r ($endParent+".cv[*]") ;
+	xform -r -os -s ($fDist*0.2) ($fDist*0.2) ($fDist*0.2) ;
+	setAttr ($startParent+".overrideEnabled") 1;		// on
+	setAttr ($startParent+".overrideColor") 14 ;		// green
+	setAttr ($endParent+".overrideEnabled") 1;		// on
+	setAttr ($endParent+".overrideColor") 14 ;		// green
+	parent $startParent $endParent $grpMain ;
+
+	if ($attachStart != "")
+		parent $startParent $attachStart ;
+	if ($attachEnd != "")
+		parent $endParent $attachEnd ;
+
+	// make end move down length a bit so distance pose works not only rotation...this just makes it better...
+	// Do AFTER parenting... since we are moving in object space of the parent...ie: locally.
+	float $fixMove[3] = {0,0,0} ;
+	if ($nPrimaryAxis >= 3)
+		{
+		$fixMove[$nPrimaryAxis-3] = -1 * $fDist ;
+		}
+	else
+		$fixMove[$nPrimaryAxis] = $fDist ;
+	xform -r -os -t $fixMove[0] $fixMove[1] $fixMove[2] $endParent ;
+
+
+	string $aCons[] = `aimConstraint -w 1 -aim 0 1 0 -wut "object" -u 1 0 0 -wuo $attaches[1] $attaches[2] $attaches[3] $startParent` ;
+	delete $aCons ;
+	string $aCons[] = `orientConstraint -w 1 $startParent $endParent` ;
+	delete $aCons ;
+
+
+	// Make all the mid controls and connect in....
+	int $m ;
+	for ($m=0; $m < $nMidControls; ++$m)
+		{
+		int $cIdx = $m+1 ;
+
+		float $fPct = ($m+1.0) / ($nMidControls+2.0-1.0) ;		// +1 since after start and +2 since extra start/end but these are mid
+
+		float $fPctHalf = 1.0 - (abs($fPct-0.5) / 0.5 ) ;
+		float $fPctHalfSmooth = $fPctHalf * $fPctHalf * (3.0 - (2.0 * $fPctHalf) ) ;
+		float $fRadCur = $fRadius + ($fPctHalfSmooth * $fRadius) ;
+
+
+		string $ctrl = `curve -d 1 -p -0.25 0.25 0.25 -p 0.25 0.25 0.25 -p 0.25 0.25 -0.25 -p -0.25 0.25 -0.25 -p -0.25 0.25 0.25 -p -0.25 -0.25 0.25 -p -0.25 -0.25 -0.25 -p 0.25 -0.25 -0.25 -p 0.25 -0.25 0.25 -p -0.25 -0.25 0.25 -p 0.25 -0.25 0.25 -p 0.25 0.25 0.25 -p 0.25 0.25 -0.25 -p 0.25 -0.25 -0.25 -p -0.25 -0.25 -0.25 -p -0.25 0.25 -0.25 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15
+							-n ("iControlMid"+$baseName+($m+1)+"#")`;
+
+		string $linearZERO = `group -em -w -n ("linear"+$baseName+($m+1)+"ZERO#")` ;
+		string $linearAUTO = `group -em -w -n ("linear"+$baseName+($m+1)+"AUTO#")` ;
+
+		string $attach = `curve -d 1 -p -0.25 0.25 0.25 -p 0.25 0.25 0.25 -p 0.25 0.25 -0.25 -p -0.25 0.25 -0.25 -p -0.25 0.25 0.25 -p -0.25 -0.25 0.25 -p -0.25 -0.25 -0.25 -p 0.25 -0.25 -0.25 -p 0.25 -0.25 0.25 -p -0.25 -0.25 0.25 -p 0.25 -0.25 0.25 -p 0.25 0.25 0.25 -p 0.25 0.25 -0.25 -p 0.25 -0.25 -0.25 -p -0.25 -0.25 -0.25 -p -0.25 0.25 -0.25 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15
+							-n ("AttachMid"+$baseName+($m+1)+"#")`;
+
+		string $attachSq = `curve -d 1 -p 0.0632965 -0.00545365 0.178093 -p 0.0632965 -0.00545365 0.115934 -p 0.187614 -0.00545365 0.115934 -p 0.187614 -0.00545365 0.0537749 -p 0.0632965 -0.00545365 0.0537749 -p 0.0632965 -0.00545365 -0.194861 -p 0.249773 -0.00545365 -0.194861 -p 0.249773 -0.00545365 -0.132702 -p 0.125455 -0.00545365 -0.132702 -p 0.125455 -0.00545365 -0.008384 -p 0.249773 -0.00545365 -0.008384 -p 0.249773 -0.00545365 0.178093 -p 0.0632965 -0.00545365 0.178093 -p 0.00113762 -0.00545365 0.178093 -p 0.00113762 -0.00545365 -0.194861 -p -0.185339 -0.00545365 -0.194861 -p -0.259148 -0.00545365 -0.293355 -p -0.328421 -0.00545365 -0.251323 -p -0.247498 -0.00545365 -0.194861 -p -0.247498 -0.00545365 0.178093 -p 0.00113762 -0.00545365 0.178093 -p 0.00113762 -0.00545365 0.115934 -p -0.0610213 -0.00545365 0.115934 -p -0.0610213 -0.00545365 -0.132702 -p -0.185339 -0.00545365 -0.132702 -p -0.185339 -0.00545365 0.115934 -p -0.0610213 -0.00545365 0.115934 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 -k 25 -k 26
+							-n ("AttachMidSquash"+$baseName+($m+1)+"#")` ;
+		string $attachSt = `curve -d 1 -p 0.0515658 -0.00505248 0.178209 -p 0.0515658 -0.00505248 0.11605 -p 0.175884 -0.00505248 0.11605 -p 0.175884 -0.00505248 0.0538911 -p 0.0515658 -0.00505248 0.0538911 -p 0.0515658 -0.00505248 -0.194744 -p 0.238042 -0.00505248 -0.194744 -p 0.238042 -0.00505248 -0.132586 -p 0.113725 -0.00505248 -0.132586 -p 0.113725 -0.00505248 -0.00826775 -p 0.238042 -0.00505248 -0.00826775 -p 0.238042 -0.00505248 0.178209 -p -0.259229 -0.00505248 0.178209 -p -0.259229 -0.00505248 0.11605 -p -0.134911 -0.00505248 0.11605 -p -0.134911 -0.00505248 -0.194744 -p -0.072752 -0.00505248 -0.194744 -p -0.072752 -0.00505248 0.11605 -p 0.0515658 -0.00505248 0.11605 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18
+							-n ("AttachMidStretch"+$baseName+($m+1)+"#")` ;
+
+
+
+		select -r ($ctrl+".cv[*]") ;
+		xform -r -os -s ($fDist*1.0) ($fDist*0.3) ($fDist*0.3) ;
+		select -r ($attach+".cv[*]") ;
+		xform -r -os -s ($fDist*0.8) ($fDist*0.25) ($fDist*0.25) ;
+		select -r ($attachSq+".cv[*]") ;
+		xform -r -os -s ($fDist*0.1) ($fDist*0.1) ($fDist*0.1) ;
+		select -r ($attachSt+".cv[*]") ;
+		xform -r -os -s ($fDist*0.1) ($fDist*0.1) ($fDist*0.1) ;
+		string $ctrlZERO = `group -em -w -n ("grpiControlMid"+$baseName+($m+1)+"ZERO#")` ;
+		string $ctrlAUTO = `group -em -w -n ("grpiControlMid"+$baseName+($m+1)+"AUTO#")` ;
+
+		// Color pretty....
+		setAttr ($ctrl+".overrideEnabled") 1;		// on
+		setAttr ($ctrl+".overrideColor") 23 ;		// dark green
+		setAttr ($attach+".overrideEnabled") 1;		// on
+		setAttr ($attach+".overrideColor") 13 ;		// red
+		setAttr ($attachSq+".overrideEnabled") 1;	// on
+		setAttr ($attachSq+".overrideColor") 18 ;	// cyan
+		setAttr ($attachSt+".overrideEnabled") 1;	// on
+		setAttr ($attachSt+".overrideColor") 6 ;	// blue
+
+		string $shapesTemp[] = `listRelatives -ni -shapes $attach` ;
+		connectAttr -f ($creator+".showRestMovers") ($shapesTemp[0]+".v") ;
+		connectAttr -f ($creator+".showSquashMovers") ($attachSq+".v") ;
+		connectAttr -f ($creator+".showStretchMovers") ($attachSt+".v") ;
+		setAttr -lock 0 -k 0 ($attachSq+".v") ;
+		setAttr -lock 0 -k 0 ($attachSt+".v") ;
+
+
+		// Parent
+		parent $ctrl $ctrlAUTO ;
+		parent $ctrlAUTO $ctrlZERO ;
+		parent $ctrlZERO $grpCTRLs ;
+
+		parent $linearZERO $grpATTACHs ;
+		parent $linearAUTO $linearZERO ;
+		parent $attach $linearAUTO ;
+		parent $attachSq $attachSt $attach ;
+
+		// Move to right spot...
+//		float $pos[3] = cMuscle_interObjPos($fPct, $attaches) ;
+//		xform -ws -a -t $pos[0] $pos[1] $pos[2] $attach ;
+
+//		string $aCons[] = `aimConstraint -w 1 -aim 0 1 0 -wut "object" -u 1 0 0 -wuo $attaches[1] $attaches[2] $attaches[3] $attach` ;
+//		delete $aCons ;
+
+//		if ($fPct <= 0.5 && $attachStart != "")
+//			parent $attach $attachStart ;
+//		else if ($fPct > 0.5 && $attachEnd != "")
+//			parent $attach $attachEnd ;
+
+
+		// Set up Attrs
+		addAttr -ln "uValue" -sn "uval" -dv $fPct -min 0.0 -max 1.0 -k 1 $linearZERO ;
+
+		addAttr -ln "gravity" -sn "grav" -dv $fPctHalfSmooth -min 0.0 -k 1 $attach ;
+
+		addAttr -ln "JIGGLE" -at "enum" -en "-" -k 1 $ctrl ;  setAttr -l true ($ctrl+".JIGGLE") ;
+		addAttr -ln "jiggle" -sn "jig" -dv $fPctHalfSmooth -k 1 $ctrl ;
+		addAttr -ln "jiggleX" -sn "jigx" -dv 1.0 -k 1 $ctrl ;
+		addAttr -ln "jiggleY" -sn "jigy" -dv 0.25 -k 1 $ctrl ;
+		addAttr -ln "jiggleZ" -sn "jigz" -dv 1.0 -k 1 $ctrl ;
+		addAttr -ln "jiggleImpact" -sn "jigimp" -dv (0.5) -k 1 $ctrl ;
+		addAttr -ln "jiggleImpactStart" -sn "jigimpst" -dv 1000 -k 1 $ctrl ;
+		addAttr -ln "jiggleImpactStop" -sn "jigimpsp" -dv 0.001 -k 1 $ctrl ;
+		addAttr -ln "cycle" -sn "cyc" -min 1.0 -dv 12.0 -k 1 $ctrl ;
+		addAttr -ln "rest" -sn "rst" -min 1.0 -dv 24.0 -k 1 $ctrl ;
+		setAttr -l 1 -k 0 ($ctrl+".sx") ;
+		setAttr -l 1 -k 0 ($ctrl+".sy") ;
+		setAttr -l 1 -k 0 ($ctrl+".sz") ;
+		connectAttr -f ($creator+".showControls") ($ctrl+".v") ;
+		setAttr -l 0 -k 0 ($ctrl+".v") ;
+
+		connectAttr -f ($linearZERO+".worldMatrix") ($creator+".linearData["+$m+"].linearMatrix") ;
+		connectAttr -f ($linearZERO+".uValue") ($creator+".linearData["+$m+"].uValue") ;
+
+		connectAttr -f ($attach+".worldMatrix") ($creator+".attachData["+$m+"].attachMatrix") ;
+		connectAttr -f ($attachSq+".worldMatrix") ($creator+".attachData["+$m+"].attachMatrixSq") ;
+		connectAttr -f ($attachSt+".worldMatrix") ($creator+".attachData["+$m+"].attachMatrixSt") ;
+		connectAttr -f ($attach+".gravity") ($creator+".attachData["+$m+"].gravityMult") ;
+
+
+		connectAttr -f ($creator+".outLinearData["+$m+"].outLinearTranslate") ($linearAUTO+".translate") ;
+		connectAttr -f ($creator+".outLinearData["+$m+"].outLinearRotate") ($linearAUTO+".rotate") ;
+		connectAttr -f ($creator+".outAttachData["+$m+"].outAttachTranslate") ($ctrlAUTO+".translate") ;
+		connectAttr -f ($creator+".outAttachData["+$m+"].outAttachRotate") ($ctrlAUTO+".rotate") ;
+		connectAttr -f ($creator+".userScale") ($ctrlAUTO+".scaleX") ;
+		connectAttr -f ($creator+".userScale") ($ctrlAUTO+".scaleY") ;
+		connectAttr -f ($creator+".userScale") ($ctrlAUTO+".scaleZ") ;
+
+		connectAttr -f ($ctrl+".worldMatrix") ($creator+".controlData["+$cIdx+"].insertMatrix") ;
+
+		connectAttr -f ($ctrl+".jiggle") ($creator+".controlData["+$cIdx+"].jiggle") ;
+		connectAttr -f ($ctrl+".cycle") ($creator+".controlData["+$cIdx+"].cycle") ;
+		connectAttr -f ($ctrl+".rest") ($creator+".controlData["+$cIdx+"].rest") ;
+		connectAttr -f ($ctrl+".jiggleX") ($creator+".controlData["+$cIdx+"].jiggleX") ;
+		connectAttr -f ($ctrl+".jiggleY") ($creator+".controlData["+$cIdx+"].jiggleY") ;
+		connectAttr -f ($ctrl+".jiggleZ") ($creator+".controlData["+$cIdx+"].jiggleZ") ;
+		connectAttr -f ($ctrl+".jiggleImpact") ($creator+".controlData["+$cIdx+"].jiggleImpact") ;
+		connectAttr -f ($ctrl+".jiggleImpactStart") ($creator+".controlData["+$cIdx+"].jiggleImpactStart") ;
+		connectAttr -f ($ctrl+".jiggleImpactStop") ($creator+".controlData["+$cIdx+"].jiggleImpactStop") ;
+
+
+
+		// Now create the sub sq/st controls...
+		//
+		string $parent = $ctrl ;
+
+		string $rests[] = `circle -c 0 0 0 -nr 0 1 0 -sw 360 -r $fRadCur -d 3 -ut 0 -tol 0.01 -s $nAround -ch 1 -n ($parent+"_crossSectionREST")` ;
+		string $rest = $rests[0] ;
+		string $restShapes[] = `listRelatives -ni -shapes $rest` ;
+		string $sqs[] = `circle -c 0 0 0 -nr 0 1 0 -sw 360 -r (1.5*$fRadCur) -d 3 -ut 0 -tol 0.01 -s $nAround -ch 1 -n ($parent+"_crossSectionSQUASH")` ;
+		string $sq = $sqs[0] ;
+		string $sqShapes[] = `listRelatives -ni -shapes $sq` ;
+		string $sts[] = `circle -c 0 0 0 -nr 0 1 0 -sw 360 -r (0.6*$fRadCur) -d 3 -ut 0 -tol 0.01 -s $nAround -ch 1 -n ($parent+"_crossSectionSTRETCH")` ;
+		string $st = $sts[0] ;
+		string $stShapes[] = `listRelatives -ni -shapes $st` ;
+
+		parent $rest $sq $st $parent ;
+		cMuscle_snap($parent, $rest) ;
+		cMuscle_snap($parent, $sq) ;
+		cMuscle_snap($parent, $st) ;
+
+
+		setAttr ($rest+".overrideEnabled") 1;		// on
+		setAttr ($rest+".overrideColor") 9 ;		// magenta
+		connectAttr -f ($creator+".showRestMovers") ($rest+".v") ;
+
+		setAttr ($sq+".overrideEnabled") 1;		// on
+		setAttr ($sq+".overrideColor") 18 ;		// cyan
+		connectAttr -f ($creator+".showSquashMovers") ($sq+".v") ;
+
+		setAttr ($st+".overrideEnabled") 1;		// on
+		setAttr ($st+".overrideColor") 6 ;			// blue
+		connectAttr -f ($creator+".showStretchMovers") ($st+".v") ;
+
+		setAttr -lock 1 -k 1 ($rest+".tx") ;
+		setAttr -lock 1 -k 1 ($rest+".ty") ;
+		setAttr -lock 1 -k 1 ($rest+".tz") ;
+		setAttr -lock 1 -k 1 ($rest+".rx") ;
+		setAttr -lock 1 -k 1 ($rest+".ry") ;
+		setAttr -lock 1 -k 1 ($rest+".rz") ;
+		setAttr -lock 1 -k 1 ($rest+".sx") ;
+		setAttr -lock 1 -k 1 ($rest+".sy") ;
+		setAttr -lock 1 -k 1 ($rest+".sz") ;
+		setAttr -lock 0 -k 0 ($rest+".v") ;
+
+		setAttr -lock 1 -k 1 ($sq+".tx") ;
+		setAttr -lock 1 -k 1 ($sq+".ty") ;
+		setAttr -lock 1 -k 1 ($sq+".tz") ;
+		setAttr -lock 1 -k 1 ($sq+".rx") ;
+		setAttr -lock 1 -k 1 ($sq+".ry") ;
+		setAttr -lock 1 -k 1 ($sq+".rz") ;
+		setAttr -lock 1 -k 1 ($sq+".sx") ;
+		setAttr -lock 1 -k 1 ($sq+".sy") ;
+		setAttr -lock 1 -k 1 ($sq+".sz") ;
+		setAttr -lock 0 -k 0 ($sq+".v") ;
+
+		setAttr -lock 1 -k 1 ($st+".tx") ;
+		setAttr -lock 1 -k 1 ($st+".ty") ;
+		setAttr -lock 1 -k 1 ($st+".tz") ;
+		setAttr -lock 1 -k 1 ($st+".rx") ;
+		setAttr -lock 1 -k 1 ($st+".ry") ;
+		setAttr -lock 1 -k 1 ($st+".rz") ;
+		setAttr -lock 1 -k 1 ($st+".sx") ;
+		setAttr -lock 1 -k 1 ($st+".sy") ;
+		setAttr -lock 1 -k 1 ($st+".sz") ;
+		setAttr -lock 0 -k 0 ($st+".v") ;
+
+		connectAttr -f ($restShapes[0]+".worldSpace") ($creator+".controlData["+$cIdx+"].curveRest") ;
+		connectAttr -f ($sqShapes[0]+".worldSpace") ($creator+".controlData["+$cIdx+"].curveSq") ;
+		connectAttr -f ($stShapes[0]+".worldSpace") ($creator+".controlData["+$cIdx+"].curveSt") ;
+
+		}
+
+
+
+	// Create the animCurve stuff for Sq/St curve mode...
+	// Sq
+	string $animCurveSq = `createNode animCurveUU -n ("animCurveUU_Sq_"+$creator)` ;
+	setKeyframe -f 0.0 -v 0.0 -itt "flat" -ott "flat" $animCurveSq;
+	setKeyframe -f 0.25 -v 0.15 -itt "spline" -ott "spline" $animCurveSq;
+	setKeyframe -f 0.75 -v 0.85 -itt "spline" -ott "spline" $animCurveSq;
+	setKeyframe -f 1.0 -v 1.0 -itt "flat" -ott "flat" $animCurveSq;
+	connectAttr -f ($animCurveSq+".message") ($creator+".msgAnimCurveSq") ;
+	connectAttr -f ($animCurveSq+".output") ($creator+".animCurveOutputSq") ;
+	// St
+	string $animCurveSt = `createNode animCurveUU -n ("animCurveUU_St_"+$creator)` ;
+	setKeyframe -f 0.0 -v 0.0 -itt "flat" -ott "flat" $animCurveSt;
+	setKeyframe -f 0.25 -v 0.15 -itt "spline" -ott "spline" $animCurveSt;
+	setKeyframe -f 0.75 -v 0.85 -itt "spline" -ott "spline" $animCurveSt;
+	setKeyframe -f 1.0 -v 1.0 -itt "flat" -ott "flat" $animCurveSt;
+	connectAttr -f ($animCurveSt+".message") ($creator+".msgAnimCurveSt") ;
+	connectAttr -f ($animCurveSt+".output") ($creator+".animCurveOutputSt") ;
+
+
+
+
+	// Connect stuff up!
+	connectAttr -f ("time1.outTime") ($creator+".inTime") ;
+	connectAttr -f ($attaches[0]+".worldMatrix") ($creator+".startPointA") ;
+	connectAttr -f ($attaches[1]+".worldMatrix") ($creator+".startPointB") ;
+	connectAttr -f ($attaches[2]+".worldMatrix") ($creator+".endPointA") ;
+	connectAttr -f ($attaches[3]+".worldMatrix") ($creator+".endPointB") ;
+
+	// Fake start/end control data too...internally this get done right, but we need to grow array and such here
+//	connectAttr -f ($attaches[0]+".worldMatrix") ($creator+".controlData[0].insertMatrix") ;
+//	connectAttr -f ($attaches[2]+".worldMatrix") ($creator+".controlData["+($nMidControls+1)+"].insertMatrix") ;
+	connectAttr -f ($startParent+".worldMatrix") ($creator+".controlData[0].insertMatrix") ;
+	connectAttr -f ($endParent+".worldMatrix") ($creator+".controlData["+($nMidControls+1)+"].insertMatrix") ;
+
+	connectAttr -f ($startParent+".worldMatrix") ($creator+".startParent") ;
+	connectAttr -f ($endParent+".worldMatrix") ($creator+".endParent") ;
+
+
+	connectAttr -f ($creator+".outNurbs") ($surf+".create") ;
+
+	// Set attrs nice
+	setAttr -l 1 ($creator+".MODEL") ;
+	setAttr -l 1 ($creator+".SQUASH_STRETCH") ;
+	setAttr -l 1 ($creator+".JIGGLE") ;
+
+	float $defLen = `getAttr ($creator+".outLength")` ;
+	setAttr ($creator+".lenDefault") $defLen ;
+	setAttr ($creator+".lenSquash") (0.5*$defLen) ;
+	setAttr ($creator+".lenStretch") (2.0*$defLen) ;
+
+	setAttr ($creator+".crossSections") ( 2 * $nMidControls ) ;
+	setAttr ($creator+".sides") ( $nAround ) ;
+
+	// Material time!
+	cMuscle_makeMuscleMaterial() ;		// Make material if it doesn't exist.
+
+	// Apply material
+    select -r $surf ;
+    sets -e -forceElement ("matMuscleCreatorSG");
+
+	// Make it have a Red wireframe color.
+	setAttr ($surf+".overrideEnabled") 1 ;
+	setAttr ($surf+".overrideColor") 13 ;
+
+	// Now set it up as a cMuscleObject shape too if desired...
+	if ($bMakeMO)
+		{
+		select -r $xform ;
+		string $mOs[] = cMuscle_makeMuscle(0) ;
+		}
+
+	select -r $xform $creator ;
+
+	return {$creator, $xform, $surf} ;
+}
+
+/*
+ * cMuscle_createCreatorLocsCB() - Creates 4 locators for a muscle to attach to
+ *		so the user doesn't have to make them by hand.
+ */
+global proc aMuscle_createCreatorLocsCB(string $baseName, string $attachStart, string $attachEnd)
+{
+	string $locStart1s[] = `spaceLocator -n ("loc"+$baseName+"Start1")` ;
+	string $locStart1 = $locStart1s[0] ;
+	string $locStart2s[] = `spaceLocator -n ("loc"+$baseName+"Start2")` ;
+	string $locStart2 = $locStart2s[0] ;
+	string $locEnd1s[] = `spaceLocator -n ("loc"+$baseName+"End1")` ;
+	string $locEnd1 = $locEnd1s[0] ;
+	string $locEnd2s[] = `spaceLocator -n ("loc"+$baseName+"End2")` ;
+	string $locEnd2 = $locEnd2s[0] ;
+
+	if ($attachStart != "")
+		{
+		cMuscle_snap($attachStart, $locStart1) ;
+		cMuscle_snap($attachStart, $locStart2) ;
+		}
+	if ($attachEnd != "")
+		{
+		cMuscle_snap($attachEnd, $locEnd1) ;
+		cMuscle_snap($attachEnd, $locEnd2) ;
+		}
+
+    // TODO: make spread nice....
+
+    // Now to make it spread out we look at the trans value of the end relative to the start
+    // and take the smallest one as the axis...
+    // So we temporarily parent the end to the start to read
+    parent $locEnd1 $locStart1 ;
+    parent $locEnd2 $locStart2 ;
+	float $tx1 = `getAttr ($locEnd1+".tx")` ;
+	float $tx2 = `getAttr ($locEnd2+".tx")` ;
+	float $ty1 = `getAttr ($locEnd1+".ty")` ;
+	float $ty2 = `getAttr ($locEnd2+".ty")` ;
+	float $tz1 = `getAttr ($locEnd1+".tz")` ;
+	float $tz2 = `getAttr ($locEnd2+".tz")` ;
+    float $avgX = ( abs( $tx1 ) + abs( $tx2 ) ) / 2.0 ;
+    float $avgY = ( abs( $ty1 ) + abs( $ty2 ) ) / 2.0 ;
+    float $avgZ = ( abs( $tz1 ) + abs( $tz2 ) ) / 2.0 ;
+
+	// Also calc avg distance...
+	float $avgDist = ( cMuscle_objDist($locStart1, $locEnd1) + cMuscle_objDist($locStart2, $locEnd2) ) / 2.0 ;
+	float $fShift = $avgDist / 8.0 ;
+
+	float $mx=0, $my=0, $mz=0 ;
+	if ($avgX <= $avgY && $avgX <= $avgZ)
+        $mx = 1.0 ;
+	else if ($avgY <= $avgX && $avgY <= $avgZ)
+        $my = 1.0 ;
+	else
+		$mz = 1.0 ;
+
+	xform -r -os -t (-$fShift * $mx) (-$fShift * $my) (-$fShift * $mz)  $locStart1 ;
+	xform -r -os -t ( $fShift * $mx) ( $fShift * $my) ( $fShift * $mz)  $locStart2 ;
+	// Now everything is made nice...parent
+	if ($attachStart != "")
+		{
+		parent $locStart1 $locStart2 $attachStart ;
+		}
+	if ($attachEnd != "")
+		{
+		parent $locEnd1 $locEnd2 $attachEnd ;
+		}
+
+	select -r $locStart1 $locStart2 $locEnd1 $locEnd2 ;
+}
