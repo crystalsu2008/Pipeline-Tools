@@ -20,12 +20,12 @@ class PipelineSetup(object):
 
     ignore_filetype = ['.pyc']
     ignore_filename = ['__init__']
-    menu_filetype = ['.py', '.PY', '.mel', '.MEL']
+    menu_filetype = ['.py', '.PY', '.mel', '.MEL', '.div', '.DIV']
 
-    baseflags = ['name', 'l', 'c', 'type']
-    extendflags = ['file']
-    ext2Type = {'.py': 'python', '.PY': 'python', '.mel': 'mel', '.MEL': 'mel'}
-    type2ext = {'python': '.py', 'mel': '.mel'}
+    #baseflags = ['name', 'l', 'c', 'type']
+    #extendflags = ['file']
+    #ext2Type = {'.py': 'python', '.PY': 'python', '.mel': 'mel', '.MEL': 'mel'}
+    #type2ext = {'python': '.py', 'mel': '.mel'}
 
     menus={}
     mainMenu = None
@@ -183,6 +183,12 @@ class PipelineSetup(object):
                     info['c'] = 'mel.eval(\'' + menu + '\')'
                     info['file'] = menufilepath
                     info['parent'] = parent
+                elif suffix in ['.div', '.DIV']:
+                    info['type'] = 'divider'
+                    info['name'] = menu
+                    info['l'] = mel.eval('interToUI( "'+menu.split('_')[-1]+'" )')
+                    info['file'] = menufilepath
+                    info['parent'] = parent
 
                 subfile = os.path.join(namepath+'.sub')
                 if os.path.exists(subfile):
@@ -278,12 +284,21 @@ class PipelineSetup(object):
     def add_a_menucmd(self, info):
         if pm.menuItem( info['name'], ex=True ):
             pm.deleteUI( info['name'] )
-        self.menus[info['name']]={'object': pm.menuItem( info['name'], l=info['l'], p=info['parent'] )}
+        if info['type'] == 'divider':
+            self.menus[info['name']]={'object': pm.menuItem( info['name'], l=info['l'], divider=True, p=info['parent'] )}
+        else:
+            self.menus[info['name']]={'object': pm.menuItem( info['name'], l=info['l'], p=info['parent'] )}
         self.menus[info['name']]['type'] = info['type']
         self.menus[info['name']]['file'] = info['file']
 
         if 'c' in info:
             pm.menuItem( info['name'], e=True, c=info['c'] )
+
+    def updateMenu(self):
+        for k, menu in self.menus.iteritems():
+            filepath = menu['file'] if menu.has_key('file') else menu['dir']
+            if not os.path.exists(filepath):
+                pass
 
     def createMenu(self):
         self.menus.clear()
@@ -372,19 +387,6 @@ class PipelineSetup(object):
     #             + "from "+self.repositoryName+".pipelineStartup import *\n" \
     #             + "reload ("+self.repositoryName+".pipelineStartup)\n"
     #     return refreshCmd
-
-    # def install3rd(self):
-    #     the3rdSour = os.path.join(self.source, '3rd')
-    #     the3rdDest = os.path.join(self.destination, '3rd')
-    #     if not os.path.exists(the3rdDest):
-    #         os.mkdir(the3rdDest)
-    #
-    #     for root, dirs, files in os.walk(the3rdSour):
-    #         for the3rdfile in files:
-    #             suffix = os.path.splitext(the3rdfile)[-1]
-    #             if suffix in ['.py', '.PY', '.inf', '.INF', '.mel', '.MEL']:
-    #                 shutil.copy(os.path.join(root, the3rdfile),\
-    #                             os.path.join(the3rdDest, the3rdfile))
 
     def pipelineStartup_py(self, refresh=False):
         startupCmd = 'import sys, os, shutil\n'

@@ -1,2 +1,0 @@
-'AdvancedSkeleton5.2.0' '\\ART_DS216\Resource\Software\CG\Maya\AdvancedSkeleton\5.2.0'
-'AdvancedSkeleton5.2.3' '\\ART_DS216\Resource\Software\CG\Maya\AdvancedSkeleton\5.2.3'

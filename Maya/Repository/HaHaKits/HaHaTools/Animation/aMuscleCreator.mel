@@ -41,8 +41,6 @@ global proc string[] aMuscle_createCreatorMuscleFromSel(string $baseName, int $n
 		$nSel = size($origSel) ;
 		}
 
-    return {""};
-
 	string $attaches[] ;
 	int $a = 0 ;
 	int $i ;
