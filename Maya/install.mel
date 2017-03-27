@@ -17,7 +17,7 @@ proc string getPiplineToolsInstallDestination(int $InstallToVersionDir)
   if ($InstallToVersionDir)
   {
     $dest = dirname(`internalVar -upd`);
-    $dest = toNativePath($dest+"scripts");
+    $dest = toNativePath($dest+"/scripts");
   }
   else
   {
