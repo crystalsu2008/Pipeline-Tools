@@ -1,4 +1,4 @@
-global proc asTransferSkinUnreal ()
+global proc HH_asTransferSkinUnreal ()
 {
 if (!`asConfirmIfNotInBuildPose`)
 	return;

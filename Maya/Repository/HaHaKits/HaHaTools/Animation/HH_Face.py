@@ -14,7 +14,17 @@ def HH_Face(name='HHExpr', textScale=10, font='Times New Roman|h-13|w400|c0'):
                  'B_M_P':    {'label': 'b_m_p',    'tar': 'Mouth_B_M_P'   },
                  'F_V':      {'label': 'f_v',      'tar': 'Mouth_F_V'     },
                  'O':        {'label': 'o',        'tar': 'Mouth_O'       },
+                 'U_Tongue': {'label': 'u_tongue', 'tar': 'Mouth_UTongue' },
                  'Kiss':     {'label': 'kiss',     'tar': 'Mouth_Kiss'    }}
+
+    pronTargsx = [{'label': 'zcdnrstx', 'tar': 'Mouth_ZCDNRSTX'},
+                  {'label': 'a_e_i',    'tar': 'Mouth_A_E_I'   },
+                  {'label': 'u_w',      'tar': 'Mouth_U_W'     },
+                  {'label': 'b_m_p',    'tar': 'Mouth_B_M_P'   },
+                  {'label': 'f_v',      'tar': 'Mouth_F_V'     },
+                  {'label': 'o',        'tar': 'Mouth_O'       },
+                  {'label': 'u_tongue', 'tar': 'Mouth_UTongue' },
+                  {'label': 'kiss',     'tar': 'Mouth_Kiss'    }]
 
     handles = {'Jaw': {'points': [(0, -7, 0),
                                  (-0.794751475, -7, 0),
@@ -218,7 +228,7 @@ def HH_Face(name='HHExpr', textScale=10, font='Times New Roman|h-13|w400|c0'):
 
     exprBlender = None
     if pm.objExists(baseMesh):
-        exprBlender = pm.blendShape( 'Head_Mesh' )[0]
+        exprBlender = pm.blendShape( 'Head_Mesh', foc=True )[0]
     else:
         pm.warning('The base mesh "'+targets['Base']['tar']+'" does not exists!!!')
         return
@@ -353,6 +363,13 @@ def HH_Face(name='HHExpr', textScale=10, font='Times New Roman|h-13|w400|c0'):
     xpos = bbox[0] - hbox[3] - .2*(bbox[3]-bbox[0])
     ypos = bbox[1] - hbox[1]
     pm.setAttr((headGrp_curve+".t"), (xpos, ypos, 0))
+
+    # Create Tongue Blender
+    TongueBlender = pm.blendShape( 'Tongue_Expr', 'Tongue' )[0]
+
+    UTongueBlender = pm.blendShape( 'Tongue_Mouth_UTongue', 'Tongue', foc=True )[0]
+    pm.setDrivenKeyframe(UTongueBlender+".Tongue_Mouth_UTongue", cd='Slideru_tongue.tx', dv=0, v=0, itt='linear', ott='linear', )
+    pm.setDrivenKeyframe(UTongueBlender+".Tongue_Mouth_UTongue", cd='Slideru_tongue.tx', dv=50, v=1, itt='linear', ott='linear', )
 
 def facialHandles(name, handles, handleRules, targs):
     # Create headGrp Curve

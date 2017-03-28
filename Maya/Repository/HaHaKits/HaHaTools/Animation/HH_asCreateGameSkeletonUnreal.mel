@@ -1,4 +1,4 @@
-global proc asCreateGameSkeletonUnreal ()
+global proc HH_asCreateGameSkeletonUnreal ()
 {
 if (!`asConfirmIfNotInBuildPose`)
 	return;

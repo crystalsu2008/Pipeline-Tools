@@ -167,6 +167,7 @@ class PipelineSetup(object):
             info['dir'] = namepath
             info['parent'] = parent
             info['sub'] = False
+            info['hide'] = os.path.exists(os.path.join(namepath+'.hid'))
         else:
             if menu not in self.ignore_filename and suffix in self.menu_filetype:
                 if suffix in ['.py', '.PY']:
@@ -198,6 +199,7 @@ class PipelineSetup(object):
                     info.pop('c')
                 else:
                     info['sub'] = False
+                info['hide'] = os.path.exists(os.path.join(namepath+'.hid'))
             else:
                 info = None
         return info
@@ -243,6 +245,7 @@ class PipelineSetup(object):
                     info['parent'] = parentInfo['name']
                     info['type'] = 'python'
                     info['c'] = menu+'.'+function+'()'
+                    info['hide'] = True
                     subinfo.append(info)
         elif suffix in ['.mel', '.MEL']:
             for eachLine in analyzfile:
@@ -255,6 +258,7 @@ class PipelineSetup(object):
                     info['parent'] = parentInfo['name']
                     info['type'] = 'mel'
                     info['c'] = 'mel.eval(\'' + function + '\')'
+                    info['hide'] = True
                     subinfo.append(info)
         return subinfo
 
@@ -288,17 +292,18 @@ class PipelineSetup(object):
             self.menus[info['name']]={'object': pm.menuItem( info['name'], l=info['l'], divider=True, p=info['parent'] )}
         else:
             self.menus[info['name']]={'object': pm.menuItem( info['name'], l=info['l'], p=info['parent'] )}
-        self.menus[info['name']]['type'] = info['type']
-        self.menus[info['name']]['file'] = info['file']
-
         if 'c' in info:
             pm.menuItem( info['name'], e=True, c=info['c'] )
+        self.menus[info['name']]['type'] = info['type']
+        self.menus[info['name']]['file'] = info['file']
+        if info['hide'] :
+            pm.deleteUI( self.menus[info['name']]['object'] )
 
-    def updateMenu(self):
-        for k, menu in self.menus.iteritems():
-            filepath = menu['file'] if menu.has_key('file') else menu['dir']
-            if not os.path.exists(filepath):
-                pass
+    # def updateMenu(self):
+    #     for k, menu in self.menus.iteritems():
+    #         filepath = menu['file'] if menu.has_key('file') else menu['dir']
+    #         if not os.path.exists(filepath):
+    #             pass
 
     def createMenu(self):
         self.menus.clear()
