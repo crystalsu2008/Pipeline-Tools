@@ -367,8 +367,10 @@ def HH_Face(name='HHExpr', textScale=10, font='Times New Roman|h-13|w400|c0'):
 
     # Create U-Tongue Blender
     UTongueBlender = pm.blendShape( 'Tongue_Mouth_UTongue', 'Tongue', foc=True )[0]
-    pm.setDrivenKeyframe(UTongueBlender+".Tongue_Mouth_UTongue", cd='Slideru_tongue.tx', dv=0, v=0, itt='linear', ott='linear', )
-    pm.setDrivenKeyframe(UTongueBlender+".Tongue_Mouth_UTongue", cd='Slideru_tongue.tx', dv=50, v=1, itt='linear', ott='linear', )
+    aliasMel = 'blendShapeRenameTargetAlias '+UTongueBlender+' 0 "u_tongue";'
+    mel.eval(aliasMel)
+    pm.setDrivenKeyframe(UTongueBlender+".u_tongue", cd='Slideru_tongue.tx', dv=0, v=0, itt='linear', ott='linear', )
+    pm.setDrivenKeyframe(UTongueBlender+".u_tongue", cd='Slideru_tongue.tx', dv=50, v=1, itt='linear', ott='linear', )
 
 def facialHandles(name, handles, handleRules, targs):
     # Create headGrp Curve
