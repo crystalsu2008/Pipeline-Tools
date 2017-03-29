@@ -7,24 +7,7 @@ def HH_Face(name='HHExpr', textScale=10, font='Times New Roman|h-13|w400|c0'):
     p=0
 
     baseMesh = 'Head_Mesh'
-
-    pronTargs = {'ZCDNRSTX': {'label': 'zcdnrstx', 'tar': 'Mouth_ZCDNRSTX'},
-                 'A_E_I':    {'label': 'a_e_i',    'tar': 'Mouth_A_E_I'   },
-                 'U_W':      {'label': 'u_w',      'tar': 'Mouth_U_W'     },
-                 'B_M_P':    {'label': 'b_m_p',    'tar': 'Mouth_B_M_P'   },
-                 'F_V':      {'label': 'f_v',      'tar': 'Mouth_F_V'     },
-                 'O':        {'label': 'o',        'tar': 'Mouth_O'       },
-                 'U_Tongue': {'label': 'u_tongue', 'tar': 'Mouth_UTongue' },
-                 'Kiss':     {'label': 'kiss',     'tar': 'Mouth_Kiss'    }}
-
-    pronTargsx = [{'label': 'zcdnrstx', 'tar': 'Mouth_ZCDNRSTX'},
-                  {'label': 'a_e_i',    'tar': 'Mouth_A_E_I'   },
-                  {'label': 'u_w',      'tar': 'Mouth_U_W'     },
-                  {'label': 'b_m_p',    'tar': 'Mouth_B_M_P'   },
-                  {'label': 'f_v',      'tar': 'Mouth_F_V'     },
-                  {'label': 'o',        'tar': 'Mouth_O'       },
-                  {'label': 'u_tongue', 'tar': 'Mouth_UTongue' },
-                  {'label': 'kiss',     'tar': 'Mouth_Kiss'    }]
+    baseTongue = 'Tongue'
 
     handles = {'Jaw': {'points': [(0, -7, 0),
                                  (-0.794751475, -7, 0),
@@ -226,18 +209,36 @@ def HH_Face(name='HHExpr', textScale=10, font='Times New Roman|h-13|w400|c0'):
                             'LowerEyelid_Look_Up': 'LowerEyelid_Look_Up',
                                 'UpperEyelid_Look_Down': 'UpperEyelid_Look_Down'}
 
+    # Create Expressions Blender
+    #
     exprBlender = None
     if pm.objExists(baseMesh):
-        exprBlender = pm.blendShape( 'Head_Mesh', foc=True )[0]
+        exprBlender = pm.blendShape( baseMesh, foc=True )[0]
     else:
         pm.warning('The base mesh "'+targets['Base']['tar']+'" does not exists!!!')
         return
 
     expressionCtrl_rootGrp = pm.group( em=True, name=name+'_contrals' )
 
+    # Create Tongue Blender
+    #
+    TongueBlender = pm.blendShape( 'Tongue' )[0]
+
+    # Build Pronounciation and Tongue Data
+    #
+    pronTargs = [{'label': 'zcdnrstx', 'baseMesh': baseMesh,   'blender': exprBlender,   'tar': 'Mouth_ZCDNRSTX'},
+                 {'label': 'a_e_i',    'baseMesh': baseMesh,   'blender': exprBlender,   'tar': 'Mouth_A_E_I'   },
+                 {'label': 'u_w',      'baseMesh': baseMesh,   'blender': exprBlender,   'tar': 'Mouth_U_W'     },
+                 {'label': 'b_m_p',    'baseMesh': baseMesh,   'blender': exprBlender,   'tar': 'Mouth_B_M_P'   },
+                 {'label': 'f_v',      'baseMesh': baseMesh,   'blender': exprBlender,   'tar': 'Mouth_F_V'     },
+                 {'label': 'o',        'baseMesh': baseMesh,   'blender': exprBlender,   'tar': 'Mouth_O'       },
+                 {'label': 'kiss',     'baseMesh': baseMesh,   'blender': exprBlender,   'tar': 'Mouth_Kiss'    },
+                 {'label': 'u_tongue', 'baseMesh': baseMesh,   'blender': exprBlender,   'tar': 'Mouth_UTongue' },
+                 {'label': 'tongue',   'baseMesh': baseTongue, 'blender': TongueBlender, 'tar': 'Tongue_Expr'   }]
+
     # Create Pronounciation Controls
     #
-    pronounciation_grp, p = pronExpression(p, name, exprBlender, baseMesh, textScale, font, pronTargs)
+    pronounciation_grp, p = pronExpression(p, name, textScale, font, pronTargs)
     pm.parent(pronounciation_grp, expressionCtrl_rootGrp)
 
     # Create Facial Handles
@@ -364,9 +365,7 @@ def HH_Face(name='HHExpr', textScale=10, font='Times New Roman|h-13|w400|c0'):
     ypos = bbox[1] - hbox[1]
     pm.setAttr((headGrp_curve+".t"), (xpos, ypos, 0))
 
-    # Create Tongue Blender
-    TongueBlender = pm.blendShape( 'Tongue_Expr', 'Tongue' )[0]
-
+    # Create U-Tongue Blender
     UTongueBlender = pm.blendShape( 'Tongue_Mouth_UTongue', 'Tongue', foc=True )[0]
     pm.setDrivenKeyframe(UTongueBlender+".Tongue_Mouth_UTongue", cd='Slideru_tongue.tx', dv=0, v=0, itt='linear', ott='linear', )
     pm.setDrivenKeyframe(UTongueBlender+".Tongue_Mouth_UTongue", cd='Slideru_tongue.tx', dv=50, v=1, itt='linear', ott='linear', )
@@ -487,16 +486,11 @@ def facialBlender(p, name, blender, baseMesh, targs):
             pm.warning('The target mesh "'+expr['tar']+'" does not exists! Skiped.')
     return p
 
-def pronExpression(p, name, blender, baseMesh, textScale, font, targs, offset=-12):
+def pronExpression(p, name, textScale, font, targs, offset=-12):
     pronounciationGrp = pm.group(em=True, name=name+'_pronGrp')
     ty = 0
-    for pronName, expr in targs.iteritems():
+    for expr in targs:
         if pm.objExists(expr['tar']):
-            pm.blendShape(blender, e=True, t=(baseMesh, p, expr['tar'], 1.0))
-            aliasMel = 'blendShapeRenameTargetAlias '+blender+' '+str(p)+' '+expr['label']+';'
-            mel.eval(aliasMel)
-            #pm.aliasAttr(expr['label'], blender+'.w['+str(idx)+']')
-
             Slider_Dock = sliderDock_curve('Slider_Dock'+expr['label'])
             titleCurve = sliderLabel_curve(expr['label'], (-20.25, 0, 0), textScale, font)
             SlideSlot = slideSlot_curve('Slider_Slot'+expr['label'])
@@ -518,16 +512,28 @@ def pronExpression(p, name, blender, baseMesh, textScale, font, targs, offset=-1
             pm.setAttr((Slider+'.sz'), l=True, k=False, cb=False)
             pm.setAttr((Slider+'.v'), l=True, k=False, cb=False)
 
+            blender = expr['blender']
+            if expr['label'] == 'tongue':
+                pm.blendShape(blender, e=True, t=(expr['baseMesh'], 0, expr['tar'], 1.0))
+                aliasMel = 'blendShapeRenameTargetAlias '+blender+' 0 '+expr['label']+';'
+                mel.eval(aliasMel)
+                pm.setAttr((Slider+'.tx'), 50)
+            else:
+                pm.blendShape(blender, e=True, t=(expr['baseMesh'], p, expr['tar'], 1.0))
+                aliasMel = 'blendShapeRenameTargetAlias '+blender+' '+str(p)+' '+expr['label']+';'
+                mel.eval(aliasMel)
+                p += 1
+
             pm.setDrivenKeyframe(blender+"."+expr['label'], cd=Slider+'.tx', dv=0, v=0, itt='linear', ott='linear', )
             pm.setDrivenKeyframe(blender+"."+expr['label'], cd=Slider+'.tx', dv=50, v=1, itt='linear', ott='linear', )
 
             pm.setAttr((Slider_Dock+".t"), (0, ty, 0))
             ty += offset
-            p += 1
+
         else:
             pm.warning('The target mesh "'+expr['tar']+'" does not exists! Skiped.')
 
-    bbox = pm.exactWorldBoundingBox(baseMesh)
+    bbox = pm.exactWorldBoundingBox(targs[0]['baseMesh'])
     hbox = pm.exactWorldBoundingBox(pronounciationGrp)
     xpos = bbox[3] - hbox[0] + .2*(bbox[3]-bbox[0])
     ypos = bbox[1] - hbox[1]
