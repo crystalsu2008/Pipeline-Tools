@@ -29,7 +29,7 @@ for ($i=0;$i<size($destJoints);$i++)
 		error ("A object with the name \""+$destJoints[$i]+"\" already exists, rename this to another name first.");
 		}
 
-string $unrealFile=`asGetScriptLocation`+"/AdvancedSkeleton5Files/div/asUnreal.ma";
+string $unrealFile=`asGetScriptLocation`+"/AdvancedSkeleton5Files/div/hhasUnreal.ma";
 if (!`file -q -ex $unrealFile`)
 	error ("Not found:"+$unrealFile);
 file -i $unrealFile;
@@ -263,6 +263,48 @@ if (`objExists Head_M`)
 	setAttr head_orientConstraint1.offsetX 180;
 	}
 
+if (`objExists tongue1_M`)
+	{
+	pointConstraint tongue1_M tongue01;
+	orientConstraint tongue1_M tongue01;
+	//setAttr neck_01_orientConstraint1.offsetX 180;
+	}
+if (`objExists tongue2_M`)
+    {
+    pointConstraint tongue2_M tongue02;
+    orientConstraint tongue2_M tongue02;
+    //setAttr neck_01_orientConstraint1.offsetX 180;
+    }
+if (`objExists tongue3_M`)
+    {
+    pointConstraint tongue3_M tongue03;
+    orientConstraint tongue3_M tongue03;
+    //setAttr neck_01_orientConstraint1.offsetX 180;
+    }
+if (`objExists tongue4_M`)
+    {
+    pointConstraint tongue4_M tongue04;
+    orientConstraint tongue4_M tongue04;
+    //setAttr neck_01_orientConstraint1.offsetX 180;
+    }
+if (`objExists tongue5_M`)
+    {
+    pointConstraint tongue5_M tongue05;
+    orientConstraint tongue5_M tongue05;
+    //setAttr neck_01_orientConstraint1.offsetX 180;
+    }
+if (`objExists tongue6_M`)
+    {
+    pointConstraint tongue6_M tongue06;
+    orientConstraint tongue6_M tongue06;
+    //setAttr neck_01_orientConstraint1.offsetX 180;
+    }
+if (`objExists tongue7_M`)
+    {
+    pointConstraint tongue7_M tongue07;
+    orientConstraint tongue7_M tongue07;
+    //setAttr neck_01_orientConstraint1.offsetX 180;
+    }
 select -cl;
 print ("// GameSkeleton created\n");
 }

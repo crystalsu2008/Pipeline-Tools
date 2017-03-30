@@ -1,14 +1,16 @@
-global proc HH_asTransferSkinUnreal ()
+global proc HH_asTransferSkinUnreal_jointTongue ()
 {
 if (!`asConfirmIfNotInBuildPose`)
 	return;
 
 string $scs[]=`ls -type skinCluster`;
 string $deformJointsList[]=`sets -q "DeformSet"`;
-string $sourceJoints[]={"Root_M","Spine1_M","RootPart1_M","Chest_M","Neck_M","Head_M"};
+string $sourceJoints[]={"Root_M","Spine1_M","RootPart1_M","Chest_M","Neck_M","Head_M",
+                        "tongue1_M","tongue2_M","tongue3_M","tongue4_M","tongue5_M","tongue6_M","tongue7_M","tongue8_M"};
 if (`objExists Spine2_M`)
     $sourceJoints[2] = "Spine2_M";
-string $destJoints[]={"pelvis","spine_01","spine_02","spine_03","neck_01","head"};
+string $destJoints[]={"pelvis","spine_01","spine_02","spine_03","neck_01","head",
+                      "tongue01","tongue02","tongue03","tongue04","tongue05","tongue06","tongue07","tongue08"};
 string $scps[],$sideSourceJoints[],$sideDestJoints[];
 string $SIDE="_R";
 string $side="_r";
@@ -65,12 +67,14 @@ for ($i=0;$i<size($scs);$i++)
 for ($i=0;$i<size($scs);$i++)
 	freezeSkinCluster $scs[$i];
 
-if (`objExists "Tongue_Expr"`)
-    setAttr "Tongue_Expr.visibility" 1;
 if (`objExists "Tongue"`)
-    delete "Tongue";
-if (`objExists "tongue01"`)
-    delete "tongue01";
+    {
+    string $tongueShape[] = `listRelatives -c -s "Tongue"`;
+    string $blendNode[] = `listConnections -t "blendShape" $tongueShape[0]`;
+    delete $blendNode;
+    }
+if (`objExists "Tongue_Expr"`)
+    delete "Tongue_Expr";
 
 dgdirty -a;
 print ("// Skinning transferred to Unreal Skeleton\n");
