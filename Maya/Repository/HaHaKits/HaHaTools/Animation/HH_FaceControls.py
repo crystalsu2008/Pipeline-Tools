@@ -2,7 +2,7 @@ import pymel.core as pm
 import maya.mel as mel
 #import freezeToOrigin
 
-def HH_Face(name='HHExpr', textScale=10, font='Times New Roman|h-13|w400|c0'):
+def HH_FaceControls(name='HHExpr_', textScale=10, font='Times New Roman|h-13|w400|c0'):
 
     p=0
 
@@ -218,7 +218,7 @@ def HH_Face(name='HHExpr', textScale=10, font='Times New Roman|h-13|w400|c0'):
         pm.warning('The base mesh "'+targets['Base']['tar']+'" does not exists!!!')
         return
 
-    expressionCtrl_rootGrp = pm.group( em=True, name=name+'_contrals' )
+    expressionCtrl_rootGrp = pm.group( em=True, name=name+'contrals' )
 
     # Create Tongue Blender
     #
@@ -369,8 +369,8 @@ def HH_Face(name='HHExpr', textScale=10, font='Times New Roman|h-13|w400|c0'):
     UTongueBlender = pm.blendShape( 'Tongue_Mouth_UTongue', 'Tongue', foc=True )[0]
     aliasMel = 'blendShapeRenameTargetAlias '+UTongueBlender+' 0 "u_tongue";'
     mel.eval(aliasMel)
-    pm.setDrivenKeyframe(UTongueBlender+".u_tongue", cd='Slideru_tongue.tx', dv=0, v=0, itt='linear', ott='linear', )
-    pm.setDrivenKeyframe(UTongueBlender+".u_tongue", cd='Slideru_tongue.tx', dv=50, v=1, itt='linear', ott='linear', )
+    pm.setDrivenKeyframe(UTongueBlender+".u_tongue", cd=name+'Slideru_tongue.tx', dv=0, v=0, itt='linear', ott='linear', )
+    pm.setDrivenKeyframe(UTongueBlender+".u_tongue", cd=name+'Slideru_tongue.tx', dv=50, v=1, itt='linear', ott='linear', )
 
 def facialHandles(name, handles, handleRules, targs):
     # Create headGrp Curve
@@ -423,7 +423,7 @@ def facialHandles(name, handles, handleRules, targs):
     hbox = pm.exactWorldBoundingBox(headGrp_curve)
 
     for handName, handle in handles.iteritems():
-        handleName = name+'_'+handName
+        handleName = name+handName
         if handle.has_key('points'):
             points = handle['points']
             d = handle['d']
@@ -448,7 +448,7 @@ def facialHandles(name, handles, handleRules, targs):
             for attr in handle['lock']:
                 pm.setAttr(handleCurve+'.'+attr, l=True, k=False, cb=False)
 
-            handle_grp = pm.group(handleCurve, name=handleName+'_grp')
+            handle_grp = pm.group(handleCurve, name=handleName+'grp')
             handle['grp'] = handle_grp
             pm.setAttr(handle_grp+'.t', handle['grplocal'])
             pm.parent(handle_grp, headGrp_curve)
@@ -489,14 +489,14 @@ def facialBlender(p, name, blender, baseMesh, targs):
     return p
 
 def pronExpression(p, name, textScale, font, targs, offset=-12):
-    pronounciationGrp = pm.group(em=True, name=name+'_pronGrp')
+    pronounciationGrp = pm.group(em=True, name=name+'pronGrp')
     ty = 0
     for expr in targs:
         if pm.objExists(expr['tar']):
-            Slider_Dock = sliderDock_curve('Slider_Dock'+expr['label'])
-            titleCurve = sliderLabel_curve(expr['label'], (-20.25, 0, 0), textScale, font)
-            SlideSlot = slideSlot_curve('Slider_Slot'+expr['label'])
-            Slider = slider_curve('Slider'+expr['label'])
+            Slider_Dock = sliderDock_curve(name+'Slider_Dock'+expr['label'])
+            titleCurve = sliderLabel_curve(name+expr['label'], expr['label'], (-20.25, 0, 0), textScale, font)
+            SlideSlot = slideSlot_curve(name+'Slider_Slot'+expr['label'])
+            Slider = slider_curve(name+'Slider'+expr['label'])
 
             pm.parent(Slider, Slider_Dock)
             pm.parent(SlideSlot, Slider_Dock)
@@ -553,8 +553,8 @@ def slideSlot_curve(name):
 def sliderDock_curve(name):
     return pm.curve( n=name, d=1, p=[(-39, 5, 0), (54, 5, 0), (54, -5, 0), (-39, -5, 0), (-39, 5, 0)] )
 
-def sliderLabel_curve(label, t, s, font='Times New Roman|h-13|w400|c0'):
-    curve = pm.textCurves(n=label, ch=False, f=font, t=label)[0]
+def sliderLabel_curve(name, title, t, s, font='Times New Roman|h-13|w400|c0'):
+    curve = pm.textCurves(n=name, ch=False, f=font, t=title)[0]
     pm.setAttr(curve+'.s', (s, s, s))
     freezeToOrigin(objects=[str(curve)],cx='mid',cy='mid',cz='mid')
     pm.setAttr(curve+'.t', t)

@@ -1,6 +1,6 @@
 import pymel.core as pm
 
-def HHAS_Character():
+def HHAS_Character(name='HHAS_', exprCtrlname='HHExpr_'):
     FKSpinal = ['Main', 'RootX_M', 'FKRoot_M', 'FKSpine1_M', 'FKSpine2_M', 'FKChest_M',
                 'FKNeck_M', 'FKHead_M', 'HipSwinger_M']
     IKSpinal = ['IKSpine1_M', 'IKSpine2_M']
@@ -28,28 +28,28 @@ def HHAS_Character():
     FKIK = ['FKIKArm_R', 'FKIKArm_L', 'FKIKSpine_M', 'FKIKLeg_R', 'FKIKLeg_L', 'FKIKSplineTongue_M']
 
     pm.character(FKSpinal, IKSpinal, facial, FKArm_L, IKArm_L, FKArm_R, IKArm_R, hand_L, hand_R, IKLeg_L, FKLeg_L, IKLeg_R, FKLeg_R, FKIK,\
-                 name='HHAS_BodySet', excludeVisibility=True, excludeScale=False)
+                 name=name+'BodySet', excludeVisibility=True, excludeScale=False)
     pm.select(cl=True)
 
     # ======================================================================== #
 
-    Pronounciations = ['Sliderzcdnrstx.tx', 'Slidera_e_i.tx', 'Slideru_w.tx', 'Sliderb_m_p.tx',
-                'Sliderf_v.tx', 'Slidero.tx', 'Sliderkiss.tx', 'Slideru_tongue.tx', 'Slidertongue.tx']
+    Pronounciations = [exprCtrlname+'Sliderzcdnrstx.tx', exprCtrlname+'Slidera_e_i.tx', exprCtrlname+'Slideru_w.tx', exprCtrlname+'Sliderb_m_p.tx',
+            exprCtrlname+'Sliderf_v.tx', exprCtrlname+'Slidero.tx', exprCtrlname+'Sliderkiss.tx', exprCtrlname+'Slideru_tongue.tx', exprCtrlname+'Slidertongue.tx']
 
-    Expressions = ['HHExpr_Jaw.tx', 'HHExpr_Jaw.ty', 'HHExpr_Mouth_Smile_Depressed.ty', 'HHExpr_Mouth_Corner_R.tx', 'HHExpr_Mouth_Corner_R.ty',
-                  'HHExpr_Mouth_Corner_L.tx', 'HHExpr_Mouth_Corner_L.ty', 'HHExpr_Mouth_Jeer_L.tx', 'HHExpr_Mouth_Jeer_L.ty', 'HHExpr_Mouth_Jeer_R.tx',
-                  'HHExpr_Mouth_Jeer_R.ty', 'HHExpr_Brow_Up_Down_Out_L.ty', 'HHExpr_UpperEyelid_R.ty', 'HHExpr_Brow_Up_Angry_In_R.ty', 'HHExpr_Nose.tx',
-                  'HHExpr_Nose.ty', 'HHExpr_Nose_Up_L.ty', 'HHExpr_Nose_Up_R.ty', 'HHExpr_Nose_Enlarge.ty', 'HHExpr_UpperEyelid_L.ty',
-                  'HHExpr_Brow_Up_Down_Out_R.ty', 'HHExpr_LowerEyelid_Half_R.ty', 'HHExpr_LowerEyelid_Half_L.ty', 'HHExpr_Brow_Up_Angry_In_L.ty']
+    Expressions = [exprCtrlname+'Jaw.tx', exprCtrlname+'Jaw.ty', exprCtrlname+'Mouth_Smile_Depressed.ty', exprCtrlname+'Mouth_Corner_R.tx', exprCtrlname+'Mouth_Corner_R.ty',
+                   exprCtrlname+'Mouth_Corner_L.tx', exprCtrlname+'Mouth_Corner_L.ty', exprCtrlname+'Mouth_Jeer_L.tx', exprCtrlname+'Mouth_Jeer_L.ty', exprCtrlname+'Mouth_Jeer_R.tx',
+                   exprCtrlname+'Mouth_Jeer_R.ty', exprCtrlname+'Brow_Up_Down_Out_L.ty', exprCtrlname+'UpperEyelid_R.ty', exprCtrlname+'Brow_Up_Angry_In_R.ty', exprCtrlname+'Nose.tx',
+                   exprCtrlname+'Nose.ty', exprCtrlname+'Nose_Up_L.ty', exprCtrlname+'Nose_Up_R.ty', exprCtrlname+'Nose_Enlarge.ty', exprCtrlname+'UpperEyelid_L.ty',
+                   exprCtrlname+'Brow_Up_Down_Out_R.ty', exprCtrlname+'LowerEyelid_Half_R.ty', exprCtrlname+'LowerEyelid_Half_L.ty', exprCtrlname+'Brow_Up_Angry_In_L.ty']
 
-    pronounciationSet = pm.character(em=True, name='HHAS_PronounciationSet')
+    pronounciationSet = pm.character(em=True, name=name+'PronounciationSet')
     for pron in Pronounciations:
         if pm.objExists(pron):
             pm.character(pron, add=pronounciationSet)
 
-    expressionSet = pm.character(em=True, name='HHAS_ExpressionSet')
+    expressionSet = pm.character(em=True, name=name+'ExpressionSet')
     for expr in Expressions:
         if pm.objExists(expr):
             pm.character(expr, add=expressionSet)
 
-    pm.character( pronounciationSet, expressionSet, n='HHAS_FaceSet' )
+    pm.character( pronounciationSet, expressionSet, n=name+'FaceSet' )
