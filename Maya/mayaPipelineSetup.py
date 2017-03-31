@@ -245,7 +245,7 @@ class PipelineSetup(object):
                     info['parent'] = parentInfo['name']
                     info['type'] = 'python'
                     info['c'] = menu+'.'+function+'()'
-                    info['hide'] = True
+                    info['hide'] = False
                     subinfo.append(info)
         elif suffix in ['.mel', '.MEL']:
             for eachLine in analyzfile:
@@ -258,7 +258,7 @@ class PipelineSetup(object):
                     info['parent'] = parentInfo['name']
                     info['type'] = 'mel'
                     info['c'] = 'mel.eval(\'' + function + '\')'
-                    info['hide'] = True
+                    info['hide'] = False
                     subinfo.append(info)
         return subinfo
 
