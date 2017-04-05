@@ -24,34 +24,88 @@ def HH_ComplexBlender(poses=None,
                 return
 
     if not geometries:
-        meshs = pm.listRelatives(pm.ls(sl=True), typ='mesh')
-        validMesh = [x for x in meshs if not pm.getAttr(x+'.intermediateObject')]
-        nurbses = pm.listRelatives(pm.ls(sl=True), typ='nurbsSurface')
-        validNurbs = [x for x in nurbses if not pm.getAttr(x+'.intermediateObject')]
-        geometries = validMesh + validNurbs
-        if not geometries:
-            pm.warning( "Please at least selected one valid geometry!" )
-            return
+        geometries = pm.ls(sl=True)
+    meshs = filterMeshs(geometries)
+    nurbses = filterNurbs(geometries)
+    if not meshs and not nurbses:
+        pm.warning( "Please at least selected one valid geometry!" )
+        return
 
     #complexExprGrp = pm.group( em=True, name='Complex_Experssions' )
-    print geometries
     expressions = {}
-    for geo in geometries:
-        expressions[str(geo)] = {'geometry': geo, 'group': pm.group(em=True, name=geo), 'poses': {}}
+    if meshs:
+        for mesh in meshs:
+            expressions[str(mesh)] = {'geometry': mesh, 'type':'mesh', 'group': pm.group(em=True, name=mesh), 'poses': {}}
+            expressions[str(mesh)]['blendShapes'] = searchNodes(mesh, 'blendShape')
+            print expressions[str(mesh)]['blendShapes']
+            # , ['joint','animCurveUU','animCurveTL','transform','animClip'], True)
+    if nurbses:
+        for nurbs in nurbses:
+            expressions[str(nurbs)] = {'geometry': nurbs, 'type':'nurbs', 'group': pm.group(em=True, name=nurbs), 'poses': {}}
+            expressions[str(nurbs)]['blendShapes'] = searchNodes(nurbs, 'blendShape')
 
+    poseMove = 0
     for pose in poses:
+        poseMoveAdd = 0
+        poseGeos = []
         for char in characters:
             pm.pose(char, a=True, n=pose)
             pm.refresh()
-#         for geo in geometries:
-#             dupPose = pm.duplicate(geo, po=True)
-#             pm.parent(dupPose, expressions[str(geo)]['group'])
-#             expressions[str(geo)]['poses'][pose] = dupPose
-#
-#
-# def copyMesh(mesh):
-#     if not pm.nodeType(mesh) == mesh:
-#         mesh = pm.listRelatives(mesh, typ='mesh')[0]
-#
-#     string $cube[] = `polyCube -w 1 -h 1 -d 1 -sx 1 -sy 1 -sz 1 -ax 0 1 0 -cuv 4 -ch 0`;
-#     pm.polyCube(w=1, h=1, d=1, sx=1, sy=1,)
+        for geo, exprData in expressions.iteritems():
+            if exprData['type'] == 'mesh':
+                dupPose = copyMesh(exprData['geometry'], pose)
+            elif exprData['type'] == 'nurbs':
+                dupPose = copyNurbs(exprData['geometry'], pose)
+
+            bbox = pm.exactWorldBoundingBox(dupPose)
+            poseMoveAdd = bbox[3] if bbox[3] > poseMoveAdd else poseMoveAdd
+            poseGeos.append(dupPose)
+
+            pm.parent(dupPose, exprData['group'])
+            exprData['poses'][pose] = dupPose
+
+        poseMove += poseMoveAdd*2.1
+        pm.move(poseMove, poseGeos, x=True)
+
+
+def searchNodes(innode, searchNodeType, marked=[]):
+    sourceNodes = pm.listConnections(innode, d=False, s=True, scn=True)
+    sourceNodes = list(set(sourceNodes).difference(set(marked)))
+    marked.extend(sourceNodes)
+    nodes = []
+    for node in sourceNodes:
+        if pm.nodeType(node) == searchNodeType:
+            nodes.append( node )
+        nodes.extend( searchNodes(node, searchNodeType, marked) )
+    return nodes
+
+def copyMesh(mesh, poseName=''):
+    cube = pm.polyCube(w=1, h=1, d=1, sx=1, sy=1, sz=1, ax=(0,1,0), cuv=4, ch=0)[0]
+    cubeShape = pm.listRelatives(cube, c=True, s=True)[0]
+    pm.connectAttr(mesh+'.outMesh', cubeShape+'.inMesh', f=True)
+    pm.delete(cube, ch=True)
+    return pm.rename(cube, mesh+'_'+poseName)
+
+def copyNurbs(nurbs, poseName=''):
+    sphere = pm.sphere(r=10, ch=0)[0]
+    sphereShape = pm.listRelatives(sphere, c=True, s=True)[0]
+    pm.connectAttr(nurbs+'.worldSpace[0]', sphereShape+'.create', f=True)
+    pm.delete(sphere, ch=True)
+    return pm.rename(sphere, nurbs+'_'+poseName)
+
+
+def filterMeshs(objs):
+    meshs = pm.ls(objs, type='mesh')
+    trans = pm.ls(objs, type='transform')
+    if trans:
+        validMeshs = [x for x in pm.listRelatives(trans, typ='mesh') if not pm.getAttr(x+'.intermediateObject')]
+        meshs.extend(validMeshs)
+    return meshs if meshs else None
+
+def filterNurbs(objs):
+    nurbses = pm.ls(objs, type='nurbsSurface')
+    trans = pm.ls(objs, type='transform')
+    if trans:
+        validNurbses = [x for x in pm.listRelatives(trans, typ='nurbsSurface') if not pm.getAttr(x+'.intermediateObject')]
+        nurbses.extend(validNurbses)
+    return nurbses if nurbses else None
