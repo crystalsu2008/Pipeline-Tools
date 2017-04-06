@@ -1,8 +1,12 @@
 import pymel.core as pm
+import maya.mel as mel
 
 def HH_ComplexBlender(poses=None,
                       characters=['HHAS_PronounciationSet','HHAS_ExpressionSet','HHAS_FaceSet'],
                       geometries=None):
+
+    # Prepare Selected Objects
+    #
     if not poses:
         clips = pm.ls(sl=True, type='animClip')
         if not clips:
@@ -31,20 +35,27 @@ def HH_ComplexBlender(poses=None,
         pm.warning( "Please at least selected one valid geometry!" )
         return
 
-    #complexExprGrp = pm.group( em=True, name='Complex_Experssions' )
+    # Build Experssion Data
+    #
     expressions = {}
+    blendShapes = []
     if meshs:
         for mesh in meshs:
-            expressions[str(mesh)] = {'geometry': mesh, 'type':'mesh', 'group': pm.group(em=True, name=mesh), 'poses': {}}
-            expressions[str(mesh)]['blendShapes'] = searchNodes(mesh, 'blendShape')
-            print expressions[str(mesh)]['blendShapes']
-            # , ['joint','animCurveUU','animCurveTL','transform','animClip'], True)
+            expressions[str(mesh)] = {'geometry': mesh, 'type':'mesh', 'group': pm.group(em=True, name=mesh), 'poses': []}
+            exceptType = ['joint','animCurveUU','animCurveTL','transform','animClip','groupId','objectSet']
+            expressions[str(mesh)]['blendShapes'] = searchNodes(mesh, 'blendShape', exceptType)
+            blendShapes.extend(expressions[str(mesh)]['blendShapes'])
     if nurbses:
         for nurbs in nurbses:
-            expressions[str(nurbs)] = {'geometry': nurbs, 'type':'nurbs', 'group': pm.group(em=True, name=nurbs), 'poses': {}}
-            expressions[str(nurbs)]['blendShapes'] = searchNodes(nurbs, 'blendShape')
+            expressions[str(nurbs)] = {'geometry': nurbs, 'type':'nurbs', 'group': pm.group(em=True, name=nurbs), 'poses': []}
+            exceptType = ['joint','animCurveUU','animCurveTL','transform','animClip','groupId','objectSet']
+            expressions[str(nurbs)]['blendShapes'] = searchNodes(nurbs, 'blendShape', exceptType)
+            blendShapes.extend(expressions[str(nurbs)]['blendShapes'])
 
+    # Duplicate Experssion Pose
+    #
     poseMove = 0
+    number = 0
     for pose in poses:
         poseMoveAdd = 0
         poseGeos = []
@@ -62,21 +73,37 @@ def HH_ComplexBlender(poses=None,
             poseGeos.append(dupPose)
 
             pm.parent(dupPose, exprData['group'])
-            exprData['poses'][pose] = dupPose
+            exprData['poses'].append({'pose': pose, 'id': number, 'geo': dupPose})
+            number += 1
 
         poseMove += poseMoveAdd*2.1
         pm.move(poseMove, poseGeos, x=True)
 
+    # Build Complex Expressions Blendshape
+    pm.delete(blendShapes)
+    for expr, exprData in expressions.iteritems():
+        exprData['complexBlender'] = pm.blendShape( exprData['geometry'], foc=True )[0]
+        for pose in exprData['poses']:
+            pm.blendShape(exprData['complexBlender'], e=True, t=(exprData['geometry'], pose['id'], pose['geo'], 1.0))
+            aliasMel = 'blendShapeRenameTargetAlias '+exprData['complexBlender']+' '+str(pose['id'])+' '+pose['pose']+';'
+            mel.eval(aliasMel)
 
-def searchNodes(innode, searchNodeType, marked=[]):
+    pm.select(cl=True)
+    for geo, exprData in expressions.iteritems():
+        pm.select(exprData['group'], tgl=True)
+
+
+def searchNodes(innode, searchNodeType, exceptType=[], marked=[]):
     sourceNodes = pm.listConnections(innode, d=False, s=True, scn=True)
     sourceNodes = list(set(sourceNodes).difference(set(marked)))
     marked.extend(sourceNodes)
     nodes = []
     for node in sourceNodes:
-        if pm.nodeType(node) == searchNodeType:
-            nodes.append( node )
-        nodes.extend( searchNodes(node, searchNodeType, marked) )
+        nodeType = pm.nodeType(node)
+        if nodeType not in exceptType:
+            if nodeType == searchNodeType:
+                nodes.append( node )
+            nodes.extend( searchNodes(node, searchNodeType, exceptType, marked) )
     return nodes
 
 def copyMesh(mesh, poseName=''):
@@ -92,7 +119,6 @@ def copyNurbs(nurbs, poseName=''):
     pm.connectAttr(nurbs+'.worldSpace[0]', sphereShape+'.create', f=True)
     pm.delete(sphere, ch=True)
     return pm.rename(sphere, nurbs+'_'+poseName)
-
 
 def filterMeshs(objs):
     meshs = pm.ls(objs, type='mesh')
