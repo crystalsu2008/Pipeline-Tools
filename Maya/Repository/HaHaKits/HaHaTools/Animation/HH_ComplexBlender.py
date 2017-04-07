@@ -42,14 +42,12 @@ def HH_ComplexBlender(poses=None,
     if meshs:
         for mesh in meshs:
             expressions[str(mesh)] = {'geometry': mesh, 'type':'mesh', 'group': pm.group(em=True, name=mesh), 'poses': []}
-            exceptType = ['joint','animCurveUU','animCurveTL','transform','animClip','groupId','objectSet']
-            expressions[str(mesh)]['blendShapes'] = searchNodes(mesh, 'blendShape', exceptType)
+            expressions[str(mesh)]['blendShapes'] = searchNodes(mesh, 'blendShape')
             blendShapes.extend(expressions[str(mesh)]['blendShapes'])
     if nurbses:
         for nurbs in nurbses:
             expressions[str(nurbs)] = {'geometry': nurbs, 'type':'nurbs', 'group': pm.group(em=True, name=nurbs), 'poses': []}
-            exceptType = ['joint','animCurveUU','animCurveTL','transform','animClip','groupId','objectSet']
-            expressions[str(nurbs)]['blendShapes'] = searchNodes(nurbs, 'blendShape', exceptType)
+            expressions[str(nurbs)]['blendShapes'] = searchNodes(nurbs, 'blendShape')
             blendShapes.extend(expressions[str(nurbs)]['blendShapes'])
 
     # Duplicate Experssion Pose
@@ -93,7 +91,7 @@ def HH_ComplexBlender(poses=None,
         pm.select(exprData['group'], tgl=True)
 
 
-def searchNodes(innode, searchNodeType, exceptType=[], marked=[]):
+def searchNodes(innode, searchNodeType, exceptType=['joint','animCurveUU','animCurveTL','transform','animClip','groupId','objectSet'], marked=[]):
     sourceNodes = pm.listConnections(innode, d=False, s=True, scn=True)
     sourceNodes = list(set(sourceNodes).difference(set(marked)))
     marked.extend(sourceNodes)

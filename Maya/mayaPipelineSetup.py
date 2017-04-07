@@ -153,8 +153,6 @@ class PipelineSetup(object):
         if not filecmp.cmp(sourceFile, destinationFile):
             shutil.copy(sourceFile, destinationFile)
             print "Copy '" + sourceFile + "'\n  to '" + destinationFile + "'."
-
-        print 'Updated!'
 #------------------------------------------------------------------------------#
     def analyzeInfo(self, menufilepath, isdir=False):
         info = {}
@@ -344,20 +342,22 @@ class PipelineSetup(object):
 
         # Update
         updateCmd = self.repositoryName+'_pipset.update()\n'
-        updateCmd += self.pipelineStartup_py(refresh=True)
-        #updateCmd += self.pipelineStartup_py(refresh=True)
+        updateCmd += 'refcmd = '+self.repositoryName+'_pipset.pipelineStartup_py(refresh=True)\n'
+        updateCmd +=  "exec( refcmd )\n"
+        updateCmd +=  "print 'Updated!'\n"
         pm.menuItem('update', l='Update', c=updateCmd, p=parent)
 
         # Refresh
-        refreshCmd = self.pipelineStartup_py(refresh=True)
-        #refreshCmd += self.pipelineStartup_py(refresh=True)
-        refreshCmd +=  "print 'Refreshed!'"
+        refreshCmd = 'refcmd = '+self.repositoryName+'_pipset.pipelineStartup_py(refresh=True)\n'
+        refreshCmd +=  "exec( refcmd )\n"
+        refreshCmd +=  "print 'Refreshed!'\n"
         pm.menuItem('refresh', l='Refresh', c=refreshCmd, p=parent)
 
         # Reinstall
         reinstallCmd = self.repositoryName+'_pipset.reinstall()\n'
-        reinstallCmd += self.pipelineStartup_py(refresh=True)
-        #reinstallCmd += self.pipelineStartup_py(refresh=True)
+        reinstallCmd += 'refcmd = '+self.repositoryName+'_pipset.pipelineStartup_py(refresh=True)\n'
+        reinstallCmd +=  "exec( refcmd )\n"
+        reinstallCmd +=  "print 'Reinstalled!'\n"
         pm.menuItem('reinstall', l='Reinstall', c=reinstallCmd, p=parent)
 
         # Uninstall
