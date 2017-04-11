@@ -14,12 +14,23 @@ def searchTextureInProject(fileNodes=[]):
                 return
 
     textures={}
+    fileTextureName={}
     for node in fileNodes:
-        textures[node] = os.path.split(pm.getAttr(node+'.fileTextureName'))[1]
+        fileTextureName[node] = pm.getAttr(node+'.fileTextureName')
+        textures[node] = os.path.split(fileTextureName[node])[1]
 
     rootdir = pm.workspace(q=True, rd=True)
-    for root, dirs, files in os.walk(rootdir):
+    for parent, dirs, files in os.walk(rootdir):
         for fil in files:
+            popitems=[]
             for node, imageName in textures.iteritems():
                 if imageName == fil:
-                    print imageName
+                    relativePath = os.path.join(parent.partition(rootdir)[2], imageName)
+                    pm.setAttr(node+'.fileTextureName', relativePath, type='string')
+                    print('%s: \n\t%s --> %s') % (node+'.fileTextureName', fileTextureName[node], relativePath)
+                    popitems.append(node)
+            if popitems:
+                for x in popitems:
+                    textures.pop(x)
+                    if not textures:
+                        return
