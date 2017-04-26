@@ -6,8 +6,14 @@ def HH_FaceControls(name='HHExpr_', textScale=10, font='Times New Roman|h-13|w40
 
     p=0
 
-    baseMesh = 'Head_Mesh'
+    selObj = pm.ls(sl=True)
+    if not selObj:
+        pm.warning('Yous must selected the original head mesh!')
+        return
+    baseMesh = selObj[0]
+
     baseTongue = 'Tongue'
+    UTongue = 'Tongue_Mouth_UTongue'
 
     handles = {'Jaw': {'points': [(0, -7, 0),
                                  (-0.794751475, -7, 0),
@@ -212,17 +218,14 @@ def HH_FaceControls(name='HHExpr_', textScale=10, font='Times New Roman|h-13|w40
     # Create Expressions Blender
     #
     exprBlender = None
+    print baseMesh
     if pm.objExists(baseMesh):
         exprBlender = pm.blendShape( baseMesh, foc=True )[0]
     else:
-        pm.warning('The base mesh "'+targets['Base']['tar']+'" does not exists!!!')
+        pm.warning('The base mesh "'+baseMesh+'" does not exists!!!')
         return
 
     expressionCtrl_rootGrp = pm.group( em=True, name=name+'contrals' )
-
-    # Create Tongue Blender
-    #
-    TongueBlender = pm.blendShape( 'Tongue' )[0]
 
     # Build Pronounciation and Tongue Data
     #
@@ -233,8 +236,13 @@ def HH_FaceControls(name='HHExpr_', textScale=10, font='Times New Roman|h-13|w40
                  {'label': 'f_v',      'baseMesh': baseMesh,   'blender': exprBlender,   'tar': 'Mouth_F_V'     },
                  {'label': 'o',        'baseMesh': baseMesh,   'blender': exprBlender,   'tar': 'Mouth_O'       },
                  {'label': 'kiss',     'baseMesh': baseMesh,   'blender': exprBlender,   'tar': 'Mouth_Kiss'    },
-                 {'label': 'u_tongue', 'baseMesh': baseMesh,   'blender': exprBlender,   'tar': 'Mouth_UTongue' },
-                 {'label': 'tongue',   'baseMesh': baseTongue, 'blender': TongueBlender, 'tar': 'Tongue_Expr'   }]
+                 {'label': 'u_tongue', 'baseMesh': baseMesh,   'blender': exprBlender,   'tar': 'Mouth_UTongue' }]
+
+    # Create Tongue Blender
+    #
+    if pm.objExists(baseTongue):
+        TongueBlender = pm.blendShape( baseTongue )[0]
+        pronTargs.append({'label': 'tongue',   'baseMesh': baseTongue, 'blender': TongueBlender, 'tar': 'Tongue_Expr'   })
 
     # Create Pronounciation Controls
     #
@@ -366,11 +374,12 @@ def HH_FaceControls(name='HHExpr_', textScale=10, font='Times New Roman|h-13|w40
     pm.setAttr((headGrp_curve+".t"), (xpos, ypos, 0))
 
     # Create U-Tongue Blender
-    UTongueBlender = pm.blendShape( 'Tongue_Mouth_UTongue', 'Tongue', foc=True )[0]
-    aliasMel = 'blendShapeRenameTargetAlias '+UTongueBlender+' 0 "u_tongue";'
-    mel.eval(aliasMel)
-    pm.setDrivenKeyframe(UTongueBlender+".u_tongue", cd=name+'Slideru_tongue.tx', dv=0, v=0, itt='linear', ott='linear', )
-    pm.setDrivenKeyframe(UTongueBlender+".u_tongue", cd=name+'Slideru_tongue.tx', dv=50, v=1, itt='linear', ott='linear', )
+    if pm.objExists(UTongue):
+        UTongueBlender = pm.blendShape( UTongue, baseTongue, foc=True )[0]
+        aliasMel = 'blendShapeRenameTargetAlias '+UTongueBlender+' 0 "u_tongue";'
+        mel.eval(aliasMel)
+        pm.setDrivenKeyframe(UTongueBlender+".u_tongue", cd=name+'Slideru_tongue.tx', dv=0, v=0, itt='linear', ott='linear', )
+        pm.setDrivenKeyframe(UTongueBlender+".u_tongue", cd=name+'Slideru_tongue.tx', dv=50, v=1, itt='linear', ott='linear', )
 
 def facialHandles(name, handles, handleRules, targs):
     # Create headGrp Curve
