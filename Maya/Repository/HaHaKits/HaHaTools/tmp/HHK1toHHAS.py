@@ -1,7 +1,11 @@
 import pymel.core as pm
 
 def HHK1toHHAS():
-    sel = pm.ls(sl=True)[0]
+    selobjs = pm.ls(sl=True)
+    if not selobjs:
+        pm.warning( "The target kinect1 character's root joint(HIP_CENTER) must been selected!" )
+        return
+    sel = selobjs[0]
     prefix, root = sel.split(':')
 
     pm.select(sel, hierarchy=True)
