@@ -1,6 +1,6 @@
 import pymel.core as pm
 
-def HHK1toHHAS():
+def constrain_AS_to_K1():
     selobjs = pm.ls(sl=True)
     if not selobjs:
         pm.warning( "The target kinect1 character's root joint(HIP_CENTER) must been selected!" )
