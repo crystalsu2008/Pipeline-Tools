@@ -3,10 +3,12 @@ import maya.mel as mel
 
 def HH_ComplexBlender(poses=None,
                       characters=['HHAS_PronounciationSet','HHAS_ExpressionSet','HHAS_FaceSet'],
-                      geometries=None):
+                      geometries=None,
+                      PosePrefix = 'PO_'):
 
     # Prepare Selected Objects
     #
+    PrefixLen=len(PosePrefix)
     if not poses:
         clips = pm.ls(sl=True, type='animClip')
         if not clips:
@@ -14,7 +16,7 @@ def HH_ComplexBlender(poses=None,
             if not clips:
                 pm.warning( "No Pose Found!" )
                 return
-        poses = [clip for clip in clips if pm.getAttr(clip+'.pose')]
+        poses = [clip for clip in clips if pm.getAttr(clip+'.pose') and str(clip)[:PrefixLen]==PosePrefix]
         if not poses:
             pm.warning( "No Pose Found!" )
             return
@@ -62,16 +64,16 @@ def HH_ComplexBlender(poses=None,
             pm.refresh()
         for geo, exprData in expressions.iteritems():
             if exprData['type'] == 'mesh':
-                dupPose = copyMesh(exprData['geometry'], pose)
+                dupPose = copyMesh(exprData['geometry'], exprData['group'], str(pose)[PrefixLen:])
             elif exprData['type'] == 'nurbs':
-                dupPose = copyNurbs(exprData['geometry'], pose)
+                dupPose = copyNurbs(exprData['geometry'], exprData['group'], str(pose)[PrefixLen:])
 
             bbox = pm.exactWorldBoundingBox(dupPose)
             poseMoveAdd = bbox[3] if bbox[3] > poseMoveAdd else poseMoveAdd
             poseGeos.append(dupPose)
 
-            pm.parent(dupPose, exprData['group'])
-            exprData['poses'].append({'pose': pose, 'id': number, 'geo': dupPose})
+            #pm.parent(dupPose, exprData['group'])
+            exprData['poses'].append({'pose': pose, 'alias': str(pose)[PrefixLen:], 'id': number, 'geo': dupPose})
             number += 1
 
         poseMove += poseMoveAdd*2.1
@@ -80,26 +82,31 @@ def HH_ComplexBlender(poses=None,
     # Build Complex Expressions Blendshape
     pm.delete(blendShapes)
 
-    prefix = 'ComplexExpr_'
+    ctrlPrefix = 'ComplexExpr_'
     textScale=10
     ty = 0
     offset=-12
     font='Times New Roman|h-13|w400|c0'
 
-    complexExpressionGrp = pm.group(em=True, name=prefix+'Contol_Grp')
+    complexExpressionGrp = pm.group(em=True, name=ctrlPrefix+'Contol_Grp')
 
     for expr, exprData in expressions.iteritems():
-        exprData['complexBlender'] = pm.blendShape( exprData['geometry'], foc=True )[0]
+        pm.select(cl=True)
         for pose in exprData['poses']:
-            pm.blendShape(exprData['complexBlender'], e=True, t=(exprData['geometry'], pose['id'], pose['geo'], 1.0))
-            aliasMel = 'blendShapeRenameTargetAlias '+exprData['complexBlender']+' '+str(pose['id'])+' '+pose['pose']+';'
-            mel.eval(aliasMel)
+            pm.select(pose['geo'], add=True)
+        pm.select(expr, add=True)
+        #exprData['complexBlender'] = pm.blendShape( exprData['geometry'], foc=True )[0]
+        exprData['complexBlender'] = pm.blendShape(foc=True)[0]
+        for pose in exprData['poses']:
+            #pm.blendShape(exprData['complexBlender'], e=True, t=(exprData['geometry'], pose['id'], pose['geo'], 1.0))
+            #aliasMel = 'blendShapeRenameTargetAlias '+exprData['complexBlender']+' '+str(pose['id'])+' '+pose['pose']+';'
+            #mel.eval(aliasMel)
 
-            control = prefix+'Slider_'+pose['pose']
+            control = ctrlPrefix+'Slider_'+pose['pose']
             if not pm.objExists(control):
-                Slider_Dock = sliderDock_curve(prefix+'Slider_Dock_'+pose['pose'])
-                titleCurve = sliderLabel_curve(prefix+'Title_'+pose['pose'], pose['pose'], textScale, font)
-                SlideSlot = slideSlot_curve(prefix+'Slider_Slot_'+pose['pose'])
+                Slider_Dock = sliderDock_curve(ctrlPrefix+'Slider_Dock_'+pose['pose'])
+                titleCurve = sliderLabel_curve(ctrlPrefix+'Title_'+pose['pose'], pose['alias'], textScale, font)
+                SlideSlot = slideSlot_curve(ctrlPrefix+'Slider_Slot_'+pose['pose'])
                 Slider = slider_curve(control)
 
                 pm.parent(Slider, Slider_Dock)
@@ -121,9 +128,9 @@ def HH_ComplexBlender(poses=None,
                 pm.setAttr((Slider_Dock+".t"), (0, ty, 0))
                 ty += offset
 
-            pm.setDrivenKeyframe(exprData['complexBlender']+"."+pose['pose'], cd=control+'.tx', dv=0, v=0, itt='linear', ott='linear')
-            pm.setDrivenKeyframe(exprData['complexBlender']+"."+pose['pose'], cd=control+'.tx', dv=50, v=1, itt='linear', ott='linear')
-            print exprData['complexBlender']+"."+pose['pose'], control+'.tx'
+            pm.setDrivenKeyframe(exprData['complexBlender']+"."+pose['alias'], cd=control+'.tx', dv=0, v=0, itt='linear', ott='linear')
+            pm.setDrivenKeyframe(exprData['complexBlender']+"."+pose['alias'], cd=control+'.tx', dv=50, v=1, itt='linear', ott='linear')
+            print exprData['complexBlender']+"."+pose['alias'], control+'.tx'
 
     pm.select(cl=True)
     for geo, exprData in expressions.iteritems():
@@ -149,19 +156,23 @@ def searchNodes(innode, searchNodeType, exceptType=['joint','animCurveUU','animC
             nodes.extend( searchNodes(node, searchNodeType, exceptType, marked) )
     return nodes
 
-def copyMesh(mesh, poseName=''):
+def copyMesh(mesh, grp, poseName=''):
     cube = pm.polyCube(w=1, h=1, d=1, sx=1, sy=1, sz=1, ax=(0,1,0), cuv=4, ch=0)[0]
+    pm.parent(cube, grp)
     cubeShape = pm.listRelatives(cube, c=True, s=True)[0]
     pm.connectAttr(mesh+'.outMesh', cubeShape+'.inMesh', f=True)
     pm.delete(cube, ch=True)
-    return pm.rename(cube, mesh+'_'+poseName)
+    #return pm.rename(cube, mesh+'_'+poseName)
+    return pm.rename(cube, poseName)
 
-def copyNurbs(nurbs, poseName=''):
+def copyNurbs(nurbs, grp, poseName=''):
     sphere = pm.sphere(r=10, ch=0)[0]
+    pm.parent(sphere, grp)
     sphereShape = pm.listRelatives(sphere, c=True, s=True)[0]
     pm.connectAttr(nurbs+'.worldSpace[0]', sphereShape+'.create', f=True)
     pm.delete(sphere, ch=True)
-    return pm.rename(sphere, nurbs+'_'+poseName)
+    #return pm.rename(sphere, nurbs+'_'+poseName)
+    return pm.rename(sphere, poseName)
 
 def filterMeshs(objs):
     meshs = pm.ls(objs, type='mesh')

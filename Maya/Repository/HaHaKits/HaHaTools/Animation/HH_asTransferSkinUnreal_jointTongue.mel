@@ -68,14 +68,16 @@ for ($i=0;$i<size($scs);$i++)
 	freezeSkinCluster $scs[$i];
 
 if (`objExists "Tongue"`)
-    {
-    string $tongueShape[] = `listRelatives -c -s "Tongue"`;
-    string $blendNode[] = `listConnections -t "blendShape" $tongueShape[0]`;
-    delete $blendNode;
-    }
-if (`objExists "Tongue_Expr"`)
-    delete "Tongue_Expr";
-
+	{
+  string $tongueShape[] = `listRelatives -c -s "Tongue"`;
+  string $blendNode[] = `listConnections -t "blendShape" $tongueShape[0]`;
+  delete $blendNode;
+  }
+if (`objExists "Tongue_Expr"` && `objExists "Tongue"`)
+	{
+	setAttr "Tongue_Expr.visibility" 1;
+  delete "Tongue";
+	}
 dgdirty -a;
 print ("// Skinning transferred to Unreal Skeleton\n");
 }
